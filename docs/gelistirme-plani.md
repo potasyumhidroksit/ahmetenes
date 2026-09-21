@@ -120,5 +120,13 @@ Kapsam: EmDash + Astro (Node/SQLite), canlı site
 - P2 (Faz 3): CSP ve form korumasi. Guvenlik hijyeni.
 - P3 (Faz 4-5): UX, erisilebilirlik, icerik ve operasyon. Uzun vadeli kalite.
 
-## Not
-Bu plan yalnizca tespit ve oneridir; hicbir degisiklik uygulanmadi. Onay verirsen Faz 0 ile baslayip her fazi canlida dogrulayarak ilerleyebilirim.
+## Uygulama durumu (2026-09-21) — TAMAMLANDI
+
+- Faz 0: robots/site url duzeltildi; posts/pages urlPattern "/{slug}"; bilinmeyen URL dogrudan 404; canonical + og:image + twitter:card; statik sayfalar icin ozel sitemap + robots.
+- Faz 1: ana sayfaya WebSite + Person JSON-LD; markali varsayilan OG gorseli (1200x630); ozel meta aciklamalari.
+- Faz 2: public HTML'e Cache-Control + Cloudflare-CDN-Cache-Control; Cloudflare Cache Rules (HTML 300s, varliklar 7 gun) ile cf-cache-status HIT; deploy sonrasi otomatik purge.
+- Faz 3: CSP + Permissions-Policy + Referrer-Policy + X-Content-Type-Options/X-Frame-Options; form honeypot + IP hiz siniri.
+- Faz 4: galeri alt metinleri + lightbox klavye/odak; bulten CLI (list/export) + List-Unsubscribe; /now sayfasi; icerik takvimi.
+- Faz 5: gizlilik dostu analitik (beacon + CLI); healthcheck konteyner/DB/sitemap kontrolu; systemd timer dogrulamasi.
+
+Repo: https://github.com/potasyumhidroksit/ahmetenes

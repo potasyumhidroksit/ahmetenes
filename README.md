@@ -40,7 +40,9 @@ Panel: `http://localhost:4321/_emdash/admin`
   (API anahtarı sunucuda kalır, sharp ile boyutlandırılır, `IMG_CACHE_DIR` altında önbelleklenir).
 - **Medya:** Pulse (`/api/pulse` same-origin proxy) + Sinedexter `/api/stats`.
 - **İletişim/Bülten:** Resend; aboneler `data/newsletter.json` (double opt-in, HMAC imzalı token).
-- Bülten gönderimi: `pnpm send-newsletter "Başlık" "slug" ["özet"]`
+- Bülten: `pnpm newsletter list` (aboneler), `pnpm newsletter export [dosya.csv]` (CSV), `pnpm send-newsletter "Başlık" "slug" ["özet"]` (gönderim, `List-Unsubscribe` başlıklı).
+- Analitik (gizlilik dostu; IP/çerez saklanmaz): `pnpm analytics [gün]`
+- Performans & güvenlik: public HTML için edge cache (`Cache-Control` + Cloudflare Cache Rules, deploy'da purge), CSP ve güvenlik başlıkları, form honeypot + IP hız sınırı.
 
 ## Dağıtım (VPS)
 

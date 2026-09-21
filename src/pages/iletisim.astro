@@ -1,0 +1,111 @@
+---
+import Content from "../layouts/Content.astro";
+---
+<Content title="İletişim" description="Mesaj gönder veya bültene katıl.">
+  <section class="archive-section contact-page">
+    <header class="archive-header">
+      <h1>İletişim</h1>
+      <p>Bir iş, bir soru ya da sadece merhaba.</p>
+    </header>
+    <div class="contact-grid">
+      <form class="contact-form" data-contact novalidate>
+        <label>Ad
+          <input type="text" name="name" required minlength="2" maxlength="120" autocomplete="name" />
+        </label>
+        <label>E-posta
+          <input type="email" name="email" required autocomplete="email" />
+        </label>
+        <label>Mesaj
+          <textarea name="message" required minlength="5" maxlength="5000" rows="6"></textarea>
+        </label>
+        <button type="submit">Gönder</button>
+        <p class="form-status" data-contact-status role="status" aria-live="polite"></p>
+      </form>
+      <aside class="contact-side">
+        <a href="mailto:info@ahmetenes.com">info@ahmetenes.com</a>
+        <a href="https://instagram.com/eneswideshut" target="_blank" rel="noopener noreferrer">@eneswideshut</a>
+        <div class="newsletter-box">
+          <h2>Bülten</h2>
+          <p>Yeni yazılar için e-posta ile haber ver.</p>
+          <form data-newsletter novalidate>
+            <input type="email" name="email" required placeholder="eposta@ornek.com" autocomplete="email" />
+            <button type="submit">Kaydol</button>
+            <p class="form-status" data-newsletter-status role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Content>
+
+<script>
+  function bind(formSelector: string, statusSelector: string, url: string, build: (fd: FormData) => Record<string, string>) {
+    const form = document.querySelector<HTMLFormElement>(formSelector);
+    const status = document.querySelector<HTMLElement>(statusSelector);
+    if (!form || !status) return;
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const fd = new FormData(form);
+      status.textContent = "Gönderiliyor...";
+      status.dataset.state = "pending";
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(build(fd)),
+        });
+        const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; message?: string };
+        if (res.ok && data.ok) {
+          status.textContent = data.message || "Teşekkürler!";
+          status.dataset.state = "ok";
+          form.reset();
+        } else {
+          status.textContent = data.error || "Bir şeyler ters gitti, tekrar dene.";
+          status.dataset.state = "error";
+        }
+      } catch {
+        status.textContent = "Bağlantı kurulamadı, tekrar dene.";
+        status.dataset.state = "error";
+      }
+    });
+  }
+
+  bind("[data-contact]", "[data-contact-status]", "/api/contact", (fd) => ({
+    name: String(fd.get("name") || ""),
+    email: String(fd.get("email") || ""),
+    message: String(fd.get("message") || ""),
+  }));
+
+  bind("[data-newsletter]", "[data-newsletter-status]", "/api/newsletter", (fd) => ({
+    email: String(fd.get("email") || ""),
+  }));
+</script>
+
+<style>
+  .contact-grid { display: grid; gap: 2.5rem; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+  @media (max-width: 760px) { .contact-grid { grid-template-columns: 1fr; } }
+  .contact-form { display: grid; gap: 1.1rem; }
+  .contact-form label { display: grid; gap: 0.4rem; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-muted); }
+  .contact-form input, .contact-form textarea, .newsletter-box input {
+    font: inherit; color: var(--color-text); background: var(--color-bg);
+    border: 1px solid var(--color-border); border-radius: var(--radius);
+    padding: 0.7rem 0.85rem; text-transform: none; letter-spacing: normal;
+  }
+  .contact-form input:focus-visible, .contact-form textarea:focus-visible, .newsletter-box input:focus-visible {
+    outline: 2px solid var(--color-brand); outline-offset: 1px;
+  }
+  .contact-form button, .newsletter-box button {
+    justify-self: start; font: inherit; font-weight: 600; cursor: pointer;
+    color: var(--color-on-brand); background: var(--color-brand);
+    border: 0; border-radius: var(--radius); padding: 0.7rem 1.3rem;
+  }
+  .contact-side { display: grid; gap: 1rem; align-content: start; font-size: 0.95rem; }
+  .contact-side a { color: var(--color-brand); text-decoration: none; }
+  .newsletter-box { margin-top: 1rem; padding-top: 1.25rem; border-top: 1px solid var(--color-border-subtle); }
+  .newsletter-box h2 { font-size: 1rem; margin: 0 0 0.35rem; }
+  .newsletter-box p { margin: 0 0 0.9rem; color: var(--color-muted); font-size: 0.875rem; }
+  .newsletter-box form { display: grid; gap: 0.6rem; }
+  .form-status { min-height: 1.2em; font-size: 0.85rem; color: var(--color-muted); margin: 0; }
+  .form-status[data-state="ok"] { color: #1a7f37; }
+  .form-status[data-state="error"] { color: #c0392b; }
+</style>

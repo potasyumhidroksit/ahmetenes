@@ -1,0 +1,46 @@
+---
+import Content from "../layouts/Content.astro";
+import { equipment, gearCategories } from "../lib/equipment";
+
+const groups = gearCategories
+  .map((cat) => ({ cat, items: equipment.filter((e) => e.category === cat.id) }))
+  .filter((g) => g.items.length > 0);
+---
+<Content title="Ekipman" description="Kadrajın arkasındaki araçlar.">
+  <section class="archive-section gear-page">
+    <header class="archive-header">
+      <h1>Ekipman</h1>
+      <p>Kullandığım gövdeler, objektifler ve aksesuarlar.</p>
+    </header>
+    <div class="gear-list">
+      {groups.map(({ cat, items }) => (
+        <section class="gear-group">
+          <h2>{cat.label}</h2>
+          <ul>
+            {items.map((item) => (
+              <li>
+                <strong>{item.name}</strong>
+                <span>{item.detail}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </section>
+</Content>
+
+<style>
+  .gear-list { display: grid; gap: 2.5rem; }
+  .gear-group h2 {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.18em;
+    color: var(--color-muted); margin: 0 0 1rem;
+  }
+  .gear-group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.85rem; }
+  .gear-group li {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 0.9rem;
+    padding-bottom: 0.85rem; border-bottom: 1px solid var(--color-border-subtle);
+  }
+  .gear-group strong { font-weight: 500; color: var(--color-text); }
+  .gear-group span { font-size: 0.875rem; color: var(--color-muted); }
+</style>

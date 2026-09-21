@@ -2,8 +2,8 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { markdownToPortableText } from "emdash/client";
 
-const OLD = "/var/www/deneme/projeler/ahmetenes/src/content/blog";
-const ROOT = "/var/www/deneme/projeler/ahmetenes-personabio";
+const OLD = "/var/www/deneme/projeler/ahmetenes-nextjs-archive/src/content/blog";
+const ROOT = "/var/www/deneme/projeler/ahmetenes";
 const OLD_ORIGIN = "http://127.0.0.1:5193";
 
 // Oldest first: seed inserts entries in order and stamps published_at at insert
@@ -167,8 +167,12 @@ const seed = {
       name: "primary", label: "Ana menü",
       items: [
         { type: "custom", label: "Ana sayfa", url: "/" },
-        { type: "custom", label: "Hakkımda", url: "/hakkimda" },
+        { type: "custom", label: "Galeri", url: "/galeri" },
+        { type: "custom", label: "Ekipman", url: "/ekipman" },
+        { type: "custom", label: "Medya", url: "/medya" },
         { type: "custom", label: "Yazılar", url: "/posts" },
+        { type: "custom", label: "Hakkımda", url: "/hakkimda" },
+        { type: "custom", label: "İletişim", url: "/iletisim" },
       ],
     },
     {

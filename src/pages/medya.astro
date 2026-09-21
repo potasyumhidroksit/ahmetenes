@@ -1,0 +1,113 @@
+---
+import Content from "../layouts/Content.astro";
+import { getSinedexterStats, getPulseStatus } from "../lib/services";
+
+export const prerender = false;
+
+const stats = await getSinedexterStats();
+const pulse = await getPulseStatus();
+const track = pulse.track;
+---
+<Content title="Medya" description="Şu an çalanlar ve izleme istatistikleri.">
+  <section class="archive-section media-page">
+    <header class="archive-header">
+      <h1>Medya</h1>
+      <p>Pulse ve Sinedexter'dan canlı sinyaller.</p>
+    </header>
+    <div class="media-grid">
+      <article class="media-card" data-pulse-card>
+        <p class="media-label">Şu an çalıyor</p>
+        <div class="pulse-row">
+          <img data-pulse-art src={track?.art || "/favicon.svg"} alt="" width="64" height="64" />
+          <div class="pulse-meta">
+            <strong data-pulse-name>{track?.name || "Şu an sessizlik"}</strong>
+            <span data-pulse-artist>{track ? track.artist : "Pulse bekleniyor"}</span>
+            <span class="pulse-progress" data-pulse-progress></span>
+          </div>
+        </div>
+      </article>
+      <article class="media-card">
+        <p class="media-label">Sinedexter</p>
+        <div class="stat-grid">
+          <div class="stat"><strong data-stat="films">{stats.films}</strong><span>Film</span></div>
+          <div class="stat"><strong data-stat="series">{stats.series}</strong><span>Dizi</span></div>
+          <div class="stat"><strong data-stat="episodes">{stats.episodes}</strong><span>Bölüm</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+</Content>
+
+<script>
+  const fmt = (ms: number | null | undefined) => {
+    if (!ms) return "0:00";
+    const s = Math.floor(ms / 1000);
+    return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  };
+  const nameEl = document.querySelector<HTMLElement>("[data-pulse-name]");
+  const artistEl = document.querySelector<HTMLElement>("[data-pulse-artist]");
+  const artEl = document.querySelector<HTMLImageElement>("[data-pulse-art]");
+  const progEl = document.querySelector<HTMLElement>("[data-pulse-progress]");
+  let timer: ReturnType<typeof setInterval> | null = null;
+
+  function paint(data: {
+    playing?: boolean;
+    track?: { name?: string; artist?: string; art?: string | null; progressMs?: number | null; durationMs?: number | null } | null;
+  }) {
+    const t = data.track;
+    if (nameEl) nameEl.textContent = t?.name || "Şu an sessizlik";
+    if (artistEl) artistEl.textContent = t ? t.artist || "" : "Pulse bekleniyor";
+    if (artEl && t?.art) artEl.src = t.art;
+    if (progEl) {
+      if (t && data.playing && t.durationMs) {
+        const pct = Math.min(100, Math.max(0, ((t.progressMs || 0) / t.durationMs) * 100));
+        progEl.textContent = fmt(t.progressMs) + " / " + fmt(t.durationMs);
+        progEl.style.setProperty("--p", pct + "%");
+      } else if (t) {
+        progEl.textContent = data.playing ? "" : "duraklatıldı";
+      } else {
+        progEl.textContent = "";
+      }
+    }
+  }
+
+  async function tick() {
+    try {
+      const res = await fetch("/api/pulse", { cache: "no-store" });
+      if (res.ok) paint(await res.json());
+    } catch {
+      // sessizce bekle
+    }
+  }
+  tick();
+  timer = setInterval(tick, 5000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden && timer) { clearInterval(timer); timer = null; }
+    else if (!document.hidden && !timer) { tick(); timer = setInterval(tick, 5000); }
+  });
+</script>
+
+<style>
+  .media-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .media-card {
+    background: var(--color-surface); border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg); padding: 1.5rem;
+  }
+  .media-label {
+    margin: 0 0 1rem; font-size: 0.7rem; text-transform: uppercase;
+    letter-spacing: 0.2em; color: var(--color-muted);
+  }
+  .pulse-row { display: flex; align-items: center; gap: 1rem; }
+  .pulse-row img {
+    width: 64px; height: 64px; border-radius: var(--radius); object-fit: cover;
+    background: var(--color-bg-subtle);
+  }
+  .pulse-meta { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+  .pulse-meta strong { font-weight: 500; color: var(--color-text); }
+  .pulse-meta span { font-size: 0.875rem; color: var(--color-muted); }
+  .pulse-progress { font-variant-numeric: tabular-nums; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .stat { display: flex; flex-direction: column; gap: 0.25rem; }
+  .stat strong { font-size: 1.6rem; font-weight: 600; color: var(--color-text); font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--color-muted); }
+</style>

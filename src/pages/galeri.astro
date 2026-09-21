@@ -1,0 +1,142 @@
+---
+import Content from "../layouts/Content.astro";
+import { loadGallery, galleryCategories } from "../lib/gallery";
+
+export const prerender = false;
+
+const photos = await loadGallery();
+const exifLine = (p: (typeof photos)[number]) =>
+  [p.exif?.camera, p.exif?.lens, p.exif?.focal, p.exif?.aperture ? "f/" + p.exif.aperture : null, p.exif?.shutter, p.exif?.iso ? "ISO " + p.exif.iso : null]
+    .filter(Boolean)
+    .join(" · ");
+const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " + s.w + "w").join(", ");
+---
+<Content title="Galeri" description="Kareler — filtrelenebilir portfolyo.">
+  <section class="archive-section gallery-page">
+    <header class="archive-header">
+      <h1>Galeri</h1>
+      <p>{photos.length} kare · Immich albümünden</p>
+    </header>
+    <div class="gallery-filters" role="group" aria-label="Kategori filtresi">
+      {galleryCategories.map((cat) => (
+        <button type="button" data-filter={cat.id} class:list={[cat.id === "tumu" && "active"]}>{cat.label}</button>
+      ))}
+    </div>
+    <div class="gallery-grid" data-gallery>
+      {photos.map((p) => (
+        <button
+          type="button"
+          class="gallery-item"
+          data-gallery-item
+          data-category={p.category}
+          data-full={p.fullSrc}
+          data-title={p.title}
+          data-exif={exifLine(p)}
+          data-location={p.location}
+          data-year={p.year}
+          data-story={p.story}
+          style={p.width && p.height ? "aspect-ratio: " + p.width + " / " + p.height : undefined}
+        >
+          <img
+            src={p.src}
+            srcset={srcset(p)}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            alt={p.title}
+            loading="lazy"
+            decoding="async"
+            {...(p.width && p.height ? { width: p.width, height: p.height } : {})}
+          />
+          <span class="gallery-item-caption">{p.title}</span>
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <dialog class="lightbox" data-lightbox>
+    <button type="button" class="lightbox-close" data-lightbox-close aria-label="Kapat">×</button>
+    <figure>
+      <img data-lightbox-img src="" alt="" />
+      <figcaption>
+        <strong data-lightbox-title></strong>
+        <span data-lightbox-meta></span>
+        <p data-lightbox-story></p>
+      </figcaption>
+    </figure>
+  </dialog>
+</Content>
+
+<script>
+  const items = document.querySelectorAll<HTMLButtonElement>("[data-gallery-item]");
+  document.querySelectorAll<HTMLButtonElement>("[data-filter]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const filter = btn.dataset.filter || "tumu";
+      document.querySelectorAll("[data-filter]").forEach((b) => b.classList.toggle("active", b === btn));
+      items.forEach((item) => {
+        item.hidden = !(filter === "tumu" || item.dataset.category === filter);
+      });
+    });
+  });
+
+  const dialog = document.querySelector<HTMLDialogElement>("[data-lightbox]");
+  if (dialog) {
+    const img = dialog.querySelector<HTMLImageElement>("[data-lightbox-img]");
+    const title = dialog.querySelector<HTMLElement>("[data-lightbox-title]");
+    const meta = dialog.querySelector<HTMLElement>("[data-lightbox-meta]");
+    const story = dialog.querySelector<HTMLElement>("[data-lightbox-story]");
+    items.forEach((item) => {
+      item.addEventListener("click", () => {
+        if (!img || !title || !meta || !story) return;
+        img.src = item.dataset.full || "";
+        img.alt = item.dataset.title || "";
+        title.textContent = item.dataset.title || "";
+        meta.textContent = [item.dataset.exif, item.dataset.location, item.dataset.year].filter(Boolean).join(" · ");
+        story.textContent = item.dataset.story || "";
+        dialog.showModal();
+      });
+    });
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.querySelector("[data-lightbox-close]")?.addEventListener("click", () => dialog.close());
+  }
+</script>
+
+<style>
+  .gallery-filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.75rem; }
+  .gallery-filters button {
+    font: inherit; font-size: 0.8rem; cursor: pointer; padding: 0.4rem 0.9rem;
+    color: var(--color-muted); background: transparent;
+    border: 1px solid var(--color-border); border-radius: 999px;
+  }
+  .gallery-filters button.active { color: var(--color-on-brand); background: var(--color-brand); border-color: var(--color-brand); }
+  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+  .gallery-item {
+    position: relative; padding: 0; border: 0; cursor: zoom-in; overflow: hidden;
+    border-radius: var(--radius-lg); background: var(--color-bg-subtle);
+  }
+  .gallery-item[hidden] { display: none; }
+  .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+  .gallery-item:hover img { transform: scale(1.03); }
+  .gallery-item-caption {
+    position: absolute; inset: auto 0 0 0; padding: 1.4rem 0.9rem 0.75rem;
+    font-size: 0.8rem; text-align: left; color: #fff;
+    background: linear-gradient(to top, rgba(0,0,0,0.62), transparent);
+    opacity: 0; transition: opacity 0.25s ease;
+  }
+  .gallery-item:hover .gallery-item-caption, .gallery-item:focus-visible .gallery-item-caption { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .gallery-item img { transition: none; } }
+
+  .lightbox {
+    border: 0; padding: 0; background: transparent; max-width: min(1100px, 94vw);
+  }
+  .lightbox::backdrop { background: rgba(10,12,15,0.82); }
+  .lightbox figure { margin: 0; display: grid; gap: 0.75rem; }
+  .lightbox img { width: 100%; max-height: 78vh; object-fit: contain; border-radius: var(--radius); background: #000; }
+  .lightbox figcaption { color: #e6e9ec; display: grid; gap: 0.25rem; }
+  .lightbox figcaption span { font-size: 0.8rem; color: #a3afb9; }
+  .lightbox figcaption p { margin: 0.4rem 0 0; font-size: 0.9rem; color: #cfd6dc; max-width: 70ch; }
+  .lightbox-close {
+    position: absolute; top: 0.5rem; right: 0.75rem; z-index: 2;
+    font-size: 1.6rem; line-height: 1; color: #fff; background: transparent; border: 0; cursor: pointer;
+  }
+</style>

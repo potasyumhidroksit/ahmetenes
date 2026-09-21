@@ -197,13 +197,33 @@
         },
         {
           "type": "custom",
-          "label": "Hakkımda",
-          "url": "/hakkimda"
+          "label": "Galeri",
+          "url": "/galeri"
+        },
+        {
+          "type": "custom",
+          "label": "Ekipman",
+          "url": "/ekipman"
+        },
+        {
+          "type": "custom",
+          "label": "Medya",
+          "url": "/medya"
         },
         {
           "type": "custom",
           "label": "Yazılar",
           "url": "/posts"
+        },
+        {
+          "type": "custom",
+          "label": "Hakkımda",
+          "url": "/hakkimda"
+        },
+        {
+          "type": "custom",
+          "label": "İletişim",
+          "url": "/iletisim"
         }
       ]
     },

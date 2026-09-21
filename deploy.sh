@@ -31,6 +31,13 @@ docker run -d --name "$CONTAINER_NAME" --restart unless-stopped \
   -e SITE_URL="${SITE_URL:-https://ahmetenes.com}" \
   -e DATABASE_URL="file:./data/data.db" \
   -e MEDIA_DIR="./data/uploads" \
+  -e IMMICH_URL \
+  -e IMMICH_API_KEY \
+  -e RESEND_API_KEY \
+  -e RESEND_FROM \
+  -e CONTACT_TO \
+  -e DATA_DIR=/app/data \
+  -e IMG_CACHE_DIR=/app/data/imgcache \
   -e EMDASH_ENCRYPTION_KEY \
   -e EMDASH_AUTH_SECRET \
   -e EMDASH_IP_SALT \

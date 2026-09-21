@@ -18,6 +18,9 @@ import Content from "../layouts/Content.astro";
         <label>Mesaj
           <textarea name="message" required minlength="5" maxlength="5000" rows="6"></textarea>
         </label>
+        <div class="hp-field" aria-hidden="true">
+          <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+        </div>
         <button type="submit">Gönder</button>
         <p class="form-status" data-contact-status role="status" aria-live="polite"></p>
       </form>
@@ -29,6 +32,9 @@ import Content from "../layouts/Content.astro";
           <p>Yeni yazılar için e-posta ile haber ver.</p>
           <form data-newsletter novalidate>
             <input type="email" name="email" required placeholder="eposta@ornek.com" autocomplete="email" />
+            <div class="hp-field" aria-hidden="true">
+              <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+            </div>
             <button type="submit">Kaydol</button>
             <p class="form-status" data-newsletter-status role="status" aria-live="polite"></p>
           </form>
@@ -83,6 +89,7 @@ import Content from "../layouts/Content.astro";
 
 <style>
   .contact-grid { display: grid; gap: 2.5rem; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+  .hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   @media (max-width: 760px) { .contact-grid { grid-template-columns: 1fr; } }
   .contact-form { display: grid; gap: 1.1rem; }
   .contact-form label { display: grid; gap: 0.4rem; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-muted); }

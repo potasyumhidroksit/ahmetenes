@@ -12,10 +12,10 @@ const {title, description, content, demo = false} = Astro.props;
 // Kanonik URL ve varsayılan paylaşım görseli.
 const canonical = new URL(Astro.url.pathname, Astro.url.origin).href;
 const ogImage = Astro.url.origin + "/og-default.jpg";
-const page = createPublicPageContext({Astro, kind: content ? "content" : "custom", pageType:"website", title, description, canonical, image: ogImage, content, seo: demo ? {robots:"noindex, nofollow"} : { ogImage }});
+const page = createPublicPageContext({Astro, kind: content ? "content" : "custom", pageType:"website", siteName: title, title, description, canonical, image: ogImage, content, seo: demo ? {robots:"noindex, nofollow"} : { ogImage }});
 ---
 <!doctype html>
 <html lang={localeFromUrl(Astro.url)} data-public-theme="personabio-bio" data-appearance="dark">
-  <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><SiteFavicon/><AppearanceHead/><title>{title}</title><Font cssVariable="--font-personabio" preload/><EmDashHead page={page}/></head>
+  <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><SiteFavicon/><AppearanceHead/><title>{title}</title><Font cssVariable="--font-personabio" preload/><EmDashHead page={page}/><script type="application/ld+json" set:html={JSON.stringify({"@context":"https://schema.org","@type":"Person","name":"Ahmet Enes","jobTitle":"Fotoğrafçı","url":Astro.url.origin,"sameAs":["https://instagram.com/eneswideshut"]})} /></head>
   <body><EmDashBodyStart page={page}/><slot/><EmDashBodyEnd page={page}/></body>
 </html>

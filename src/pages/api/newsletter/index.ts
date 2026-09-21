@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { addSubscriber, removeSubscriber, signEmailToken } from "../../../lib/newsletter";
+import { clientIp, isBot, rateLimit } from "../../../lib/rate-limit";
 
 export const prerender = false;
 
@@ -14,9 +15,12 @@ export const POST: APIRoute = async ({ request, url }) => {
   } catch {
     return Response.json({ ok: false, error: "Geçersiz istek." }, { status: 400 });
   }
-  const raw = typeof (body as Record<string, unknown> | null)?.email === "string"
-    ? ((body as Record<string, unknown>).email as string)
-    : "";
+  const b = (body ?? {}) as Record<string, unknown>;
+  if (isBot(b)) return Response.json({ ok: true, message: "Teşekkürler!" });
+  if (!rateLimit("newsletter:" + clientIp(request), 5, 60_000)) {
+    return Response.json({ ok: false, error: "Çok fazla istek, lütfen biraz bekleyin." }, { status: 429 });
+  }
+  const raw = typeof b.email === "string" ? b.email : "";
   const email = raw.trim().toLowerCase();
   if (!EMAIL_RE.test(email)) {
     return Response.json({ ok: false, error: "Geçerli bir e-posta girin." }, { status: 400 });

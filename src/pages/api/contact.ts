@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { clientIp, isBot, rateLimit } from "../../lib/rate-limit";
 
 export const prerender = false;
 
@@ -23,6 +24,13 @@ export const POST: APIRoute = async ({ request }) => {
     return Response.json({ ok: false, error: "Geçersiz istek." }, { status: 400 });
   }
   const b = (body ?? {}) as Record<string, unknown>;
+
+  // Bot korumasi: honeypot dolduysa sessizce yut; IP hiz sinirini uygula.
+  if (isBot(b)) return Response.json({ ok: true });
+  if (!rateLimit("contact:" + clientIp(request), 5, 60_000)) {
+    return Response.json({ ok: false, error: "Çok fazla istek, lütfen biraz bekleyin." }, { status: 429 });
+  }
+
   const name = typeof b.name === "string" ? b.name.trim() : "";
   const email = typeof b.email === "string" ? b.email.trim() : "";
   const message = typeof b.message === "string" ? b.message.trim() : "";

@@ -1,4 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
+import type { APIContext } from "astro";
 import { personabioTheme, PERSONABIO_ID, PERSONABIO_PREVIEW_PATH } from "./themes/personabio/manifest";
 
 const catalog = "/_emdash/api/admin/themes/marketplace";
@@ -16,11 +17,32 @@ async function fixAdminColorScheme(response: Response) {
   });
 }
 
+/** Public HTML sayfalari edge/tarayici onbellegine uygun mu? (admin, api, arama ve
+ * kendi TTL'ini yoneten xml/txt ciktilar haric) */
+function isCacheable(pathname: string): boolean {
+  if (pathname.startsWith("/_emdash") || pathname.startsWith("/api/")) return false;
+  if (pathname.startsWith("/search")) return false;
+  if (/\/(?:sitemap|rss)[^/]*\.(?:xml)$/.test(pathname) || pathname === "/robots.txt") return false;
+  return true;
+}
+
+/** Yanit govdesini bozmadan onbellek basliklarini ekler. */
+function withCache(response: Response): Response {
+  const headers = new Headers(response.headers);
+  headers.set("Cache-Control", "public, max-age=0, s-maxage=300, stale-while-revalidate=86400");
+  headers.set("Cloudflare-CDN-Cache-Control", "max-age=300, stale-while-revalidate=86400");
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 /** Extend the built-in catalog, retaining EmDash authentication and upstream entries.
  * Runs after next() so core auth, permissions and CSRF checks always execute first.
  * Local catalog handling is deliberately restricted to administrator accounts.
  */
-export const onRequest = defineMiddleware(async (context, next) => {
+async function handleRequest(context: APIContext, next: () => Promise<Response>): Promise<Response> {
   const {url, request} = context;
   const path = url.pathname.replace(/\/$/, "");
   if (path === "/_emdash/admin/themes") return context.redirect("/_emdash/admin/themes/marketplace",302);
@@ -34,6 +56,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
   let response = await next();
   if (path.startsWith("/_emdash/admin")) response = await fixAdminColorScheme(response);
+
+  // Herkese acik HTML sayfalar icin edge/tarayici onbellegi. Edge'de en fazla
+  // s-maxage kadar bayat kalir; deploy'da Cloudflare purge edilir.
+  const contentType = response.headers.get("content-type") || "";
+  if (
+    request.method === "GET" &&
+    response.status === 200 &&
+    contentType.includes("text/html") &&
+    isCacheable(url.pathname) &&
+    !response.headers.has("set-cookie")
+  ) {
+    response = withCache(response);
+  }
   if (!context.locals.user || context.locals.user.role < 50 || [401,403].includes(response.status)) return response;
   if (localPreview && (response.ok || response.status === 400)) {
     // No remote content export or signing is needed for this same-site preview.
@@ -58,4 +93,50 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const match = `${theme.name} ${theme.description} ${theme.keywords.join(" ")}`.toLocaleLowerCase("tr").includes(query) && (!keyword || theme.keywords.includes(keyword));
   if (!url.searchParams.get("cursor") && match) data.items = [theme, ...data.items.filter(item => item.id !== PERSONABIO_ID)];
   return json(data);
+}
+
+/** Guvenlik basliklari. CSP yalnizca public sayfalara uygulanir; EmDash admin
+ * editorunu (inline worker/editor scriptleri) kirmamak icin /_emdash haric tutulur. */
+function withSecurityHeaders(response: Response, pathname: string): Response {
+  try {
+    response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+    response.headers.set("X-Content-Type-Options", "nosniff");
+    response.headers.set("X-Frame-Options", "SAMEORIGIN");
+    if (!pathname.startsWith("/_emdash")) {
+      response.headers.set(
+        "Content-Security-Policy",
+        [
+          "default-src 'self'",
+          "script-src 'self' 'unsafe-inline'",
+          "style-src 'self' 'unsafe-inline'",
+          "img-src 'self' data: blob: https:",
+          "font-src 'self' data:",
+          "connect-src 'self' https:",
+          "frame-ancestors 'self'",
+          "object-src 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+        ].join("; "),
+      );
+    }
+    return response;
+  } catch {
+    // Basliklar immutable ise yeni bir Response ile ayni govdeyi dondur.
+    const headers = new Headers(response.headers);
+    headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+    headers.set("X-Content-Type-Options", "nosniff");
+    headers.set("X-Frame-Options", "SAMEORIGIN");
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+  }
+}
+
+export const onRequest = defineMiddleware(async (context, next) => {
+  const response = await handleRequest(context, next);
+  return withSecurityHeaders(response, context.url.pathname);
 });

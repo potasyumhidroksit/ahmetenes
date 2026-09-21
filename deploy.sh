@@ -50,7 +50,18 @@ docker ps --format "{{.Names}} {{.Status}} {{.Ports}}" | grep "$CONTAINER_NAME"
 echo "→ Sağlık kontrolü..."
 for i in 1 2 3 4 5 6 7 8 9 10; do
   code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "http://127.0.0.1:${HOST_PORT}/" || true)
-  if [ "$code" = "200" ]; then echo "OK: http://127.0.0.1:${HOST_PORT}/ (HTTP $code)"; exit 0; fi
+  if [ "$code" = "200" ]; then
+    echo "OK: http://127.0.0.1:${HOST_PORT}/ (HTTP $code)"
+    # Cloudflare edge onbellegini temizle (yeni surum aninda gorunsun).
+    if [ -f /root/.cloudflare/env ]; then
+      ( set -a; . /root/.cloudflare/env; set +a
+        curl -s -X POST "https://api.cloudflare.com/client/v4/zones/5079525e40cebf813550cbf2bd411b46/purge_cache" \
+          -H "X-Auth-Email: $CF_EMAIL" -H "X-Auth-Key: $CF_GLOBAL_KEY" \
+          -H 'Content-Type: application/json' --data '{"purge_everything":true}' >/dev/null \
+          && echo "→ Cloudflare edge cache temizlendi." ) || true
+    fi
+    exit 0
+  fi
   sleep 3
 done
 echo "UYARI: sağlık kontrolü 200 dönmedi; konteyner loglarına bakın: docker logs ${CONTAINER_NAME}"

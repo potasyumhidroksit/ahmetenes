@@ -1,8 +1,9 @@
-export type Locale = "tr";
+export type Locale = "tr" | "en";
 
 /**
- * ahmetenes.com is published in Turkish only: every route is locale "tr".
- * Kept as a function so the existing call sites stay unchanged.
+ * ahmetenes.com is published in Turkish only, so every route resolves to
+ * locale "tr". The Locale type still admits "en" so the theme's shared
+ * components keep type-checking; no "/en" routes are rendered.
  */
 export function localeFromUrl(_url: URL): Locale {
   return "tr";

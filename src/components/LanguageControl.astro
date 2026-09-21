@@ -18,8 +18,7 @@ function target(language: "tr" | "en") {
 }
 ---
 <nav class="language-control" aria-label={translate(locale, "Dil seçimi")}>
-  <a href={target("tr")} lang="tr" aria-label="Türkçe" title="Türkçe" aria-current={locale === "tr" ? "page" : undefined}>{fullLabels ? "Türkçe" : "TR"}</a>
-  <a href={target("en")} lang="en" aria-label="English" title="English" aria-current={locale === "en" ? "page" : undefined}>{fullLabels ? "English" : "EN"}</a>
+  <a href={target("tr")} lang="tr" aria-label="Türkçe" title="Türkçe" aria-current="page">{fullLabels ? "Türkçe" : "TR"}</a>
 </nav>
 <script>
   document.addEventListener("click", (event) => {

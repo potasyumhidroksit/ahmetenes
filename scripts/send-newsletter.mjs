@@ -66,7 +66,16 @@ for (const email of list) {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: "Bearer " + API_KEY, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: FROM, to: [email], subject: title, html }),
+    body: JSON.stringify({
+      from: FROM,
+      to: [email],
+      subject: title,
+      html,
+      headers: {
+        "List-Unsubscribe": "<mailto:info@ahmetenes.com?subject=unsubscribe>, <" + unsub + ">",
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      },
+    }),
   });
   if (!res.ok) {
     console.error("hata", email, res.status, await res.text());

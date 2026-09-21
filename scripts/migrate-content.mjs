@@ -92,6 +92,26 @@ const aboutMd = [
   "Bana ulaşmak için aşağıdaki bağlantıları kullanabilirsiniz.",
 ].join("\n");
 
+const nowMd = [
+  "# Şu an",
+  "",
+  "Bu sayfa, şu sıralar neyle meşgul olduğumu kısaca anlatır.",
+  "",
+  "## Fotoğraf",
+  "- Şehir ve sokakta ışığın peşindeyim; hafta sonları erken saatlerde çekim yapıyorum.",
+  "- Liman, iskele ve sabah sisi üzerine kişisel bir seri sürüyor.",
+  "",
+  "## Öğrenme",
+  "- Doğal ışıkta portre ve negatif dolgu üzerine pratik.",
+  "- Renk yönetimi ve baskı iş akışı.",
+  "",
+  "## Okuma ve izleme",
+  "- Fotoğraf monografileri ve sergi katalogları.",
+  "- Film arşivini düzenliyorum.",
+  "",
+  "Birlikte çalışmak ya da bir konu önermek isterseniz iletişim sayfasından yazabilirsiniz.",
+].join("\n");
+
 const seed = {
   defaultLocale: "tr",
   $schema: "https://emdashcms.com/seed.schema.json",
@@ -187,6 +207,7 @@ const seed = {
         { type: "custom", label: "Medya", url: "/medya" },
         { type: "custom", label: "Yazılar", url: "/posts" },
         { type: "custom", label: "Hakkımda", url: "/hakkimda" },
+        { type: "custom", label: "Şu an", url: "/now" },
         { type: "custom", label: "İletişim", url: "/iletisim" },
       ],
     },
@@ -211,7 +232,6 @@ const seed = {
     { source: "/blog/kategori/sanat", destination: "/category/sanat", type: 301 },
     { source: "/blog/kategori/ekipman", destination: "/category/ekipman", type: 301 },
     { source: "/blog/[slug]", destination: "/[slug]", type: 301 },
-    { source: "/now", destination: "/hakkimda", type: 301 },
     { source: "/admin", destination: "/_emdash/admin", type: 301 },
   ],
   widgetAreas: [],
@@ -221,6 +241,10 @@ const seed = {
       {
         id: "hakkimda", slug: "hakkimda", status: "published",
         data: { title: "Hakkımda", content: markdownToPortableText(aboutMd) },
+      },
+      {
+        id: "now", slug: "now", status: "published",
+        data: { title: "Şu an", content: markdownToPortableText(nowMd) },
       },
     ],
     bio_profiles: [

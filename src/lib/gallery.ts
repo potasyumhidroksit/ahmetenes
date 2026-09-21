@@ -16,6 +16,7 @@ export const galleryCategories: GalleryCategory[] = [
 export type GalleryPhoto = {
   id: string;
   title: string;
+  alt?: string;
   src: string;
   srcSet: { w: number; src: string }[];
   fullSrc: string;
@@ -41,6 +42,7 @@ export type GalleryPhoto = {
 type CuratedItem = {
   id: string;
   title: string;
+  alt?: string;
   category: string;
   layout?: "wide" | "tall";
   tags?: string[];
@@ -71,6 +73,7 @@ function toPhoto(item: CuratedItem): GalleryPhoto {
   return {
     id: item.id,
     title: item.title,
+    alt: item.alt ?? item.title,
     category: item.category,
     aspect: item.layout === "tall" ? "portrait" : "landscape",
     width,
@@ -116,6 +119,7 @@ function assetToCurated(a: ImmichAsset): CuratedItem {
   return {
     id: a.id,
     title: title || a.id.slice(0, 8),
+    alt: title || a.id.slice(0, 8),
     category: "",
     layout: w >= h ? "wide" : "tall",
     width: a.width || undefined,

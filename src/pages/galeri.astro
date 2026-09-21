@@ -41,7 +41,7 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
             src={p.src}
             srcset={srcset(p)}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            alt={p.title}
+            alt={p.alt ?? p.title}
             loading="lazy"
             decoding="async"
             {...(p.width && p.height ? { width: p.width, height: p.height } : {})}
@@ -52,7 +52,9 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
     </div>
   </section>
 
-  <dialog class="lightbox" data-lightbox>
+  <dialog class="lightbox" data-lightbox aria-label="Galeri önizleme">
+    <button type="button" class="lightbox-nav lightbox-prev" data-lightbox-prev aria-label="Önceki kare">‹</button>
+    <button type="button" class="lightbox-nav lightbox-next" data-lightbox-next aria-label="Sonraki kare">›</button>
     <button type="button" class="lightbox-close" data-lightbox-close aria-label="Kapat">×</button>
     <figure>
       <img data-lightbox-img src="" alt="" />
@@ -83,21 +85,48 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
     const title = dialog.querySelector<HTMLElement>("[data-lightbox-title]");
     const meta = dialog.querySelector<HTMLElement>("[data-lightbox-meta]");
     const story = dialog.querySelector<HTMLElement>("[data-lightbox-story]");
+    const visibleItems = () => Array.from(items).filter((el) => !el.hidden);
+    let current = -1;
+    let lastFocus: HTMLElement | null = null;
+
+    const fill = (item: HTMLButtonElement) => {
+      if (!img || !title || !meta || !story) return;
+      img.src = item.dataset.full || "";
+      img.alt = item.dataset.title || "";
+      title.textContent = item.dataset.title || "";
+      meta.textContent = [item.dataset.exif, item.dataset.location, item.dataset.year].filter(Boolean).join(" · ");
+      story.textContent = item.dataset.story || "";
+    };
+
+    const step = (delta: number) => {
+      const list = visibleItems();
+      if (list.length === 0) return;
+      current = (current + delta + list.length) % list.length;
+      fill(list[current]);
+    };
+
     items.forEach((item) => {
       item.addEventListener("click", () => {
-        if (!img || !title || !meta || !story) return;
-        img.src = item.dataset.full || "";
-        img.alt = item.dataset.title || "";
-        title.textContent = item.dataset.title || "";
-        meta.textContent = [item.dataset.exif, item.dataset.location, item.dataset.year].filter(Boolean).join(" · ");
-        story.textContent = item.dataset.story || "";
+        current = visibleItems().indexOf(item);
+        lastFocus = item;
+        fill(item);
         dialog.showModal();
       });
+    });
+
+    dialog.addEventListener("close", () => {
+      if (lastFocus) lastFocus.focus();
     });
     dialog.addEventListener("click", (event) => {
       if (event.target === dialog) dialog.close();
     });
+    dialog.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight") { event.preventDefault(); step(1); }
+      if (event.key === "ArrowLeft") { event.preventDefault(); step(-1); }
+    });
     dialog.querySelector("[data-lightbox-close]")?.addEventListener("click", () => dialog.close());
+    dialog.querySelector("[data-lightbox-prev]")?.addEventListener("click", () => step(-1));
+    dialog.querySelector("[data-lightbox-next]")?.addEventListener("click", () => step(1));
   }
 </script>
 
@@ -139,4 +168,12 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
     position: absolute; top: 0.5rem; right: 0.75rem; z-index: 2;
     font-size: 1.6rem; line-height: 1; color: #fff; background: transparent; border: 0; cursor: pointer;
   }
+  .lightbox-nav {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+    font-size: 2.2rem; line-height: 1; padding: 0.3rem 0.8rem; color: #fff;
+    background: rgba(0,0,0,0.35); border: 0; border-radius: 999px; cursor: pointer;
+  }
+  .lightbox-prev { left: 0.5rem; }
+  .lightbox-next { right: 0.5rem; }
+  .lightbox-nav:focus-visible, .lightbox-close:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 </style>

@@ -228,6 +228,11 @@
         },
         {
           "type": "custom",
+          "label": "Şu an",
+          "url": "/now"
+        },
+        {
+          "type": "custom",
           "label": "İletişim",
           "url": "/iletisim"
         }
@@ -313,11 +318,6 @@
       "type": 301
     },
     {
-      "source": "/now",
-      "destination": "/hakkimda",
-      "type": 301
-    },
-    {
       "source": "/admin",
       "destination": "/_emdash/admin",
       "type": 301
@@ -386,6 +386,196 @@
                   "_type": "span",
                   "_key": "k58",
                   "text": "Bana ulaşmak için aşağıdaki bağlantıları kullanabilirsiniz.",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "now",
+        "slug": "now",
+        "status": "published",
+        "data": {
+          "title": "Şu an",
+          "content": [
+            {
+              "_type": "block",
+              "_key": "k5b",
+              "style": "h1",
+              "markDefs": [],
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k5a",
+                  "text": "Şu an",
+                  "marks": []
+                }
+              ]
+            },
+            {
+              "_type": "block",
+              "_key": "k5d",
+              "style": "normal",
+              "markDefs": [],
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k5c",
+                  "text": "Bu sayfa, şu sıralar neyle meşgul olduğumu kısaca anlatır.",
+                  "marks": []
+                }
+              ]
+            },
+            {
+              "_type": "block",
+              "_key": "k5f",
+              "style": "h2",
+              "markDefs": [],
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k5e",
+                  "text": "Fotoğraf",
+                  "marks": []
+                }
+              ]
+            },
+            {
+              "_type": "block",
+              "_key": "k5h",
+              "style": "normal",
+              "listItem": "bullet",
+              "level": 1,
+              "markDefs": [],
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k5g",
+                  "text": "Şehir ve sokakta ışığın peşindeyim; hafta sonları erken saatlerde çekim yapıyorum.",
+                  "marks": []
+                }
+              ]
+            },
+            {
+              "_type": "block",
+              "_key": "k5j",
+              "style": "normal",
+              "listItem": "bullet",
+              "level": 1,
+              "markDefs": [],
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k5i",
+                  "text": "Liman, iskele ve sabah sisi üzerine kişisel bir seri sürüyor.",
+                  "marks": []
+                }
+              ]
+            },
+            {
+              "_type": "block",
+              "_key": "k5l",
+              "style": "h2",
+              "markDefs": [],
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k5k",
+                  "text": "Öğrenme",
+                  "marks": []
+                }
+              ]
+            },
+            {
+              "_type": "block",
+              "_key": "k5n",
+              "style": "normal",
+              "listItem": "bullet",
+              "level": 1,
+              "markDefs": [],
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k5m",
+                  "text": "Doğal ışıkta portre ve negatif dolgu üzerine pratik.",
+                  "marks": []
+                }
+              ]
+            },
+            {
+              "_type": "block",
+              "_key": "k5p",
+              "style": "normal",
+              "listItem": "bullet",
+              "level": 1,
+              "markDefs": [],
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k5o",
+                  "text": "Renk yönetimi ve baskı iş akışı.",
+                  "marks": []
+                }
+              ]
+            },
+            {
+              "_type": "block",
+              "_key": "k5r",
+              "style": "h2",
+              "markDefs": [],
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k5q",
+                  "text": "Okuma ve izleme",
+                  "marks": []
+                }
+              ]
+            },
+            {
+              "_type": "block",
+              "_key": "k5t",
+              "style": "normal",
+              "listItem": "bullet",
+              "level": 1,
+              "markDefs": [],
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k5s",
+                  "text": "Fotoğraf monografileri ve sergi katalogları.",
+                  "marks": []
+                }
+              ]
+            },
+            {
+              "_type": "block",
+              "_key": "k5v",
+              "style": "normal",
+              "listItem": "bullet",
+              "level": 1,
+              "markDefs": [],
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k5u",
+                  "text": "Film arşivini düzenliyorum.",
+                  "marks": []
+                }
+              ]
+            },
+            {
+              "_type": "block",
+              "_key": "k5x",
+              "style": "normal",
+              "markDefs": [],
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k5w",
+                  "text": "Birlikte çalışmak ya da bir konu önermek isterseniz iletişim sayfasından yazabilirsiniz.",
                   "marks": []
                 }
               ]

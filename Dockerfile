@@ -22,6 +22,8 @@ ENV HOST=0.0.0.0
 COPY --from=deps --chown=astro:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=astro:nodejs /app/dist ./dist
 COPY --from=builder --chown=astro:nodejs /app/public ./public
+# Küratörlü galeri künyesi runtime'da okunur; imaja dahil edilmeli.
+COPY --from=builder --chown=astro:nodejs /app/src/data ./src/data
 COPY --from=builder --chown=astro:nodejs /app/seed ./seed
 COPY --from=builder --chown=astro:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=astro:nodejs /app/astro.config.mjs ./astro.config.mjs

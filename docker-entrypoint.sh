@@ -4,6 +4,10 @@
 set -e
 
 mkdir -p /app/data
+# Kuatorlu galeri kunyesi: kalici veri dizininde yoksa imajdaki kopyadan olustur.
+if [ ! -f /app/data/gallery-meta.json ] && [ -f /app/src/data/gallery-meta.json ]; then
+  cp /app/src/data/gallery-meta.json /app/data/gallery-meta.json
+fi
 
 if [ -f /app/seed/seed.json ]; then
   SEED="node /app/node_modules/emdash/dist/cli/index.mjs seed /app/seed/seed.json --database /app/data/data.db --uploads-dir /app/data/uploads --media-base-url /_emdash/api/media/file"

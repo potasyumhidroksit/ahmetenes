@@ -55,16 +55,25 @@ type CuratedItem = {
   exif?: GalleryPhoto["exif"];
 };
 
-const META_FILE = path.join(process.cwd(), "src/data/gallery-meta.json");
+const DATA_DIR = process.env.DATA_DIR || "/app/data";
+// Kuatorlu kunye once kalici veri dizininde, sonra imaj icindeki src/data'da aranir.
+const META_CANDIDATES = [
+  process.env.GALLERY_META_FILE,
+  path.join(DATA_DIR, "gallery-meta.json"),
+  path.join(process.cwd(), "src/data/gallery-meta.json"),
+].filter((value): value is string => Boolean(value));
 
 export async function loadCurated(): Promise<CuratedItem[]> {
-  try {
-    const raw = await readFile(META_FILE, "utf8");
-    const arr = JSON.parse(raw) as CuratedItem[];
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
+  for (const file of META_CANDIDATES) {
+    try {
+      const raw = await readFile(file, "utf8");
+      const arr = JSON.parse(raw) as CuratedItem[];
+      if (Array.isArray(arr)) return arr;
+    } catch {
+      // sonraki adaya gec
+    }
   }
+  return [];
 }
 
 function toPhoto(item: CuratedItem): GalleryPhoto {

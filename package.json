@@ -13,6 +13,7 @@
     "preview": "astro preview",
     "start": "mkdir -p data && node ./dist/server/entry.mjs",
     "typecheck": "astro check",
+    "send-newsletter": "node scripts/send-newsletter.mjs",
     "deploy": "bash deploy.sh"
   },
   "dependencies": {

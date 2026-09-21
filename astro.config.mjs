@@ -1,27 +1,41 @@
-import cloudflare from "@astrojs/cloudflare";
+import node from "@astrojs/node";
 import react from "@astrojs/react";
-import { d1, r2 } from "@emdash-cms/cloudflare";
 import { formsPlugin } from "@emdash-cms/plugin-forms";
 import { defineConfig, fontProviders } from "astro/config";
-import emdash from "emdash/astro";
+import emdash, { local } from "emdash/astro";
+import { sqlite } from "emdash/db";
 
-const siteUrl = process.env.SITE_URL || "http://localhost:4321";
+// Self-hosted (Node) deployment for ahmetenes.com. The origin sits behind a
+// TLS-terminating proxy, so the public origin is supplied explicitly instead
+// of being inferred from the internal request.
+const siteUrl =
+	process.env.EMDASH_SITE_URL || process.env.SITE_URL || "http://localhost:4321";
 
 export default defineConfig({
 	site: siteUrl,
 	output: "server",
-	i18n: { defaultLocale: "en", locales: ["tr", "en"] },
-	adapter: cloudflare(),
+	adapter: node({ mode: "standalone" }),
 	image: {
 		layout: "constrained",
 		responsiveStyles: true,
 	},
+	security: {
+		allowedDomains: [
+			{ hostname: "ahmetenes.com", protocol: "https" },
+			{ hostname: "www.ahmetenes.com", protocol: "https" },
+		],
+	},
 	integrations: [
 		react(),
 		emdash({
-			siteUrl: siteUrl,
-			database: d1({ binding: "DB", session: "auto" }),
-			storage: r2({ binding: "MEDIA" }),
+			siteUrl,
+			database: sqlite({
+				url: process.env.DATABASE_URL || "file:./data/data.db",
+			}),
+			storage: local({
+				directory: process.env.MEDIA_DIR || "./data/uploads",
+				baseUrl: "/_emdash/api/media/file",
+			}),
 			plugins: [formsPlugin()],
 			marketplace: "https://marketplace.emdashcms.com",
 		}),

@@ -1,48 +1,69 @@
-export type Locale = "tr" | "en";
-export function localeFromUrl(url: URL): Locale {
-  return /^\/tr(?:\/|$)/.test(url.pathname) ? "tr" : "en";
+export type Locale = "tr";
+
+/**
+ * ahmetenes.com is published in Turkish only: every route is locale "tr".
+ * Kept as a function so the existing call sites stay unchanged.
+ */
+export function localeFromUrl(_url: URL): Locale {
+  return "tr";
 }
-export function localePath(path: string, locale: Locale): string {
+
+/**
+ * Canonicalise a content path. Turkish is the default locale, so the legacy
+ * "/tr" prefix is stripped and old CMS prefixes collapse to canonical routes.
+ */
+export function localePath(path: string, _locale: Locale = "tr"): string {
   if (!path.startsWith("/") || path.startsWith("//") || path.startsWith("/_emdash")) return path;
   const base = path.replace(/^\/tr(?=\/|$|[?#])/, "") || "/";
-  // Existing CMS menus can still contain the old content URL prefixes.
   const canonical = base.replace(/^\/(?:pages|posts)\/([^/?#]+)(?=\/|[?#]|$)/, "/$1");
-  // The archive has a localized URL; individual post slugs stay at the root.
-  const localized = canonical.replace(/^\/(?:posts|yazilar)(?=\/?$|[?#])/, "/posts");
-  return locale === "tr" ? `/tr${localized}` : localized;
+  return canonical.replace(/^\/(?:posts|yazilar)(?=\/?$|[?#])/, "/posts");
 }
-const english: Record<string, string> = {
-  "Ayarlar": "Settings", "Görünüm": "Appearance", "Dil": "Language", "Alt bilgi": "Footer",
-  "Ana sayfa": "Home", "Hakkımda": "About", "Yazılar": "Posts", "Ana menü": "Main navigation",
-  "Görüşme": "Book a meeting", "Fotoğraflar": "Photos", "Menüyü kapat": "Close menu",
-  "Tema": "Theme", "Açık": "Light", "Koyu": "Dark", "E-posta": "Email",
-  "Kişisel notlar & düşünceler": "Personal notes & thoughts",
-  "Profil bağlantıları": "Social links", "profili": "profile", "Profil": "Profile",
-  "Renk teması": "Color theme", "Açık tema": "Light theme", "Koyu tema": "Dark theme",
-  "Dil seçimi": "Language", "İçeriğe geç": "Skip to content", "Yaşam yolundan notlar": "Notes from life's journey",
-  "Yazılarda ara": "Search posts", "Ara": "Search", "Yönetim": "Admin", "Tüm yazılar": "All posts",
-  "Ana sayfaya dön": "Back to home", "Notlar, fikirler ve üzerine düşündüklerim.": "Notes, ideas, and things on my mind.",
-  "Yazı görünümü": "Post layout", "Liste": "List", "Kare": "Grid", "Tekli": "Single",
-  "Biraz düşünce, biraz zaman.": "A little thought, a little time.", "Yeni yazılar burada yerini alacak.": "New posts will appear here.",
-  "Notlar & düşünceler": "Notes & thoughts", "Yazıyı oku": "Read post", "dk okuma": "min read",
-  "Kategori": "Category", "Etiket": "Tag", "yazı": "posts",
-  "Bu kategoride henüz yazı yok.": "No posts in this category yet.", "Bu etikette henüz yazı yok.": "No posts with this tag yet.",
-  "Yayın tarihi": "Published", "Okuma süresi": "Reading time", "İçindekiler": "Table of contents", "Bu yazıda": "On this page",
-  "Yazar": "Author", "Yazarlar": "Authors", "Etiketler": "Tags", "İlgini Çekebilir": "Keep reading",
-  "Yazılar arasında arayın": "Search through posts", "Yazılarda ara...": "Search posts...", "Başlıksız": "Untitled",
-  "Bir kelime veya konu yazarak notlar arasında gezinin.": "Explore the notes by searching for a word or topic.",
-  "Sayfa bulunamadı": "Page not found", "Aradığınız sayfa bulunamadı.": "The page you are looking for could not be found.",
+
+// Turkish interface strings. `translate()` is fed Turkish literals by most
+// pages; English literals (a few shared layouts) are mapped back to Turkish.
+const interfaceTr: Record<string, string> = {
+  "Ayarlar": "Ayarlar", "Görünüm": "Görünüm", "Dil": "Dil", "Alt bilgi": "Alt bilgi",
+  "Ana sayfa": "Ana sayfa", "Hakkımda": "Hakkımda", "Yazılar": "Yazılar", "Ana menü": "Ana menü",
+  "Görüşme": "Görüşme", "Fotoğraflar": "Fotoğraflar", "Menüyü kapat": "Menüyü kapat",
+  "Tema": "Tema", "Açık": "Açık", "Koyu": "Koyu", "E-posta": "E-posta",
+  "Kişisel notlar & düşünceler": "Kişisel notlar & düşünceler",
+  "Profil bağlantıları": "Profil bağlantıları", "profili": "profili", "Profil": "Profil",
+  "Renk teması": "Renk teması", "Açık tema": "Açık tema", "Koyu tema": "Koyu tema",
+  "Dil seçimi": "Dil seçimi", "İçeriğe geç": "İçeriğe geç", "Yaşam yolundan notlar": "Yaşam yolundan notlar",
+  "Yazılarda ara": "Yazılarda ara", "Ara": "Ara", "Yönetim": "Yönetim", "Tüm yazılar": "Tüm yazılar",
+  "Ana sayfaya dön": "Ana sayfaya dön", "Notlar, fikirler ve üzerine düşündüklerim.": "Notlar, fikirler ve üzerine düşündüklerim.",
+  "Yazı görünümü": "Yazı görünümü", "Liste": "Liste", "Kare": "Kare", "Tekli": "Tekli",
+  "Biraz düşünce, biraz zaman.": "Biraz düşünce, biraz zaman.", "Yeni yazılar burada yerini alacak.": "Yeni yazılar burada yerini alacak.",
+  "Notlar & düşünceler": "Notlar & düşünceler", "Yazıyı oku": "Yazıyı oku", "dk okuma": "dk okuma",
+  "Kategori": "Kategori", "Etiket": "Etiket", "yazı": "yazı",
+  "Bu kategoride henüz yazı yok.": "Bu kategoride henüz yazı yok.", "Bu etikette henüz yazı yok.": "Bu etikette henüz yazı yok.",
+  "Yayın tarihi": "Yayın tarihi", "Okuma süresi": "Okuma süresi", "İçindekiler": "İçindekiler", "Bu yazıda": "Bu yazıda",
+  "Yazar": "Yazar", "Yazarlar": "Yazarlar", "Etiketler": "Etiketler", "İlgini Çekebilir": "İlgini Çekebilir",
+  "Yazılar arasında arayın": "Yazılar arasında arayın", "Yazılarda ara...": "Yazılarda ara...", "Başlıksız": "Başlıksız",
+  "Bir kelime veya konu yazarak notlar arasında gezinin.": "Bir kelime veya konu yazarak notlar arasında gezinin.",
+  "Sayfa bulunamadı": "Sayfa bulunamadı", "Aradığınız sayfa bulunamadı.": "Aradığınız sayfa bulunamadı.",
 };
-export const translate = (locale: Locale, text: string) => locale === "en" ? english[text] ?? text : text;
-export function readingTimeLabel(locale: Locale, minutes: number): string {
-  if (locale === "en") return `Reading Time ${minutes} ${minutes === 1 ? "Minute" : "Minutes"}`;
-  return `Okuma Süresi ${minutes} Dakika`;
+
+const englishToTurkish: Record<string, string> = {
+  Home: "Ana sayfa", About: "Hakkımda", Posts: "Yazılar", "My Blog": "Ahmet Enes",
+  Navigate: "Gezin", Connect: "Bağlan", Search: "Ara", "Search...": "Yazılarda ara...",
+  Admin: "Yönetim", RSS: "RSS", "All posts": "Tüm yazılar", "Read more": "Devamını oku",
+  Categories: "Kategoriler", Tags: "Etiketler", "Recent posts": "Son yazılar",
+  "Keep reading": "İlgini Çekebilir", Published: "Yayın tarihi", "Reading time": "Okuma süresi",
+  "Table of contents": "İçindekiler", "On this page": "Bu yazıda", Author: "Yazar", Authors: "Yazarlar",
+  "Page not found": "Sayfa bulunamadı", "Back to home": "Ana sayfaya dön",
+};
+
+export const translate = (_locale: Locale, text: string) =>
+  interfaceTr[text] ?? englishToTurkish[text] ?? text;
+
+export function readingTimeLabel(_locale: Locale, minutes: number): string {
+  return "Okuma Süresi " + minutes + " Dakika";
 }
-export function commentCountLabel(locale: Locale, count: number): string {
-  if (locale === "en") return count === 0 ? "No Comments Yet" : `${count} ${count === 1 ? "Comment" : "Comments"}`;
-  return count === 0 ? "Henüz Yorum Yok" : `${count} Yorum Var`;
+export function commentCountLabel(_locale: Locale, count: number): string {
+  return count === 0 ? "Henüz Yorum Yok" : count + " Yorum Var";
 }
-export function menuLabel(label: string, locale: Locale) {
+export function menuLabel(label: string, _locale: Locale) {
   const defaults: Record<string, string> = { Home: "Ana sayfa", About: "Hakkımda", Posts: "Yazılar" };
-  return translate(locale, defaults[label] ?? label);
+  return translate("tr", defaults[label] ?? label);
 }

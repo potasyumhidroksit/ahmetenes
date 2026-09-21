@@ -1,0 +1,16 @@
+node_modules
+dist
+.astro
+.emdash
+data
+uploads
+data.db
+.git
+.github
+.agents
+docs
+.env
+.env.*
+!.env.example
+*.md
+.DS_Store

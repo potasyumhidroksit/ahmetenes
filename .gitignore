@@ -3,6 +3,7 @@ dist
 .astro
 .emdash/
 uploads
+data/
 data.db
 .wrangler/
 

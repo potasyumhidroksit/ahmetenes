@@ -5,6 +5,7 @@ import { loadGallery, galleryCategories } from "../lib/gallery";
 export const prerender = false;
 
 const photos = await loadGallery();
+const featured = photos.find((p) => p.featured) ?? photos[0];
 const exifLine = (p: (typeof photos)[number]) =>
   [p.exif?.camera, p.exif?.lens, p.exif?.focal, p.exif?.aperture ? "f/" + p.exif.aperture : null, p.exif?.shutter, p.exif?.iso ? "ISO " + p.exif.iso : null]
     .filter(Boolean)
@@ -17,6 +18,17 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
       <h1>Galeri</h1>
       <p>{photos.length} kare · Immich albümünden</p>
     </header>
+    {featured && (
+      <section class="gallery-hero" aria-label="Öne çıkan kare">
+        <img src={featured.src} srcset={srcset(featured)} sizes="100vw" alt={featured.alt ?? featured.title} loading="eager" />
+        <div class="gallery-hero-body">
+          <span class="gallery-hero-kicker">Öne çıkan kare</span>
+          <h2>{featured.title}</h2>
+          {featured.story && <p>{featured.story}</p>}
+          <button type="button" class="gallery-hero-cta" data-hero-for={featured.id}>Büyüt</button>
+        </div>
+      </section>
+    )}
     <div class="gallery-filters" role="group" aria-label="Kategori filtresi">
       {galleryCategories.map((cat) => (
         <button type="button" data-filter={cat.id} class:list={[cat.id === "tumu" && "active"]}>{cat.label}</button>
@@ -28,6 +40,7 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
           type="button"
           class="gallery-item"
           data-gallery-item
+          data-id={p.id}
           data-category={p.category}
           data-full={p.fullSrc}
           data-title={p.title}
@@ -76,6 +89,14 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
       items.forEach((item) => {
         item.hidden = !(filter === "tumu" || item.dataset.category === filter);
       });
+    });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>("[data-hero-for]").forEach((cta) => {
+    cta.addEventListener("click", () => {
+      const id = cta.dataset.heroFor;
+      const target = id ? document.querySelector<HTMLButtonElement>('[data-gallery-item][data-id="' + id + '"]') : null;
+      target?.click();
     });
   });
 

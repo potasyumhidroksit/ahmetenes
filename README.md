@@ -23,11 +23,24 @@ pnpm build
 İlk istekte şema + içerik seed'i (`seed/seed.json`) otomatik uygulanır.
 Panel: `http://localhost:4321/_emdash/admin`
 
-## İçerik
+## Sayfalar
+
+- `/` profil kartı; `/posts` + `/<slug>` yazılar; `/hakkimda`
+- `/galeri` — Immich "sitede" albümü: filtre çipleri, ızgara, lightbox (EXIF)
+- `/ekipman` — gövde / objektif / filtre / ses / ışık / aksesuar listesi
+- `/medya` — Pulse "şu an çalıyor" kartı + Sinedexter film/dizi/bölüm istatistikleri
+- `/iletisim` — iletişim formu (Resend) + bülten kaydı (double opt-in)
+
+## İçerik ve servis entegrasyonları
 
 - `seed/seed.json` — koleksiyonlar, menüler, taksonomiler, sayfalar ve yazılar.
   İçerik, mevcut Next.js blog yazılarından `scripts/migrate-content.mjs` ile üretilir.
-- Blog görselleri `public/blog/<slug>/` altında; albüm/gallery için EmDash medya kütüphanesi kullanılır.
+- Blog görselleri `public/blog/<slug>/` altında.
+- **Galeri:** Immich `/timeline` API'si; görseller `/api/immich/<kind>/<id>?w=` proxy'sinden akar
+  (API anahtarı sunucuda kalır, sharp ile boyutlandırılır, `IMG_CACHE_DIR` altında önbelleklenir).
+- **Medya:** Pulse (`/api/pulse` same-origin proxy) + Sinedexter `/api/stats`.
+- **İletişim/Bülten:** Resend; aboneler `data/newsletter.json` (double opt-in, HMAC imzalı token).
+- Bülten gönderimi: `pnpm send-newsletter "Başlık" "slug" ["özet"]`
 
 ## Dağıtım (VPS)
 
@@ -36,10 +49,11 @@ bash deploy.sh    # imaj derler, konteyneri 127.0.0.1:5193'te yeniden başlatır
 ```
 
 - Konteyner: `ahmetenes` (imaj `ahmetenes:latest`), arkasında Cloudflare proxy.
-- Kalıcı veri: `/var/www/ahmetenes-data` → konteynerde `/app/data`.
+- Kalıcı veri: `/var/www/ahmetenes-data` (SQLite `data.db`, `uploads/`, `newsletter.json`, `imgcache/`) → konteynerde `/app/data`.
 - Gizli anahtarlar: `/root/ahmetenes-emdash.env` (git dışı).
-- Ortam değişkenleri: `EMDASH_SITE_URL`, `SITE_URL`, `DATABASE_URL`, `MEDIA_DIR`,
-  `EMDASH_ENCRYPTION_KEY`, `EMDASH_AUTH_SECRET`, `EMDASH_IP_SALT`.
+- Ortam değişkenleri: `EMDASH_SITE_URL`, `SITE_URL`, `EMDASH_ENCRYPTION_KEY`, `EMDASH_AUTH_SECRET`,
+  `EMDASH_IP_SALT`, `EMDASH_ALLOWED_ORIGINS`, `IMMICH_URL`, `IMMICH_API_KEY`, `RESEND_API_KEY`,
+  `RESEND_FROM`, `CONTACT_TO`, `DATA_DIR`, `IMG_CACHE_DIR`.
 
 Konteyner açılışta `docker-entrypoint.sh` ile seed'i idempotent uygular, sonra sunucuyu başlatır.
 

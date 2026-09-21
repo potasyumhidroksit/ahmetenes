@@ -11,9 +11,8 @@ interface Props {
   links: {label: string; url: string; target?: string}[];
   menu?: MenuItem[];
   edit?: Record<string, Record<string, string>>;
-  featured?: string;
 }
-const { profile, links, menu = [], edit = {}, featured } = Astro.props;
+const { profile, links, menu = [], edit = {} } = Astro.props;
 function profileLink(value: string) {
   const emailPath = value.match(/^\/email\/([^/?#\s]+@[^/?#\s]+)(\?.*)?$/i);
   if (emailPath) return `mailto:${emailPath[1]}${emailPath[2] ?? ""}`;
@@ -34,7 +33,6 @@ function safeLink(value: string) {
     <nav class="personabio-links" aria-label={translate(locale, "Profil bağlantıları")}>
       <ul>{links.map(link => ({...link, href:profileLink(link.url)})).filter(link => safeLink(link.href)).map(link => <li><a href={link.href} aria-label={link.label} title={link.label} target={link.target} rel={link.target === "_blank" ? "noopener noreferrer" : undefined}><LinkIcon url={link.href}/></a></li>)}</ul>
     </nav>
-    {featured && <a class="pb-featured" href="/galeri"><img src={featured} alt="" loading="lazy" /><span>Galeriyi gez</span></a>}
     </div>
     <div class="personabio-secondary">
       {menu.length > 0 && <nav class="personabio-menu" aria-label={translate(locale, "Ana menü")}><MenuItems items={menu}/></nav>}

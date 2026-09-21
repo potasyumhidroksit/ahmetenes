@@ -4,12 +4,11 @@ import { EmDashHead, EmDashBodyStart, EmDashBodyEnd } from "emdash/ui";
 import { createPublicPageContext } from "emdash/page";
 import "../styles/personabio.css";
 import "../styles/appearance.css";
-import "../styles/enhance.css";
 import AppearanceHead from "../components/AppearanceHead.astro";
 import SiteFavicon from "../components/SiteFavicon.astro";
 import { localeFromUrl } from "../utils/i18n";
-interface Props { title: string; description?: string; demo?: boolean; backdrop?: string; content?: {collection:string; id:string; slug?:string} }
-const {title, description, content, demo = false, backdrop} = Astro.props;
+interface Props { title: string; description?: string; demo?: boolean; content?: {collection:string; id:string; slug?:string} }
+const {title, description, content, demo = false} = Astro.props;
 // Kanonik URL ve varsayılan paylaşım görseli.
 const canonical = new URL(Astro.url.pathname, Astro.url.origin).href;
 const ogImage = Astro.url.origin + "/og-default.jpg";
@@ -18,7 +17,7 @@ const page = createPublicPageContext({Astro, kind: content ? "content" : "custom
 <!doctype html>
 <html lang={localeFromUrl(Astro.url)} data-public-theme="personabio-bio" data-appearance="dark">
   <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><SiteFavicon/><AppearanceHead/><title>{title}</title><Font cssVariable="--font-personabio" preload/><EmDashHead page={page}/><script type="application/ld+json" set:html={JSON.stringify({"@context":"https://schema.org","@type":"Person","name":"Ahmet Enes","jobTitle":"Fotoğrafçı","url":Astro.url.origin,"sameAs":["https://instagram.com/eneswideshut"]})} /></head>
-  <body><EmDashBodyStart page={page}/>{backdrop && <div class="pb-backdrop" aria-hidden="true"><img src={backdrop} alt="" /></div>}<slot/><EmDashBodyEnd page={page}/><script is:inline>
+  <body><EmDashBodyStart page={page}/><slot/><EmDashBodyEnd page={page}/><script is:inline>
       try {
         if (location.pathname.indexOf("/_emdash") !== 0) {
           fetch("/api/analytics", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: location.pathname }), keepalive: true }).catch(function () {});

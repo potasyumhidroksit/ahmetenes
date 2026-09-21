@@ -16,7 +16,6 @@ import { resolveBlogSiteIdentity } from "../utils/site-identity";
 import "../styles/tokens.css";
 import "../styles/theme.css";
 import "../styles/appearance.css";
-import "../styles/enhance.css";
 import AppearanceHead from "../components/AppearanceHead.astro";
 import SiteFavicon from "../components/SiteFavicon.astro";
 import FooterPreferences from "../components/FooterPreferences.astro";
@@ -128,21 +127,6 @@ const pageCtx = createPublicPageContext({
     </div>
     <SearchDialog />
     <EmDashBodyEnd page={pageCtx} />
-    <button class="to-top" type="button" data-to-top aria-label={t("Ana sayfaya dön")} hidden>↑</button>
-    <script is:inline>
-      (function () {
-        var btn = document.querySelector("[data-to-top]");
-        if (!btn) return;
-        function update() {
-          var y = window.scrollY || document.documentElement.scrollTop || 0;
-          btn.hidden = y < 400;
-          btn.setAttribute("data-visible", y > 600 ? "true" : "false");
-        }
-        update();
-        window.addEventListener("scroll", update, { passive: true });
-        btn.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
-      })();
-    </script>
     <script is:inline>
       try {
         if (location.pathname.indexOf("/_emdash") !== 0) {

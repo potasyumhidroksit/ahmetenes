@@ -4,7 +4,6 @@ import { localizedEntry as getEmDashEntry, localizedMenu as getMenuWithCacheHint
 import PersonaBio from "../layouts/PersonaBio.astro";
 import ProfileCard from "../components/personabio/ProfileCard.astro";
 import { localeFromUrl, translate } from "../utils/i18n";
-import { loadGallery } from "../lib/gallery";
 const locale = localeFromUrl(Astro.url);
 const [{entry, error, cacheHint}, {data:settings, cacheHint:settingsHint}, {data:menu, cacheHint:menuHint}, {data:socialMenu, cacheHint:socialMenuHint}] = await Promise.all([
   getEmDashEntry("bio_profiles", "personabio", { locale }), getSiteSettingsWithCacheHint(), getMenuWithCacheHint("primary", { locale }), getMenuWithCacheHint("social", { locale }),
@@ -17,17 +16,7 @@ const profile = {
   avatar: entry?.data.avatar ?? { src: "/themes/personabio/avatar.svg", alt: "Profile placeholder" },
 };
 const documentTitle = translate(locale, settings.title || profile.title);
-
-// Sinematik arka plan: albümdeki öne çıkan kare (Immich erişilemezse yok sayılır).
-let backdrop: string | undefined;
-try {
-  const photos = await loadGallery();
-  const featured = photos.find((p) => p.featured) ?? photos[0];
-  backdrop = featured?.fullSrc;
-} catch {
-  backdrop = undefined;
-}
 ---
-<PersonaBio title={documentTitle} description={profile.description} backdrop={backdrop} content={entry ? {collection:"bio_profiles",id:entry.data.id,slug:entry.id} : undefined}>
-  <ProfileCard profile={profile} links={socialMenu?.items ?? []} edit={entry?.edit} menu={menu?.items ?? []} featured={backdrop}/>
+<PersonaBio title={documentTitle} description={profile.description} content={entry ? {collection:"bio_profiles",id:entry.data.id,slug:entry.id} : undefined}>
+  <ProfileCard profile={profile} links={socialMenu?.items ?? []} edit={entry?.edit} menu={menu?.items ?? []}/>
 </PersonaBio>

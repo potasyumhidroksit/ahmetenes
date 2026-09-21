@@ -10,7 +10,10 @@
   "settings": {
     "title": "Ahmet Enes",
     "tagline": "Fotoğraf, ışık ve kareler üzerine notlar.",
-    "url": "https://ahmetenes.com"
+    "url": "https://ahmetenes.com",
+    "seo": {
+      "robotsTxt": "User-agent: *\nAllow: /\n\nDisallow: /_emdash/\n\nSitemap: https://ahmetenes.com/sitemap.xml\nSitemap: https://ahmetenes.com/sitemap-static.xml\n"
+    }
   },
   "collections": [
     {

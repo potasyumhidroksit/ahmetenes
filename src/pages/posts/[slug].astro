@@ -1,4 +1,5 @@
 ---
+import { notFound } from "../../utils/http";
 import {
 	getTermsForEntries,
 	getSeoMeta,
@@ -26,18 +27,19 @@ const t = (text: string) => translate(locale, text);
 
 const slug = decodeSlug(Astro.params.slug);
 
-if (/^\/(?:tr\/)?posts\//.test(Astro.url.pathname) && slug) {
-	return Astro.redirect(`${localePath(`/${encodeURIComponent(slug)}`, locale)}${Astro.url.search}`, 308);
-}
-
 if (!slug) {
-	return Astro.redirect(localePath("/404", locale));
+	return notFound(Astro);
 }
 
 const { entry: post, cacheHint } = await getEmDashEntry("posts", slug, { locale });
 
 if (!post) {
-	return Astro.redirect(localePath("/404", locale));
+	return notFound(Astro);
+}
+
+// Kanonik yazı URL'i köktedir; /posts/<slug> isteğini tek adımda oraya taşı.
+if (/^\/(?:tr\/)?posts\//.test(Astro.url.pathname)) {
+	return Astro.redirect(`${localePath(`/${encodeURIComponent(slug)}`, locale)}${Astro.url.search}`, 308);
 }
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);

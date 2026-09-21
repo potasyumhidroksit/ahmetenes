@@ -44,7 +44,7 @@ const {
 	pageTitle,
 	description,
 	image,
-	canonical,
+	canonical: canonicalProp,
 	robots,
 	type = "website",
 	publishedTime,
@@ -70,6 +70,9 @@ const socialLinks = (socialResult.data?.items ?? []).map((link) => {
   try { return ["https:", "http:", "mailto:", "tel:"].includes(new URL(link.href).protocol); } catch { return false; }
 });
 const fullTitle = title.includes(siteTitle) ? title : `${title} — ${siteTitle}`;
+// Kanonik URL ve varsayılan paylaşım görseli (EmDashHead'e verilir).
+const canonical = canonicalProp ?? new URL(Astro.url.pathname, Astro.url.origin).href;
+const ogImage = image ?? Astro.url.origin + "/og-default.jpg";
 // Build public page context for plugin contributions
 // SEO data is passed here and rendered securely by EmDashHead
 const pageCtx = createPublicPageContext({
@@ -80,9 +83,9 @@ const pageCtx = createPublicPageContext({
 	pageTitle: pageTitle ?? title,
 	description,
 	canonical,
-	image,
+	image: ogImage,
 	content,
-	seo: { ogImage: image, robots },
+	seo: { ogImage, robots },
 	articleMeta: { publishedTime, modifiedTime, author },
 	siteName: siteTitle,
 });

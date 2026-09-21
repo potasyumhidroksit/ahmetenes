@@ -105,6 +105,18 @@ const seed = {
     title: "Ahmet Enes",
     tagline: "Fotoğraf, ışık ve kareler üzerine notlar.",
     url: "https://ahmetenes.com",
+    seo: {
+      robotsTxt: [
+        "User-agent: *",
+        "Allow: /",
+        "",
+        "Disallow: /_emdash/",
+        "",
+        "Sitemap: https://ahmetenes.com/sitemap.xml",
+        "Sitemap: https://ahmetenes.com/sitemap-static.xml",
+        "",
+      ].join("\n"),
+    },
   },
   collections: [
     {

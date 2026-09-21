@@ -1,4 +1,5 @@
 ---
+import { notFound } from "../../utils/http";
 import { decodeSlug } from "emdash";
 import { localizedEntry as getEmDashEntry } from "../../utils/localized-content";
 import { PortableText } from "emdash/ui";
@@ -13,13 +14,13 @@ if (/^\/(?:tr\/)?pages\//.test(Astro.url.pathname) && slug) {
 }
 
 if (!slug) {
-	return Astro.redirect(localePath("/404", locale));
+	return notFound(Astro);
 }
 
 const { entry: page, cacheHint } = await getEmDashEntry("pages", slug, { locale });
 
 if (!page) {
-	return Astro.redirect(localePath("/404", locale));
+	return notFound(Astro);
 }
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);

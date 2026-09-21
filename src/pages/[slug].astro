@@ -1,4 +1,5 @@
 ---
+import { notFound } from "../utils/http";
 import { decodeSlug } from "emdash";
 import { localizedEntry } from "../utils/localized-content";
 import { localeFromUrl, localePath } from "../utils/i18n";
@@ -7,7 +8,7 @@ import Post from "./posts/[slug].astro";
 
 const locale = localeFromUrl(Astro.url);
 const slug = decodeSlug(Astro.params.slug);
-if (!slug) return Astro.redirect(localePath("/404", locale));
+if (!slug) return notFound(Astro);
 
 // Pages take precedence when a page and a post share the same slug.
 const page = await localizedEntry("pages", slug, { locale });
@@ -18,6 +19,6 @@ if (!page.entry) {
   if (Astro.cache?.enabled) Astro.cache.set(post.cacheHint);
   postExists = Boolean(post.entry);
 }
-if (!page.entry && !postExists) return Astro.redirect(localePath("/404", locale));
+if (!page.entry && !postExists) return notFound(Astro);
 ---
 {page.entry ? <Page /> : <Post />}

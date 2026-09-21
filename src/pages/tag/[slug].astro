@@ -1,4 +1,5 @@
 ---
+import { notFound } from "../../utils/http";
 import {
 	getTermsForEntries,
 	decodeSlug,
@@ -17,7 +18,7 @@ const slug = decodeSlug(Astro.params.slug);
 const term = slug ? await getTerm("tag", slug, { includeCounts: false, locale }) : null;
 
 if (!term) {
-	return Astro.redirect(localePath("/404", locale));
+	return notFound(Astro);
 }
 
 const { entries: posts, cacheHint } = await localizedPosts(locale, {

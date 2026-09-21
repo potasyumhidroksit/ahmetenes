@@ -3,8 +3,8 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 # Ortam: önce sunucu düzeyi dosya (auto-deploy), sonra yerel .env.local
-if [ -f /root/ahmetenes-personabio.env ]; then
-  set -a; . /root/ahmetenes-personabio.env; set +a
+if [ -f /root/ahmetenes-emdash.env ]; then
+  set -a; . /root/ahmetenes-emdash.env; set +a
 elif [ -f ./.env.local ]; then
   set -a; . ./.env.local; set +a
 fi

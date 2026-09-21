@@ -37,7 +37,7 @@ bash deploy.sh    # imaj derler, konteyneri 127.0.0.1:5193'te yeniden başlatır
 
 - Konteyner: `ahmetenes` (imaj `ahmetenes:latest`), arkasında Cloudflare proxy.
 - Kalıcı veri: `/var/www/ahmetenes-data` → konteynerde `/app/data`.
-- Gizli anahtarlar: `/root/ahmetenes-personabio.env` (git dışı).
+- Gizli anahtarlar: `/root/ahmetenes-emdash.env` (git dışı).
 - Ortam değişkenleri: `EMDASH_SITE_URL`, `SITE_URL`, `DATABASE_URL`, `MEDIA_DIR`,
   `EMDASH_ENCRYPTION_KEY`, `EMDASH_AUTH_SECRET`, `EMDASH_IP_SALT`.
 
@@ -45,5 +45,5 @@ Konteyner açılışta `docker-entrypoint.sh` ile seed'i idempotent uygular, son
 
 ## Eski site
 
-Önceki Next.js sürümü `/var/www/deneme/projeler/ahmetenes` altında rollback için korunur.
+Önceki Next.js sürümü `/var/www/deneme/projeler/ahmetenes-nextjs-archive` altında rollback için korunur.
 `/blog/*`, `/now` ve `/admin` yolları yeni rotalara 301 ile yönlendirilir.

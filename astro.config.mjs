@@ -6,10 +6,12 @@ import emdash, { local } from "emdash/astro";
 import { sqlite } from "emdash/db";
 
 // Self-hosted (Node) deployment for ahmetenes.com. The origin sits behind a
-// TLS-terminating proxy, so the public origin is supplied explicitly instead
-// of being inferred from the internal request.
+// TLS-terminating proxy, so the public origin is resolved at runtime from
+// EMDASH_SITE_URL / SITE_URL. Do NOT fall back to localhost here: this value is
+// baked at build time (where no env is set) and would override the runtime env,
+// making EmDash derive the WebAuthn rpId as "localhost" (passkey origin error).
 const siteUrl =
-	process.env.EMDASH_SITE_URL || process.env.SITE_URL || "http://localhost:4321";
+	process.env.EMDASH_SITE_URL || process.env.SITE_URL || undefined;
 
 export default defineConfig({
 	site: siteUrl,

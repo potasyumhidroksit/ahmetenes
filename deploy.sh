@@ -34,6 +34,7 @@ docker run -d --name "$CONTAINER_NAME" --restart unless-stopped \
   -e EMDASH_ENCRYPTION_KEY \
   -e EMDASH_AUTH_SECRET \
   -e EMDASH_IP_SALT \
+  -e EMDASH_ALLOWED_ORIGINS \
   "$IMAGE"
 
 sleep 4

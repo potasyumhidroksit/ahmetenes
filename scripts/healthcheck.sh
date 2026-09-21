@@ -8,8 +8,14 @@ now() { date -Iseconds; }
 http_code() { curl -s -o /dev/null -w "%{http_code}" --max-time 12 "$1" 2>/dev/null; }
 
 failed=""
+# Yerel konteyner + veri kontrolu
+if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^ahmetenes$'; then
+  failed="$failed ahmetenes-konteyner"
+fi
+[ -f /var/www/ahmetenes-data/data.db ] || failed="$failed data.db"
 for entry in \
   "https://ahmetenes.com/|ahmetenes" \
+  "https://ahmetenes.com/sitemap-static.xml|sitemap" \
   "https://sinedexter.ahmetenes.com/api/stats|sinedexter" \
   "https://foto.ahmetenes.tr/api/server/ping|immich" \
   "https://s.ahmetenes.com/api/status|pulse"; do

@@ -15,6 +15,7 @@
     "typecheck": "astro check",
     "send-newsletter": "node scripts/send-newsletter.mjs",
     "newsletter": "node scripts/newsletter.mjs",
+    "analytics": "node scripts/analytics.mjs",
     "deploy": "bash deploy.sh"
   },
   "dependencies": {

@@ -104,10 +104,12 @@ const seed = {
   settings: {
     title: "Ahmet Enes",
     tagline: "Fotoğraf, ışık ve kareler üzerine notlar.",
+    url: "https://ahmetenes.com",
   },
   collections: [
     {
       slug: "posts", label: "Yazılar", labelSingular: "Yazı",
+      urlPattern: "/{slug}",
       supports: ["drafts", "revisions", "search", "seo"], commentsEnabled: false,
       fields: [
         { slug: "title", label: "Başlık", type: "string", required: true, searchable: true },
@@ -118,6 +120,7 @@ const seed = {
     },
     {
       slug: "pages", label: "Sayfalar", labelSingular: "Sayfa",
+      urlPattern: "/{slug}",
       supports: ["drafts", "revisions", "search"],
       fields: [
         { slug: "title", label: "Başlık", type: "string", required: true, searchable: true },

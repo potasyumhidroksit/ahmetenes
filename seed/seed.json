@@ -9,13 +9,15 @@
   },
   "settings": {
     "title": "Ahmet Enes",
-    "tagline": "Fotoğraf, ışık ve kareler üzerine notlar."
+    "tagline": "Fotoğraf, ışık ve kareler üzerine notlar.",
+    "url": "https://ahmetenes.com"
   },
   "collections": [
     {
       "slug": "posts",
       "label": "Yazılar",
       "labelSingular": "Yazı",
+      "urlPattern": "/{slug}",
       "supports": [
         "drafts",
         "revisions",
@@ -53,6 +55,7 @@
       "slug": "pages",
       "label": "Sayfalar",
       "labelSingular": "Sayfa",
+      "urlPattern": "/{slug}",
       "supports": [
         "drafts",
         "revisions",

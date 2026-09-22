@@ -37,6 +37,8 @@ interface Props {
 	author?: string | null;
 	/** Pass content reference for plugin page contributions on content pages */
 	content?: { collection: string; id: string; slug?: string | null };
+	/** Sayfaya ozel ek JSON-LD (ornegin galeri icin ImageGallery) */
+	jsonLd?: Record<string, unknown>;
 }
 
 const {
@@ -51,6 +53,7 @@ const {
 	modifiedTime,
 	author,
 	content,
+	jsonLd,
 } = Astro.props;
 const [settingsResult, menuResult, socialResult, profileResult] = await Promise.all([
   getSiteSettingsWithCacheHint(), getMenuWithCacheHint("primary", { locale }), getMenuWithCacheHint("social", { locale }), getEmDashEntry("bio_profiles", "personabio", { locale }),
@@ -100,6 +103,7 @@ const pageCtx = createPublicPageContext({
     <AppearanceHead />
     <Font cssVariable="--font-personabio" preload /><Font cssVariable="--font-mono" />
     <title>{fullTitle}</title><EmDashHead page={pageCtx} />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, "\\u003c")} />}
   </head>
   <body>
     <EmDashBodyStart page={pageCtx} />

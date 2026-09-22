@@ -10,11 +10,40 @@ const exifLine = (p: (typeof photos)[number]) =>
     .filter(Boolean)
     .join(" · ");
 const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " + s.w + "w").join(", ");
+const origin = Astro.url.origin;
+const year = new Date().getFullYear();
+// Google Gorseller: yaratici/telif/kredi bilgisiyle kareler (image metadata).
+const creator = { "@type": "Person", name: "Ahmet Enes", url: origin };
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ImageGallery",
+  name: "Galeri — Ahmet Enes",
+  url: origin + "/galeri",
+  author: creator,
+  image: photos.map((p) => ({
+    "@type": "ImageObject",
+    contentUrl: origin + p.fullSrc,
+    thumbnailUrl: origin + p.src,
+    url: origin + "/galeri#kare-" + p.id,
+    name: p.title,
+    ...(p.story ? { description: p.story } : {}),
+    // contentUrl 1600px genislige olceklenmis onizleme; boyutlar ona gore.
+    ...(p.width && p.height
+      ? { width: Math.min(1600, p.width), height: Math.round((Math.min(1600, p.width) * p.height) / p.width) }
+      : {}),
+    ...(p.location ? { contentLocation: { "@type": "Place", name: p.location } } : {}),
+    creator,
+    creditText: "Ahmet Enes",
+    copyrightHolder: creator,
+    copyrightNotice: "© " + (p.year || year) + " Ahmet Enes",
+  })),
+};
+const cover = photos.find((p) => p.featured) ?? photos[0];
 // Lightbox: ekran genisligine gore 800-1600px (mobilde 1600px indirmesin).
 const fullSrcset = (p: (typeof photos)[number]) =>
   p.srcSet.filter((s) => s.w >= 800).map((s) => s.src + " " + s.w + "w").join(", ");
 ---
-<Content title="Galeri" description="Kareler — filtrelenebilir portfolyo.">
+<Content title="Galeri" description="Kareler — filtrelenebilir portfolyo." image={cover ? origin + cover.fullSrc : undefined} jsonLd={jsonLd}>
   <section class="archive-section gallery-page">
     <header class="archive-header">
       <h1>Galeri</h1>

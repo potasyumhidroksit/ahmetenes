@@ -17,7 +17,8 @@ The admin UI is at `http://localhost:4321/_emdash/admin`.
 | `src/live.config.ts`     | EmDash loader registration (boilerplate -- don't modify)                           |
 | `seed/seed.json`         | Schema definition + demo content (collections, fields, taxonomies, menus, widgets) |
 | `emdash-env.d.ts`        | Generated types for collections (auto-regenerated on dev server start)             |
-| `src/layouts/Base.astro` | Base layout with EmDash wiring (menus, search, page contributions)                 |
+| `src/layouts/Content.astro` | Content-page layout: header nav, mobile drawer, search dialog, EmDash head/body wiring |
+| `src/layouts/PersonaBio.astro` | Home-page layout for the profile card |
 | `src/pages/`             | Astro pages -- all server-rendered                                                 |
 
 ## Skills
@@ -78,7 +79,7 @@ The article layout is the standout feature: a three-column reading view with a l
 
 ## Customisation
 
-Design tokens live in `src/styles/tokens.css` with their default values. To restyle the site, override tokens in `src/styles/theme.css` -- declarations there are unlayered, so they always beat the `@layer base` defaults. Don't edit `tokens.css` or `Base.astro` for visual changes.
+Design tokens live in `src/styles/tokens.css` with their default values. To restyle the site, override tokens in `src/styles/theme.css` -- declarations there are unlayered, so they always beat the `@layer base` defaults. Don't edit `tokens.css` or the layouts for visual changes. Theme-wide button surfaces come from the `--button-surface` rule in `src/styles/appearance.css`; a scoped `background:` on a button loses to it, so use the `.button-primary` / `.button-scrim` hooks (or add one there) instead.
 
 Colours are defined with `light-dark(<light>, <dark>)`, so each token carries both modes. Overriding with a plain colour changes light and dark at once; use `light-dark()` in the override to keep them distinct. There is no separate dark palette to maintain.
 

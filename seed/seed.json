@@ -12,7 +12,7 @@
     "tagline": "Fotoğraf, ışık ve kareler üzerine notlar.",
     "url": "https://ahmetenes.com",
     "seo": {
-      "robotsTxt": "User-agent: *\nAllow: /\n\nDisallow: /_emdash/\n\nSitemap: https://ahmetenes.com/sitemap.xml\nSitemap: https://ahmetenes.com/sitemap-static.xml\n"
+      "robotsTxt": "User-agent: *\nAllow: /\n\nDisallow: /_emdash/\n# Form/beacon uclari ve sonsuz arama URL'leri taranmasin; galeri gorselleri acik.\nDisallow: /api/\nAllow: /api/immich/\nDisallow: /search\n\nSitemap: https://ahmetenes.com/sitemap.xml\nSitemap: https://ahmetenes.com/sitemap-static.xml\n"
     }
   },
   "collections": [

@@ -130,7 +130,8 @@ const pageCtx = createPublicPageContext({
     <EmDashBodyEnd page={pageCtx} />
     <script is:inline>
       try {
-        if (location.pathname.indexOf("/_emdash") !== 0) {
+        // Otomasyon (Lighthouse, headless test) ziyaret sayilmaz.
+        if (location.pathname.indexOf("/_emdash") !== 0 && !navigator.webdriver) {
           fetch("/api/analytics", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: location.pathname }), keepalive: true }).catch(function () {});
         }
       } catch (e) {}

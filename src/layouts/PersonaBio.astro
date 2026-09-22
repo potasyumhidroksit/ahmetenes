@@ -19,7 +19,8 @@ const page = createPublicPageContext({Astro, kind: content ? "content" : "custom
   <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><SiteFavicon/><AppearanceHead/><title>{title}</title><Font cssVariable="--font-personabio" preload/><EmDashHead page={page}/><script type="application/ld+json" set:html={JSON.stringify({"@context":"https://schema.org","@type":"Person","name":"Ahmet Enes","jobTitle":"Fotoğrafçı","url":Astro.url.origin,"sameAs":["https://instagram.com/eneswideshut"]})} /></head>
   <body><EmDashBodyStart page={page}/><slot/><EmDashBodyEnd page={page}/><script is:inline>
       try {
-        if (location.pathname.indexOf("/_emdash") !== 0) {
+        // Otomasyon (Lighthouse, headless test) ziyaret sayilmaz.
+        if (location.pathname.indexOf("/_emdash") !== 0 && !navigator.webdriver) {
           fetch("/api/analytics", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: location.pathname }), keepalive: true }).catch(function () {});
         }
       } catch (e) {}

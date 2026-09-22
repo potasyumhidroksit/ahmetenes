@@ -28,11 +28,18 @@ export const POST: APIRoute = async ({ request, url }) => {
 
   const result = await addSubscriber(email);
 
+  // Ayni adrese en fazla 10 dakikada bir onay e-postasi: farkli IP'lerle
+  // birinin gelen kutusunu onay mailiyle doldurmak mumkun olmasin.
+  if (result.ok && result.pending && !rateLimit("newsletter-mail:" + email, 1, 10 * 60_000)) {
+    return Response.json({ ok: true, pending: true, message: "Onay e-postası az önce gönderildi — gelen kutunu (ve spam klasörünü) kontrol et." });
+  }
+
   if (result.ok && result.pending && RESEND_API_KEY) {
     const token = signEmailToken(email, 7 * 24 * 60 * 60 * 1000);
+    // Link Host basligindan degil, yapilandirilmis site adresinden uretilir.
     const confirmUrl = new URL(
       "/api/newsletter/confirm?token=" + encodeURIComponent(token),
-      url
+      process.env.SITE_URL || url.origin
     ).toString();
     const html =
       "<!doctype html><html><body style='font-family:system-ui,sans-serif;padding:24px;color:#1c2229;background:#fff'>" +

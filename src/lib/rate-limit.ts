@@ -8,6 +8,10 @@ const buckets = new Map<string, Bucket>();
  */
 export function rateLimit(key: string, limit: number, windowMs: number): boolean {
   const now = Date.now();
+  // Suresi dolan kovalari arada temizle: cok sayida IP bellegi sisirmesin.
+  if (buckets.size > 5000) {
+    for (const [k, b] of buckets) if (b.resetAt < now) buckets.delete(k);
+  }
   const bucket = buckets.get(key);
   if (!bucket || bucket.resetAt < now) {
     buckets.set(key, { count: 1, resetAt: now + windowMs });

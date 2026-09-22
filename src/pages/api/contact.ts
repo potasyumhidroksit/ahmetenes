@@ -31,7 +31,8 @@ export const POST: APIRoute = async ({ request }) => {
     return Response.json({ ok: false, error: "Çok fazla istek, lütfen biraz bekleyin." }, { status: 429 });
   }
 
-  const name = typeof b.name === "string" ? b.name.trim() : "";
+  // Kontrol karakterleri (satir sonu vb.) konu satirina tasinmasin.
+  const name = typeof b.name === "string" ? b.name.replace(/[\u0000-\u001f\u007f]+/g, " ").trim() : "";
   const email = typeof b.email === "string" ? b.email.trim() : "";
   const message = typeof b.message === "string" ? b.message.trim() : "";
 

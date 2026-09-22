@@ -8,6 +8,9 @@ export type AnalyticsStats = {
 
 const DIR = process.env.DATA_DIR || "/app/data";
 const FILE = path.join(DIR, "analytics.json");
+/** Istemci yolu keyfi gonderebilir; farkli yol sayisi sinirli, tasanlar tek kovada. */
+const MAX_PATHS = 500;
+const OVERFLOW_KEY = "(diğer)";
 
 let cache: AnalyticsStats | null = null;
 let writeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -47,7 +50,8 @@ export function trackVisit(pathname: string): void {
     const stats = await load();
     const today = new Date().toISOString().slice(0, 10);
     stats.days[today] = (stats.days[today] || 0) + 1;
-    const key = pathname.replace(/\/+$/, "") || "/";
+    let key = pathname.replace(/[?#].*$/, "").replace(/\/+$/, "") || "/";
+    if (!(key in stats.paths) && Object.keys(stats.paths).length >= MAX_PATHS) key = OVERFLOW_KEY;
     stats.paths[key] = (stats.paths[key] || 0) + 1;
     schedule();
   })();

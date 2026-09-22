@@ -20,6 +20,9 @@ ENV NODE_ENV=production
 ENV PORT=4321
 ENV HOST=0.0.0.0
 COPY --from=deps --chown=astro:nodejs /app/node_modules ./node_modules
+# Onceki surumun hash'li varliklari (deploy.sh doldurur): edge'de/tarayicida
+# kalmis eski HTML de CSS/JS'ini bulsun. Yeni build ayni adlari ustune yazar.
+COPY --from=builder --chown=astro:nodejs /app/.deploy/prev-assets/ ./dist/client/_astro/
 COPY --from=builder --chown=astro:nodejs /app/dist ./dist
 COPY --from=builder --chown=astro:nodejs /app/public ./public
 # Küratörlü galeri künyesi runtime'da okunur; imaja dahil edilmeli.

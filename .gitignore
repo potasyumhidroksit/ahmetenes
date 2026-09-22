@@ -13,3 +13,7 @@ data.db
 !.env.example
 .dev.vars
 .dev.vars.*
+
+# deploy.sh: onceki surumun varliklari (yalnizca .gitkeep izlenir)
+.deploy/prev-assets/*
+!.deploy/prev-assets/.gitkeep

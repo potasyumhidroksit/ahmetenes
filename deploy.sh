@@ -14,6 +14,20 @@ CONTAINER_NAME="${CONTAINER_NAME:-ahmetenes}"
 HOST_PORT="${HOST_PORT:-5193}"
 DATA_DIR="${DATA_DIR:-/var/www/ahmetenes-data}"
 
+# Onceki imajin hash'li varliklarini yeni imaja tasi (14 gunden eskiler hariç).
+# Cloudflare (Cache Reserve/tiered) ya da acik sekmelerde kalan eski HTML'in
+# referans verdigi CSS/JS 404 olmasin; aksi halde sayfa stilsiz gorunur.
+PREV_ASSETS=".deploy/prev-assets"
+find "$PREV_ASSETS" -mindepth 1 ! -name .gitkeep -delete 2>/dev/null || true
+mkdir -p "$PREV_ASSETS"
+if docker image inspect "$IMAGE" >/dev/null 2>&1; then
+  prev_cid=$(docker create "$IMAGE")
+  docker cp "$prev_cid:/app/dist/client/_astro/." "$PREV_ASSETS/" 2>/dev/null || true
+  docker rm "$prev_cid" >/dev/null
+  find "$PREV_ASSETS" -type f ! -name .gitkeep -mtime +14 -delete
+  echo "→ Önceki sürümden $(find "$PREV_ASSETS" -type f ! -name .gitkeep | wc -l) varlık taşınıyor."
+fi
+
 echo "→ Docker imajı derleniyor ($IMAGE)..."
 docker build -t "$IMAGE" .
 
@@ -52,13 +66,23 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
   code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "http://127.0.0.1:${HOST_PORT}/" || true)
   if [ "$code" = "200" ]; then
     echo "OK: http://127.0.0.1:${HOST_PORT}/ (HTTP $code)"
-    # Cloudflare edge onbellegini temizle (yeni surum aninda gorunsun).
+    # Cloudflare edge onbellegini temizle (yeni surum aninda gorunsun). Zone
+    # diger alt alan adlarini da barindirir (cdn., sis., ...); yalnizca bu
+    # sitenin hostlarini temizle, olmazsa tum zone'a dus. Yaniti dogrula.
     if [ -f /root/.cloudflare/env ]; then
       ( set -a; . /root/.cloudflare/env; set +a
-        curl -s -X POST "https://api.cloudflare.com/client/v4/zones/5079525e40cebf813550cbf2bd411b46/purge_cache" \
-          -H "X-Auth-Email: $CF_EMAIL" -H "X-Auth-Key: $CF_GLOBAL_KEY" \
-          -H 'Content-Type: application/json' --data '{"purge_everything":true}' >/dev/null \
-          && echo "→ Cloudflare edge cache temizlendi." ) || true
+        purge() {
+          curl -s -X POST "https://api.cloudflare.com/client/v4/zones/5079525e40cebf813550cbf2bd411b46/purge_cache" \
+            -H "X-Auth-Email: $CF_EMAIL" -H "X-Auth-Key: $CF_GLOBAL_KEY" \
+            -H 'Content-Type: application/json' --data "$1" | grep -q '"success":true'
+        }
+        if purge '{"hosts":["ahmetenes.com","www.ahmetenes.com"]}'; then
+          echo "→ Cloudflare edge cache temizlendi (ahmetenes.com)."
+        elif purge '{"purge_everything":true}'; then
+          echo "→ Cloudflare edge cache temizlendi (tüm zone)."
+        else
+          echo "UYARI: Cloudflare purge başarısız; eski HTML en fazla s-maxage kadar görünebilir."
+        fi ) || true
     fi
     exit 0
   fi

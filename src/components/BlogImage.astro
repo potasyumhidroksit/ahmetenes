@@ -1,0 +1,41 @@
+---
+// Portable Text gorsel blogu: yerel blog gorsellerine srcset ve boyut ekler
+// (yer ayirir, CLS olmaz); digerleri icin EmDash varsayilanini kullanir.
+import { PTImage } from "emdash/ui";
+import { localImage } from "../lib/responsive-image";
+
+interface Props {
+	node: { _type: "image"; asset?: { url?: string }; alt?: string; caption?: string };
+}
+
+const { node } = Astro.props;
+const local = localImage(node?.asset?.url);
+---
+{local ? (
+	<figure class="emdash-image">
+		<img
+			src={local.src}
+			srcset={local.srcset}
+			sizes="(max-width: 760px) calc(100vw - 48px), 680px"
+			width={local.width}
+			height={local.height}
+			alt={node.alt ?? ""}
+			loading="lazy"
+			decoding="async"
+		/>
+		{node.caption && <figcaption>{node.caption}</figcaption>}
+	</figure>
+) : (
+	<PTImage node={node as any} />
+)}
+
+<style>
+	.emdash-image { margin: 1.5rem 0; }
+	.emdash-image img { display: block; max-width: 100%; height: auto; }
+	.emdash-image figcaption {
+		font-size: 0.875rem;
+		color: var(--color-muted);
+		margin-top: 0.5rem;
+		text-align: center;
+	}
+</style>

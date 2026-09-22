@@ -59,10 +59,10 @@ export const translate = (_locale: Locale, text: string) =>
   interfaceTr[text] ?? englishToTurkish[text] ?? text;
 
 export function readingTimeLabel(_locale: Locale, minutes: number): string {
-  return "Okuma Süresi " + minutes + " Dakika";
+  return minutes + " dk okuma";
 }
 export function commentCountLabel(_locale: Locale, count: number): string {
-  return count === 0 ? "Henüz Yorum Yok" : count + " Yorum Var";
+  return count === 0 ? "Henüz yorum yok" : count + " yorum";
 }
 export function menuLabel(label: string, _locale: Locale) {
   const defaults: Record<string, string> = { Home: "Ana sayfa", About: "Hakkımda", Posts: "Yazılar" };

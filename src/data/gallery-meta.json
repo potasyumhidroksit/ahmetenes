@@ -1,0 +1,112 @@
+[
+  {
+    "id": "ca293934-48d0-4dc7-b463-c2795e106cd8",
+    "title": "Saat Kulesi, golden hour",
+    "category": "sehir",
+    "layout": "wide",
+    "featured": true,
+    "location": "İzmir",
+    "year": "2026"
+  },
+  {
+    "id": "3bd8cf64-f2b6-4231-a420-11226281a29e",
+    "title": "Bankta iki adam",
+    "category": "sokak",
+    "layout": "wide",
+    "tags": [
+      "Şehir",
+      "Sokak"
+    ],
+    "story": "Yaprakların arasından kadrajı daralttım; banktaki sohbeti ön plana alıp arka plandaki meydanı yumuşak bıraktım.",
+    "year": "2026",
+    "exif": {
+      "camera": "X-T5",
+      "lens": "17-40mm F1.8 DC | Art 025",
+      "iso": "125",
+      "aperture": "4.5",
+      "shutter": "1/600",
+      "focal": "40mm"
+    },
+    "featured": false
+  },
+  {
+    "id": "a36a8c54-aedb-4bfe-9377-a5cb5d02b324",
+    "title": "Ağaçta mola",
+    "category": "doga",
+    "layout": "wide",
+    "tags": [
+      "Doğa",
+      "Şehir"
+    ],
+    "story": "Gövdeye yaslanan figürü ortada tuttum; arkadaki dağ silueti ve mavi yol çizgisi derinliği tamamladı.",
+    "year": "2026",
+    "exif": {
+      "camera": "X-T5",
+      "lens": "17-40mm F1.8 DC | Art 025",
+      "iso": "125",
+      "aperture": "5",
+      "shutter": "1/600",
+      "focal": "40mm"
+    },
+    "featured": false
+  },
+  {
+    "id": "cbcdf670-8524-4474-9c03-87a2bc9526e8",
+    "title": "Ufukta sessiz bekleyiş",
+    "category": "portre",
+    "layout": "wide",
+    "tags": [
+      "Portre",
+      "Deniz"
+    ],
+    "story": "İskele kenarında güneş doğarken bekledim; ufuk turuncuya döner dönmez tek kare yetti.",
+    "year": "2026",
+    "exif": {
+      "camera": "X-T5",
+      "lens": "17-40mm F1.8 DC | Art 025",
+      "iso": "125",
+      "aperture": "5.6",
+      "shutter": "1/900",
+      "focal": "29.8mm"
+    },
+    "featured": false
+  },
+  {
+    "id": "58f1be38-c52e-4a3c-8371-894cb4942619",
+    "title": "Aziz Charbel, gece ışığı",
+    "category": "gece",
+    "layout": "tall",
+    "tags": [
+      "Portre",
+      "Gece"
+    ],
+    "story": "Sıcak spot ile soğuk gölgeyi karşılaştırdım; İncili el ve tespih detayda kalsın diye f/1.4’te kaldım.",
+    "year": "2026",
+    "exif": {
+      "camera": "X-T5",
+      "lens": "SIGMA 56mm F1.4 DC DN | Contemporary 018",
+      "iso": "800",
+      "aperture": "1.4",
+      "shutter": "1/125",
+      "focal": "56mm"
+    },
+    "featured": false
+  },
+  {
+    "id": "cbdaa867-50bd-4451-bb24-621a7c7157af",
+    "title": "Turuncu kedi, metro",
+    "category": "portre",
+    "layout": "tall",
+    "year": "2026",
+    "exif": {
+      "camera": "X-T5",
+      "lens": "SIGMA 56mm F1.4 DC DN | Contemporary 018",
+      "iso": "125",
+      "aperture": "2.5",
+      "shutter": "1/420",
+      "focal": "56mm"
+    },
+    "featured": false,
+    "location": "İzmir"
+  }
+]

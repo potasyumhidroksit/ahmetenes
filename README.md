@@ -35,7 +35,10 @@ Panel: `http://localhost:4321/_emdash/admin`
 
 - `seed/seed.json` — koleksiyonlar, menüler, taksonomiler, sayfalar ve yazılar.
   İçerik, mevcut Next.js blog yazılarından `scripts/migrate-content.mjs` ile üretilir.
-- Blog görselleri `public/blog/<slug>/` altında.
+- Blog görselleri `public/blog/<slug>/` altında. Yeni görsel ekledikten sonra `pnpm optimize-images`
+  çalıştır: 640/960/1280px varyantları ve `src/data/image-manifest.json` üretilir; kartlar, yazı
+  kapağı ve gövde görselleri bunlarla `srcset` + gerçek boyutla sunulur (manifestte olmayan görseller
+  EmDash'in varsayılan `Image` bileşenine düşer).
 - **Galeri:** Immich `/timeline` API'si; görseller `/api/immich/<kind>/<id>?w=` proxy'sinden akar
   (API anahtarı sunucuda kalır, sharp ile boyutlandırılır, `IMG_CACHE_DIR` altında önbelleklenir).
 - **Medya:** Pulse (`/api/pulse` same-origin proxy) + Sinedexter `/api/stats`.

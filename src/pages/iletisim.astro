@@ -21,7 +21,7 @@ import Content from "../layouts/Content.astro";
         <div class="hp-field" aria-hidden="true">
           <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
         </div>
-        <button type="submit">Gönder</button>
+        <button type="submit" class="button-primary">Gönder</button>
         <p class="form-status" data-contact-status role="status" aria-live="polite"></p>
       </form>
       <aside class="contact-side">
@@ -35,7 +35,7 @@ import Content from "../layouts/Content.astro";
             <div class="hp-field" aria-hidden="true">
               <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
             </div>
-            <button type="submit">Kaydol</button>
+            <button type="submit" class="button-primary">Kaydol</button>
             <p class="form-status" data-newsletter-status role="status" aria-live="polite"></p>
           </form>
         </div>
@@ -49,8 +49,11 @@ import Content from "../layouts/Content.astro";
     const form = document.querySelector<HTMLFormElement>(formSelector);
     const status = document.querySelector<HTMLElement>(statusSelector);
     if (!form || !status) return;
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (!form.reportValidity()) return;
+      if (button) button.disabled = true;
       const fd = new FormData(form);
       status.textContent = "Gönderiliyor...";
       status.dataset.state = "pending";
@@ -72,6 +75,8 @@ import Content from "../layouts/Content.astro";
       } catch {
         status.textContent = "Bağlantı kurulamadı, tekrar dene.";
         status.dataset.state = "error";
+      } finally {
+        if (button) button.disabled = false;
       }
     });
   }
@@ -103,9 +108,9 @@ import Content from "../layouts/Content.astro";
   }
   .contact-form button, .newsletter-box button {
     justify-self: start; font: inherit; font-weight: 600; cursor: pointer;
-    color: var(--color-on-brand); background: var(--color-brand);
-    border: 0; border-radius: var(--radius); padding: 0.7rem 1.3rem;
+    color: var(--color-on-brand); border: 0; border-radius: var(--radius); padding: 0.7rem 1.3rem;
   }
+  .contact-form button:disabled, .newsletter-box button:disabled { opacity: 0.6; cursor: progress; }
   .contact-side { display: grid; gap: 1rem; align-content: start; font-size: 0.95rem; }
   .contact-side a { color: var(--color-brand); text-decoration: none; }
   .newsletter-box { margin-top: 1rem; padding-top: 1.25rem; border-top: 1px solid var(--color-border-subtle); }
@@ -113,6 +118,6 @@ import Content from "../layouts/Content.astro";
   .newsletter-box p { margin: 0 0 0.9rem; color: var(--color-muted); font-size: 0.875rem; }
   .newsletter-box form { display: grid; gap: 0.6rem; }
   .form-status { min-height: 1.2em; font-size: 0.85rem; color: var(--color-muted); margin: 0; }
-  .form-status[data-state="ok"] { color: #1a7f37; }
-  .form-status[data-state="error"] { color: #c0392b; }
+  .form-status[data-state="ok"] { color: light-dark(#1a7f37, #6fd08c); }
+  .form-status[data-state="error"] { color: light-dark(#c0392b, #ff8a80); }
 </style>

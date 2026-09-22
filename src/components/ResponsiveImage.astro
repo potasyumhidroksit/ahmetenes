@@ -1,0 +1,35 @@
+---
+// Yerel blog gorsellerini srcset + gercek boyutlarla sunar; digerlerini
+// EmDash'in Image bilesenine birakir.
+import type { MediaValue } from "emdash";
+import { Image } from "emdash/ui";
+import { localImage } from "../lib/responsive-image";
+
+interface Props {
+	image: MediaValue | string;
+	alt?: string;
+	sizes: string;
+	/** Ekranin ustundeki (LCP) gorseller icin: eager + fetchpriority=high */
+	priority?: boolean;
+	class?: string;
+}
+
+const { image, alt = "", sizes, priority = false, class: className } = Astro.props;
+const local = localImage(image);
+---
+{local ? (
+	<img
+		class:list={["emdash-image-media", className]}
+		src={local.src}
+		srcset={local.srcset}
+		sizes={sizes}
+		width={local.width}
+		height={local.height}
+		alt={alt}
+		loading={priority ? "eager" : "lazy"}
+		decoding="async"
+		fetchpriority={priority ? "high" : undefined}
+	/>
+) : (
+	<Image image={image} alt={alt} priority={priority} class={className} />
+)}

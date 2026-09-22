@@ -19,11 +19,11 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
     </header>
     <div class="gallery-filters" role="group" aria-label="Kategori filtresi">
       {galleryCategories.map((cat) => (
-        <button type="button" data-filter={cat.id} class:list={[cat.id === "tumu" && "active"]}>{cat.label}</button>
+        <button type="button" data-filter={cat.id} aria-pressed={cat.id === "tumu" ? "true" : "false"}>{cat.label}</button>
       ))}
     </div>
     <div class="gallery-grid" data-gallery>
-      {photos.map((p) => (
+      {photos.map((p, index) => (
         <button
           type="button"
           class="gallery-item"
@@ -40,9 +40,10 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
           <img
             src={p.src}
             srcset={srcset(p)}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            sizes="(max-width: 640px) calc(100vw - 48px), (max-width: 1100px) 45vw, 380px"
             alt={p.alt ?? p.title}
-            loading="lazy"
+            loading={index < 3 ? "eager" : "lazy"}
+            fetchpriority={index === 0 ? "high" : undefined}
             decoding="async"
             {...(p.width && p.height ? { width: p.width, height: p.height } : {})}
           />
@@ -72,7 +73,7 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
   document.querySelectorAll<HTMLButtonElement>("[data-filter]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const filter = btn.dataset.filter || "tumu";
-      document.querySelectorAll("[data-filter]").forEach((b) => b.classList.toggle("active", b === btn));
+      document.querySelectorAll("[data-filter]").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
       items.forEach((item) => {
         item.hidden = !(filter === "tumu" || item.dataset.category === filter);
       });
@@ -137,10 +138,12 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
     color: var(--color-muted); background: transparent;
     border: 1px solid var(--color-border); border-radius: 999px;
   }
-  .gallery-filters button.active { color: var(--color-on-brand); background: var(--color-brand); border-color: var(--color-brand); }
-  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+  .gallery-filters button[aria-pressed="true"] { color: light-dark(#1d2128, #fff); border-color: var(--glass-border-active); font-weight: 600; }
+  /* Sutun (masonry) duzeni: dikey kareler satirda bosluk birakmaz. */
+  .gallery-grid { columns: 3 260px; column-gap: 1rem; }
   .gallery-item {
-    position: relative; padding: 0; border: 0; cursor: zoom-in; overflow: hidden;
+    position: relative; display: block; width: 100%; margin: 0 0 1rem; padding: 0; border: 0;
+    cursor: zoom-in; overflow: hidden; break-inside: avoid;
     border-radius: var(--radius-lg); background: var(--color-bg-subtle);
   }
   .gallery-item[hidden] { display: none; }

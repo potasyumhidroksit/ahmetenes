@@ -6,15 +6,16 @@ import {
 	decodeSlug,
 	getSiteSettings,
 	getCommentCount,
+	getEditMeta,
 } from "emdash";
-import {
-	Image,
-	PortableText,
-} from "emdash/ui";
+import { PortableText } from "emdash/ui";
 import { Comments, CommentForm } from "emdash/ui/comments";
 import Base from "../../layouts/Content.astro";
 import PostCard from "../../components/PostCard.astro";
 import PostShare from "../../components/PostShare.astro";
+import ResponsiveImage from "../../components/ResponsiveImage.astro";
+import BlogImage from "../../components/BlogImage.astro";
+import { imageSrc } from "../../lib/responsive-image";
 import { getReadingTime } from "../../utils/reading-time";
 import { resolveBlogSiteIdentity } from "../../utils/site-identity";
 
@@ -47,7 +48,11 @@ if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
 // Get featured image URL for OG fallback
 // The image may have src (external) or meta.storageKey (local)
 function getImageUrl(img: unknown): string | undefined {
-	if (!img || typeof img !== "object") return undefined;
+	if (!img || (typeof img !== "object" && typeof img !== "string")) return undefined;
+	if (typeof img === "string") {
+		if (!img) return undefined;
+		return img.startsWith("http") ? img : `${Astro.url.origin}${img}`;
+	}
 	const image = img as Record<string, unknown>;
 	// Check for direct src
 	if (typeof image.src === "string" && image.src) {
@@ -85,6 +90,13 @@ const readingTime = getReadingTime(post.data.content);
 const tags = post.data.terms?.tag ?? [];
 const categories = post.data.terms?.category ?? [];
 const commentCount = await getCommentCount("posts", post.data.id);
+
+// Kapak gorseli zaten hero'da; govdede ayni kareyi ikinci kez gosterme.
+// Duzenleme modunda (gorsel editor) icerige dokunma.
+const heroSrc = imageSrc(post.data.featured_image);
+const bodyContent = heroSrc && Array.isArray(post.data.content) && !getEditMeta(post.data.content)
+	? post.data.content.filter((block) => !(block._type === "image" && (block as { asset?: { url?: string } }).asset?.url === heroSrc))
+	: post.data.content;
 
 // This post's tags are already hydrated onto the entry by getEmDashEntry —
 // no extra query needed.
@@ -137,7 +149,7 @@ const publishDate =
 		{
 			post.data.featured_image && (
 				<div class="article-hero" {...post.edit.featured_image}>
-					<Image image={post.data.featured_image} />
+					<ResponsiveImage image={post.data.featured_image} sizes="(max-width: 760px) 100vw, min(1200px, 90vw)" priority />
 				</div>
 			)
 		}
@@ -182,7 +194,7 @@ const publishDate =
 				</header>
 
 				<div class="article-content">
-					<PortableText value={post.data.content} />
+					<PortableText value={bodyContent} components={{ type: { image: BlogImage } }} />
 				</div>
 
 				<PostShare title={post.data.title} url={new URL(Astro.url.pathname, Astro.url.origin).href} locale={locale} />
@@ -196,10 +208,10 @@ const publishDate =
 						<span class="taxonomy-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 13 13 20l-9-9V4h7z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg></span>
 						<div class="taxonomy-values">{tags.map((term) => <a href={localePath(`/tag/${term.slug}`, locale)} aria-label={`${t("Etiket")}: ${term.label}`}>{term.label}</a>)}</div>
 					</div>}
-					<a href="#comments" class="taxonomy-item taxonomy-comments">
+					{commentCount > 0 && <a href="#comments" class="taxonomy-item taxonomy-comments">
 						<span class="taxonomy-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5h14v11H9l-4 3z"/></svg></span>
 						<span class="taxonomy-value">{commentCountLabel(locale, commentCount)}</span>
-					</a>
+					</a>}
 				</footer>
 				<div class="article-comments" id="comments" data-comment-locale={locale} data-comment-count={commentCount}>
 					<Comments collection="posts" contentId={post.data.id} threaded />

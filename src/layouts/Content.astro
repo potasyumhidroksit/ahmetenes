@@ -95,6 +95,7 @@ const pageCtx = createPublicPageContext({
 <html lang={locale} data-public-theme="personabio-content" data-appearance="dark">
   <head>
     <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>document.documentElement.setAttribute("data-js", "")</script>
     <SiteFavicon />
     <AppearanceHead />
     <Font cssVariable="--font-personabio" preload /><Font cssVariable="--font-mono" />
@@ -109,7 +110,7 @@ const pageCtx = createPublicPageContext({
           {profile?.avatar && <Image image={profile.avatar} alt="" width={48} height={48} />}
           <span>{identity}<small>{t("Yaşam yolundan notlar")}</small></span>
         </a>
-        <button class="content-menu-toggle" type="button" aria-label={t("Ana menü")} aria-expanded="false" aria-controls="content-navigation" hidden>
+        <button class="content-menu-toggle" type="button" aria-label={t("Ana menü")} aria-expanded="false" aria-controls="content-navigation">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path class="menu-bars" d="M4 6h16M4 12h16M4 18h16"/><path class="menu-close" d="m6 6 12 12M18 6 6 18"/></svg>
         </button>
         <nav id="content-navigation" class="content-nav" aria-label={t("Ana menü")}>
@@ -155,8 +156,6 @@ const pageCtx = createPublicPageContext({
       if (open) requestAnimationFrame(() => drawerClose.focus());
       else if (restoreFocus && wasOpen) requestAnimationFrame(() => toggle.focus());
     };
-    header.dataset.mobileNav = "ready";
-    toggle.hidden = false;
     setOpen(false);
     toggle.addEventListener("click", () => setOpen(true));
     drawerClose.addEventListener("click", () => setOpen(false, true));

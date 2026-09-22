@@ -1,0 +1,92 @@
+{
+  "/blog/az-ekipman-cok-kare-minimal-fotografcilik/cover.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ]
+  },
+  "/blog/az-ekipman-cok-kare-minimal-fotografcilik/kare-1.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ]
+  },
+  "/blog/dogal-isikla-portre-teknikleri/cover.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ]
+  },
+  "/blog/dogal-isikla-portre-teknikleri/kare-1.webp": {
+    "width": 1600,
+    "height": 2844,
+    "variants": [
+      640,
+      960,
+      1280
+    ]
+  },
+  "/blog/kompozisyon-temelleri-ucte-bir-kurali/cover.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ]
+  },
+  "/blog/kompozisyon-temelleri-ucte-bir-kurali/kare-1.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ]
+  },
+  "/blog/sokak-fotografciliginda-gorunmez-olmak/cover.webp": {
+    "width": 1600,
+    "height": 2351,
+    "variants": [
+      640,
+      960,
+      1280
+    ]
+  },
+  "/blog/sokak-fotografciliginda-gorunmez-olmak/kare-1.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ]
+  },
+  "/blog/uc-karede-gorsel-hikaye-anlatimi/cover.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ]
+  },
+  "/blog/uc-karede-gorsel-hikaye-anlatimi/kare-1.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ]
+  }
+}

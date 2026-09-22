@@ -22,6 +22,7 @@ const commentCounts = new Map(
 ---
 <Base title={t("Yazılar")} description={t("Notlar, fikirler ve üzerine düşündüklerim.")}>
   <section class="archive-section posts-page" data-view="single">
+    <script is:inline>try{var v=localStorage.getItem("posts-view");if(["list","grid","single"].indexOf(v)>-1)document.currentScript.parentElement.dataset.view=v}catch(e){}</script>
     <div class="posts-toolbar">
       <div class="view-switcher" role="group" aria-label={t("Yazı görünümü")}>
         <button type="button" data-view-option="list" aria-pressed="false">
@@ -40,7 +41,7 @@ const commentCounts = new Map(
     </div>
     {posts.length === 0 ? <div class="content-empty"><h2>{t("Biraz düşünce, biraz zaman.")}</h2><p>{t("Yeni yazılar burada yerini alacak.")}</p><a href={localePath("/", locale)}>{t("Ana sayfaya dön")} →</a></div> : <>
       <ul class="post-titles">{posts.map((post) => <li><a href={localePath(`/${post.id}`, locale)}>{post.data.title}</a></li>)}</ul>
-      <div class="posts-grid">{posts.map((post) => <PostCard title={post.data.title} excerpt={post.data.excerpt} featuredImage={post.data.featured_image} href={`/${post.id}`} date={post.data.publishedAt ?? undefined} readingTime={getReadingTime(post.data.content)} commentCount={commentCounts.get(post.data.id) ?? 0} metaAfterTitle coverBackground showReadMore={false} />)}</div>
+      <div class="posts-grid">{posts.map((post, index) => <PostCard priority={index === 0} title={post.data.title} excerpt={post.data.excerpt} featuredImage={post.data.featured_image} href={`/${post.id}`} date={post.data.publishedAt ?? undefined} readingTime={getReadingTime(post.data.content)} commentCount={commentCounts.get(post.data.id) ?? 0} metaAfterTitle coverBackground showReadMore={false} />)}</div>
     </>}
   </section>
 

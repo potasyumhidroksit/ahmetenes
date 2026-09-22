@@ -18,5 +18,5 @@ const profile = {
 const documentTitle = translate(locale, settings.title || profile.title);
 ---
 <PersonaBio title={documentTitle} description={profile.description} content={entry ? {collection:"bio_profiles",id:entry.data.id,slug:entry.id} : undefined}>
-  <ProfileCard profile={profile} links={socialMenu?.items ?? []} edit={entry?.edit} menu={menu?.items ?? []}/>
+  <ProfileCard profile={profile} links={socialMenu?.items ?? []} edit={entry?.edit} menu={(menu?.items ?? []).filter((item) => item.url !== "/")}/>
 </PersonaBio>

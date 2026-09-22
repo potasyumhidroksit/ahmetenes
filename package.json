@@ -16,6 +16,7 @@
     "send-newsletter": "node scripts/send-newsletter.mjs",
     "newsletter": "node scripts/newsletter.mjs",
     "analytics": "node scripts/analytics.mjs",
+    "optimize-images": "node scripts/optimize-images.mjs",
     "deploy": "bash deploy.sh"
   },
   "dependencies": {

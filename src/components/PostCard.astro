@@ -1,6 +1,6 @@
 ---
 import type { MediaValue, ContentBylineCredit } from "emdash";
-import { Image } from "emdash/ui";
+import ResponsiveImage from "./ResponsiveImage.astro";
 import { commentCountLabel, localeFromUrl, localePath, readingTimeLabel, translate } from "../utils/i18n";
 const locale = localeFromUrl(Astro.url);
 const t = (text: string) => translate(locale, text);
@@ -17,6 +17,8 @@ interface Props {
 	coverBackground?: boolean;
 	showReadMore?: boolean;
 	tags?: Array<{ slug: string; label: string }>;
+	/** Ilk gorunen kart icin gorseli oncelikli yukle (LCP). */
+	priority?: boolean;
 	bylines?: ContentBylineCredit[];
 }
 
@@ -33,6 +35,7 @@ const {
 	showReadMore = true,
 	tags,
 	bylines,
+	priority = false,
 } = Astro.props;
 
 const formattedDate = date
@@ -49,7 +52,7 @@ const formattedDate = date
 		{
 			featuredImage ? (
 				<div class="card-image" aria-hidden={coverBackground ? "true" : undefined}>
-					<Image image={featuredImage} />
+					<ResponsiveImage image={featuredImage} sizes={coverBackground ? "(max-width: 760px) 100vw, 900px" : "(max-width: 760px) 100vw, 400px"} priority={priority} />
 				</div>
 			) : (
 				<div class="card-placeholder" aria-hidden="true"><span>{t("Notlar & düşünceler")}</span><span>↗</span></div>
@@ -100,8 +103,8 @@ const formattedDate = date
 				{formattedDate && <time>{formattedDate}</time>}
 				{formattedDate && readingTime && <span class="meta-dot" />}
 				{readingTime && <span>{readingTimeLabel(locale, readingTime)}</span>}
-				{readingTime && commentCount !== undefined && <span class="meta-dot" />}
-				{commentCount !== undefined && <span>{commentCountLabel(locale, commentCount)}</span>}
+				{readingTime && commentCount ? <span class="meta-dot" /> : null}
+				{commentCount ? <span>{commentCountLabel(locale, commentCount)}</span> : null}
 			</div>
 			{!metaAfterTitle && <h2 class="card-title">{title}</h2>}
 			{excerpt && <p class="card-excerpt">{excerpt}</p>}

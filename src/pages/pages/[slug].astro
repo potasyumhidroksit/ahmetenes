@@ -3,7 +3,9 @@ import { notFound } from "../../utils/http";
 import { decodeSlug } from "emdash";
 import { localizedEntry as getEmDashEntry } from "../../utils/localized-content";
 import { PortableText } from "emdash/ui";
+import { getEditMeta, type PortableTextBlock } from "emdash";
 import Base from "../../layouts/Content.astro";
+import { firstParagraphPreview } from "../../utils/first-paragraph";
 
 import { localeFromUrl, localePath } from "../../utils/i18n";
 const locale = localeFromUrl(Astro.url);
@@ -24,20 +26,46 @@ if (!page) {
 }
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
+
+// Sayfa basligi zaten <h1>; icerikteki h1 bloklari h2'ye indirilir, basligi
+// tekrar eden ilk h1 atlanir (tek h1, tekrar eden baslik yok).
+// Duzenleme modunda (gorsel editor) icerige dokunma.
+const blockText = (block: PortableTextBlock) =>
+	((block as { children?: Array<{ text?: string }> }).children ?? []).map((child) => child.text ?? "").join("").trim();
+const rawContent = page.data.content as PortableTextBlock[] | undefined;
+const content = Array.isArray(rawContent) && !getEditMeta(rawContent)
+	? rawContent
+		.filter((block, index) => !(index === 0 && block.style === "h1" && blockText(block).toLocaleLowerCase("tr") === page.data.title.toLocaleLowerCase("tr")))
+		.map((block) => (block.style === "h1" ? { ...block, style: "h2" } : block))
+	: rawContent;
+const description = firstParagraphPreview(rawContent) || undefined;
+const updated = slug === "now" && page.data.updatedAt
+	? page.data.updatedAt.toLocaleDateString("tr-TR", { year: "numeric", month: "long", day: "numeric" })
+	: null;
 ---
 
 <Base
 	title={page.data.title}
+	description={description}
 	content={{ collection: "pages", id: page.data.id, slug }}
 >
 	<article class="page-article">
 		<header class="page-header">
 			<h1 class="page-title" {...page.edit.title}>{page.data.title}</h1>
+			{updated && <p class="page-updated">Son güncelleme: <time datetime={page.data.updatedAt.toISOString()}>{updated}</time></p>}
 		</header>
 
 		<div class="page-content">
-			<PortableText value={page.data.content} />
+			<PortableText value={content} />
 		</div>
+
+		{slug === "hakkimda" && (
+			<ul class="page-links" aria-label="Bağlantılar">
+				<li><a href="mailto:info@ahmetenes.com">info@ahmetenes.com</a></li>
+				<li><a href="https://instagram.com/eneswideshut" target="_blank" rel="noopener noreferrer">Instagram · @eneswideshut</a></li>
+				<li><a href={localePath("/iletisim", locale)}>İletişim formu →</a></li>
+			</ul>
+		)}
 	</article>
 </Base>
 
@@ -50,6 +78,39 @@ if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
 
 	.page-header {
 		margin-bottom: var(--spacing-8);
+	}
+
+	.page-updated {
+		margin-top: var(--spacing-3, 0.75rem);
+		font-size: var(--font-size-sm, 0.875rem);
+		color: var(--color-muted);
+	}
+
+	.page-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		margin: var(--spacing-6, 1.5rem) 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.page-links a {
+		display: inline-block;
+		padding: 0.6rem 1rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
+		color: var(--color-text);
+		text-decoration: none;
+	}
+
+	.page-links a:hover {
+		border-color: var(--color-text-secondary);
+	}
+
+	.page-links a:focus-visible {
+		outline: 2px solid light-dark(#536163, #e0e6eb);
+		outline-offset: 3px;
 	}
 
 	.page-title {

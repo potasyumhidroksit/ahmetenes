@@ -168,3 +168,11 @@ export async function loadGallery(): Promise<GalleryPhoto[]> {
     return curated.map((c) => toPhoto(c));
   }
 }
+
+/** "X-T5 · 17-40mm F1.8 DC | Art 025 · 40mm · f/4.5 · 1/600 · ISO 125" */
+export function exifLine(p: GalleryPhoto): string {
+  const e = p.exif;
+  return [e?.camera, e?.lens, e?.focal, e?.aperture ? "f/" + e.aperture : null, e?.shutter, e?.iso ? "ISO " + e.iso : null]
+    .filter(Boolean)
+    .join(" · ");
+}

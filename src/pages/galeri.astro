@@ -1,14 +1,10 @@
 ---
 import Content from "../layouts/Content.astro";
-import { loadGallery, galleryCategories } from "../lib/gallery";
+import { exifLine, loadGallery, galleryCategories } from "../lib/gallery";
 
 export const prerender = false;
 
 const photos = await loadGallery();
-const exifLine = (p: (typeof photos)[number]) =>
-  [p.exif?.camera, p.exif?.lens, p.exif?.focal, p.exif?.aperture ? "f/" + p.exif.aperture : null, p.exif?.shutter, p.exif?.iso ? "ISO " + p.exif.iso : null]
-    .filter(Boolean)
-    .join(" · ");
 const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " + s.w + "w").join(", ");
 const origin = Astro.url.origin;
 const year = new Date().getFullYear();

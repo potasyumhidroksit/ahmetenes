@@ -14,6 +14,8 @@ import Base from "../../layouts/Content.astro";
 import PostCard from "../../components/PostCard.astro";
 import PostShare from "../../components/PostShare.astro";
 import NewsletterForm from "../../components/NewsletterForm.astro";
+import { galleryHref, galleryPhotoFor } from "../../lib/blog-photo";
+import { exifLine } from "../../lib/gallery";
 import ResponsiveImage from "../../components/ResponsiveImage.astro";
 import BlogImage from "../../components/BlogImage.astro";
 import { imageSrc, ogImage } from "../../lib/responsive-image";
@@ -93,6 +95,9 @@ const tags = post.data.terms?.tag ?? [];
 const categories = post.data.terms?.category ?? [];
 const commentCount = await getCommentCount("posts", post.data.id);
 
+// Kapak galerideki bir kareyse altinda cekim bilgisi + galeride ac.
+const heroPhoto = await galleryPhotoFor(post.data.featured_image);
+
 // Kapak gorseli zaten hero'da; govdede ayni kareyi ikinci kez gosterme.
 // Duzenleme modunda (gorsel editor) icerige dokunma.
 const heroSrc = imageSrc(post.data.featured_image);
@@ -154,6 +159,14 @@ const publishDate =
 				<div class="article-hero" {...post.edit.featured_image}>
 					<ResponsiveImage image={post.data.featured_image} sizes="(max-width: 760px) 100vw, min(1200px, 90vw)" priority />
 				</div>
+			)
+		}
+		{
+			heroPhoto && (
+				<p class="article-hero-caption">
+					<span>{heroPhoto.title}{exifLine(heroPhoto) && <> · {exifLine(heroPhoto)}</>}</span>
+					<a href={galleryHref(heroPhoto)}>Galeride aç →</a>
+				</p>
 			)
 		}
 
@@ -348,6 +361,14 @@ const publishDate =
 		overflow: hidden;
 		background: var(--color-surface);
 	}
+
+	/* Hero'nun hemen altinda; bosluklar theme.css'te .article-hero ile birlikte. */
+	.article-hero-caption {
+		display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 1rem;
+		font-size: 0.8125rem; color: var(--color-muted); font-variant-numeric: tabular-nums;
+	}
+	.article-hero-caption a { color: var(--color-text-secondary); text-decoration: none; white-space: nowrap; }
+	.article-hero-caption a:hover { color: var(--color-text); text-decoration: underline; text-underline-offset: 3px; }
 
 	.article-hero img {
 		width: 100%;

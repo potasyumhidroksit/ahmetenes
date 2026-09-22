@@ -90,6 +90,8 @@ html[data-public-theme="personabio-content"] {
 [data-public-theme="personabio-content"] .content-panel :is(.page-content,.article-content) a { text-decoration: underline; text-underline-offset: 4px; }
 [data-public-theme="personabio-content"] .content-panel .article { max-width: none; }
 [data-public-theme="personabio-content"] .content-panel .article-hero { margin: 0 0 48px; border-radius: 20px; }
+/* Kapak alti cekim bilgisi: kapagin 12px altinda, ayni alt bosluk. */
+[data-public-theme="personabio-content"] .content-panel .article-hero-caption { margin: -36px 0 48px; }
 [data-public-theme="personabio-content"] .content-panel .article-grid { display: block; width: 100%; max-width: 800px; padding: 0; margin-inline: auto; }
 [data-public-theme="personabio-content"] .content-panel .article-header .article-meta { display: flex; }
 [data-public-theme="personabio-content"] .content-panel .article-title { font-size: clamp(32px, 3.5vw, 48px); font-weight: 500; letter-spacing: -.035em; }
@@ -141,6 +143,7 @@ html[data-public-theme="personabio-content"] {
   [data-public-theme="personabio-content"] .content-panel .card-body { padding: 20px 10px 6px; }
   [data-public-theme="personabio-content"] .content-panel .card-title { font-size: 24px; }
   [data-public-theme="personabio-content"] .content-panel .article-hero { margin-bottom: 28px; }
+  [data-public-theme="personabio-content"] .content-panel .article-hero-caption { margin: -18px 0 28px; }
   [data-public-theme="personabio-content"] .content-panel .search-form { flex-direction: column; }
   [data-public-theme="personabio-content"] .content-panel .search-button { min-height: 48px; }
   .content-footer { align-items: flex-start; font-size: 12px; gap: 12px; }

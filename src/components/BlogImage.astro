@@ -1,8 +1,11 @@
 ---
 // Portable Text gorsel blogu: yerel blog gorsellerine srcset ve boyut ekler
-// (yer ayirir, CLS olmaz); digerleri icin EmDash varsayilanini kullanir.
+// (yer ayirir, CLS olmaz); galerideki bir kareden geliyorsa EXIF satiri ve
+// galeride derin baglanti gosterir. Digerleri icin EmDash varsayilani.
 import { PTImage } from "emdash/ui";
 import { localImage } from "../lib/responsive-image";
+import { galleryHref, galleryPhotoFor } from "../lib/blog-photo";
+import { exifLine } from "../lib/gallery";
 
 interface Props {
 	node: { _type: "image"; asset?: { url?: string }; alt?: string; caption?: string };
@@ -10,20 +13,47 @@ interface Props {
 
 const { node } = Astro.props;
 const local = localImage(node?.asset?.url);
+const photo = local ? await galleryPhotoFor(local.src) : undefined;
+const exif = photo ? exifLine(photo) : "";
 ---
 {local ? (
 	<figure class="emdash-image">
-		<img
-			src={local.src}
-			srcset={local.srcset}
-			sizes="(max-width: 760px) calc(100vw - 48px), 680px"
-			width={local.width}
-			height={local.height}
-			alt={node.alt ?? ""}
-			loading="lazy"
-			decoding="async"
-		/>
-		{node.caption && <figcaption>{node.caption}</figcaption>}
+		{photo ? (
+			<a class="blog-photo-link" href={galleryHref(photo)} title="Galeride büyük gör" aria-label={(node.alt || photo.title) + " — galeride büyük gör"}>
+				<img
+					src={local.src}
+					srcset={local.srcset}
+					sizes="(max-width: 760px) calc(100vw - 48px), 680px"
+					width={local.width}
+					height={local.height}
+					alt={node.alt ?? ""}
+					loading="lazy"
+					decoding="async"
+				/>
+			</a>
+		) : (
+			<img
+				src={local.src}
+				srcset={local.srcset}
+				sizes="(max-width: 760px) calc(100vw - 48px), 680px"
+				width={local.width}
+				height={local.height}
+				alt={node.alt ?? ""}
+				loading="lazy"
+				decoding="async"
+			/>
+		)}
+		{(node.caption || photo) && (
+			<figcaption>
+				{node.caption && <span>{node.caption}</span>}
+				{photo && (
+					<span class="blog-photo-meta">
+						{exif && <span class="blog-photo-exif">{exif}</span>}
+						<a href={galleryHref(photo)}>Galeride aç →</a>
+					</span>
+				)}
+			</figcaption>
+		)}
 	</figure>
 ) : (
 	<PTImage node={node as any} />
@@ -32,10 +62,16 @@ const local = localImage(node?.asset?.url);
 <style>
 	.emdash-image { margin: 1.5rem 0; }
 	.emdash-image img { display: block; max-width: 100%; height: auto; }
+	.blog-photo-link { display: block; cursor: zoom-in; }
 	.emdash-image figcaption {
-		font-size: 0.875rem;
+		display: grid; gap: 0.25rem;
+		font-size: 0.8125rem;
 		color: var(--color-muted);
-		margin-top: 0.5rem;
-		text-align: center;
+		margin-top: 0.6rem;
+		text-align: left;
 	}
+	.blog-photo-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 1rem; }
+	.blog-photo-exif { font-variant-numeric: tabular-nums; }
+	.blog-photo-meta a { color: var(--color-text-secondary); text-decoration: none; white-space: nowrap; }
+	.blog-photo-meta a:hover { color: var(--color-text); text-decoration: underline; text-underline-offset: 3px; }
 </style>

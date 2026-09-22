@@ -48,7 +48,9 @@ async function persist(): Promise<void> {
 export function trackVisit(pathname: string): void {
   void (async () => {
     const stats = await load();
-    const today = new Date().toISOString().slice(0, 10);
+    // Gun sinirlari Istanbul saatine gore (UTC'de 00-03 arasi ziyaretler bir
+    // onceki gune yaziliyordu). en-CA -> YYYY-MM-DD.
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul" }).format(new Date());
     stats.days[today] = (stats.days[today] || 0) + 1;
     let key = pathname.replace(/[?#].*$/, "").replace(/\/+$/, "") || "/";
     if (!(key in stats.paths) && Object.keys(stats.paths).length >= MAX_PATHS) key = OVERFLOW_KEY;

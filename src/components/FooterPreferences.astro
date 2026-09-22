@@ -1,11 +1,11 @@
 ---
 import AppearanceControl from "./AppearanceControl.astro";
-import LanguageControl from "./LanguageControl.astro";
-interface Props { content?: { collection: string; id: string; slug?: string | null } }
-const { content } = Astro.props;
+// Site tek dilli: tek secenekli dil dugmesi yerine sahiplik + RSS. (Eski
+// LanguageControl her icerik sayfasinda yalnizca bunun icin DB sorgusu yapiyordu.)
+const year = new Date().getFullYear();
 ---
 <div class="personabio-footer">
   <AppearanceControl icons />
-  <LanguageControl content={content} fullLabels />
+  <p class="personabio-owner"><span>© {year} Ahmet Enes</span><span aria-hidden="true">·</span><a href="/rss.xml">RSS</a></p>
   <p class="personabio-copyright">Built with <a href="https://emdashcms.com">EmDash</a> · Persona Bio</p>
 </div>

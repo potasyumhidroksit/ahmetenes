@@ -83,6 +83,10 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
         }
         if purge '{"hosts":["ahmetenes.com","www.ahmetenes.com"]}'; then
           echo "→ Cloudflare edge cache temizlendi (ahmetenes.com)."
+          # Cache Reserve / ust katman eski kopyayi kisa sure geri doldurabiliyor
+          # (dagitimdan 10-60 sn sonra eski HTML goruldu); ikinci tur.
+          sleep 20
+          purge '{"hosts":["ahmetenes.com","www.ahmetenes.com"]}' && echo "→ İkinci temizleme turu tamam."
         elif purge '{"purge_everything":true}'; then
           echo "→ Cloudflare edge cache temizlendi (tüm zone)."
         else

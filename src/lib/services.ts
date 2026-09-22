@@ -1,15 +1,23 @@
 import { site } from "./site";
 
-export type SinedexterStats = { films: number; series: number; episodes: number };
+export type SinedexterStats = { ok: boolean; films: number; series: number; episodes: number };
+
+// Istatistikler yavas degisir; her sayfa render'inda 5 sn'lik dis istegi beklememek icin.
+let statsCache: { at: number; data: SinedexterStats } | null = null;
+const STATS_TTL = 10 * 60_000;
 
 export async function getSinedexterStats(): Promise<SinedexterStats> {
+  if (statsCache && Date.now() - statsCache.at < STATS_TTL) return statsCache.data;
   try {
     const res = await fetch(site.services.sinedexter.stats, { signal: AbortSignal.timeout(5000) });
     if (!res.ok) throw new Error("stats " + res.status);
     const d = (await res.json()) as Partial<SinedexterStats>;
-    return { films: d.films ?? 0, series: d.series ?? 0, episodes: d.episodes ?? 0 };
+    const data = { ok: true, films: d.films ?? 0, series: d.series ?? 0, episodes: d.episodes ?? 0 };
+    statsCache = { at: Date.now(), data };
+    return data;
   } catch {
-    return { films: 0, series: 0, episodes: 0 };
+    // Erisilemezse son bilinen degerler; hic yoksa "bilinmiyor" (0 degil).
+    return statsCache?.data ?? { ok: false, films: 0, series: 0, episodes: 0 };
   }
 }
 

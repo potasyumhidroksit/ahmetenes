@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// pnpm send-newsletter "Başlık" "slug" ["özet"]
+// pnpm send-newsletter "Başlık" "slug" ["özet"] ["kapak görseli URL (JPEG)"]
+// Genelde dogrudan degil `pnpm announce <slug> --send` ile cagrilir.
 // Onaylı bülten abonelerine yeni yazı duyurusu gönderir (Resend).
 import { readFileSync, existsSync } from "node:fs";
 import { createHmac } from "node:crypto";
@@ -27,12 +28,14 @@ function unsubscribeToken(email) {
 }
 const FROM = process.env.RESEND_FROM || "mail@ahmetenes.com";
 
-const [title, slug, excerpt = ""] = process.argv.slice(2);
+const [title, slug, excerpt = "", image = ""] = process.argv.slice(2);
 if (!title || !slug) {
   console.error('Kullanım: pnpm send-newsletter "Başlık" "slug" ["özet"]');
   process.exit(1);
 }
-if (!API_KEY) {
+// NEWSLETTER_PREVIEW=dosya.html: gondermeden ornek bir e-posta HTML'i yaz.
+const PREVIEW = process.env.NEWSLETTER_PREVIEW || "";
+if (!API_KEY && !PREVIEW) {
   console.error("RESEND_API_KEY bulunamadı.");
   process.exit(1);
 }
@@ -54,7 +57,7 @@ function subscribers() {
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 const postUrl = SITE + "/" + slug;
-const list = [...new Set(subscribers())];
+const list = PREVIEW ? ["ornek@example.com"] : [...new Set(subscribers())];
 if (list.length === 0) {
   console.log("Onaylı abone yok.");
   process.exit(0);
@@ -65,12 +68,18 @@ for (const email of list) {
   const unsub = SITE + "/api/newsletter/unsubscribe?token=" + encodeURIComponent(unsubscribeToken(email));
   const html =
     '<div style="font-family:system-ui,-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#fff;color:#1c2229">' +
-    '<div style="font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#0066cc;margin-bottom:20px">Ahmet Enes</div>' +
-    '<h1 style="font-family:Georgia,serif;font-weight:400;font-size:26px;line-height:1.25;margin:0 0 12px">' + esc(title) + "</h1>" +
+    '<div style="font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#606b6e;margin-bottom:20px">Ahmet Enes</div>' +
+    (image ? '<a href="' + postUrl + '"><img src="' + esc(image) + '" alt="" width="512" style="display:block;width:100%;max-width:512px;height:auto;border-radius:8px;margin:0 0 20px"></a>' : "") +
+    '<h1 style="font-weight:600;font-size:24px;line-height:1.25;margin:0 0 12px">' + esc(title) + "</h1>" +
     (excerpt ? '<p style="color:#536163;margin:0 0 20px">' + esc(excerpt) + "</p>" : "") +
-    '<p style="margin:24px 0"><a href="' + postUrl + '" style="background:#0066cc;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Yazıyı oku</a></p>' +
+    '<p style="margin:24px 0"><a href="' + postUrl + '" style="background:#1d2128;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Yazıyı oku</a></p>' +
     '<p style="color:#707a7c;font-size:12px;margin-top:28px">Bu e-postayı bültene kaydolduğun için alıyorsun. <a href="' + unsub + '" style="color:#707a7c">Bültenden çık</a>.</p>' +
     "</div>";
+  if (PREVIEW) {
+    (await import("node:fs")).writeFileSync(PREVIEW, html);
+    console.log("önizleme yazıldı: " + PREVIEW);
+    process.exit(0);
+  }
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: "Bearer " + API_KEY, "Content-Type": "application/json" },
@@ -79,6 +88,8 @@ for (const email of list) {
       to: [email],
       subject: title,
       html,
+      // Duz metin surumu (yalniz HTML spam puanini artirir).
+      text: title + "\n\n" + (excerpt ? excerpt + "\n\n" : "") + "Yazıyı oku: " + postUrl + "\n\n—\nBültenden çık: " + unsub,
       // RFC 8058 tek tik cikis: saglayici token'li URL'e Origin'siz POST atar;
       // uretimde dogrulandi (200). Yetki imzali token'dadir.
       headers: {

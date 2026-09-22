@@ -32,7 +32,10 @@ if (!item) {
 }
 const title = decode(item.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? "");
 const excerpt = decode(item.match(/<description>([\s\S]*?)<\/description>/)?.[1] ?? "");
-console.log(`Yazı: ${title}\nÖzet: ${excerpt}\nURL:  ${SITE}/${slug}\n`);
+// Bulten kapagi: yazinin og:image'i (1200x630 JPEG; WebP bircok e-posta istemcisinde gorunmez).
+const page = await (await fetch(`${SITE}/${slug}`, { signal: AbortSignal.timeout(15000) })).text();
+const image = page.match(/<meta property="og:image" content="([^"]+)"/)?.[1] ?? "";
+console.log(`Yazı:  ${title}\nÖzet:  ${excerpt}\nURL:   ${SITE}/${slug}\nKapak: ${image || "(yok)"}\n`);
 
 execFileSync("node", [path.join(DIR, "indexnow.mjs"), `/${slug}`, "/posts"], { stdio: "inherit" });
 
@@ -47,4 +50,4 @@ if (!send) {
   console.log(`\nBülten: ${confirmed} onaylı abone. Göndermek için: pnpm announce ${slug} --send`);
   process.exit(0);
 }
-execFileSync("node", [path.join(DIR, "send-newsletter.mjs"), title, slug, excerpt], { stdio: "inherit" });
+execFileSync("node", [path.join(DIR, "send-newsletter.mjs"), title, slug, excerpt, /\.jpe?g$/i.test(image) ? image : ""], { stdio: "inherit" });

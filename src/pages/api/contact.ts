@@ -54,7 +54,7 @@ export const POST: APIRoute = async ({ request }) => {
     '<h2 style="font-size:20px;margin:0 0 16px">Yeni iletişim mesajı</h2>' +
     '<p style="margin:0 0 6px"><strong>Ad:</strong> ' + escapeHtml(name) + "</p>" +
     '<p style="margin:0 0 16px"><strong>E-posta:</strong> ' + escapeHtml(email) + "</p>" +
-    '<div style="border-left:3px solid #0066cc;background:#f2f2f2;padding:14px 18px;border-radius:6px;white-space:pre-wrap">' +
+    '<div style="border-left:3px solid #1d2128;background:#f2f2f2;padding:14px 18px;border-radius:6px;white-space:pre-wrap">' +
     escapeHtml(message) +
     "</div>" +
     '<p style="margin-top:20px;font-size:12px;color:#707a7c">Ahmet Enes — ahmetenes.com</p>' +

@@ -47,7 +47,8 @@ Panel: `http://localhost:4321/_emdash/admin`
 - Bülten: `pnpm newsletter list` (aboneler), `pnpm newsletter export [dosya.csv]` (CSV), `pnpm send-newsletter "Başlık" "slug" ["özet"]` (gönderim, `List-Unsubscribe` başlıklı).
 - Analitik (gizlilik dostu; IP/çerez saklanmaz): `pnpm analytics [gün]`
 - Yeni yazı yayınladıktan sonra: `pnpm announce <slug>` (RSS'ten başlık/özet, IndexNow, bülten önizlemesi);
-  bülteni de göndermek için `pnpm announce <slug> --send`.
+  bülteni de göndermek için `pnpm announce <slug> --send`. Göndermeden e-postayı görmek için:
+  `NEWSLETTER_PREVIEW=/tmp/bulten.html pnpm send-newsletter "Başlık" "slug" "özet" "kapak.jpg"`.
 - IndexNow (Bing/Yandex hızlı indeksleme): yeni yazıdan sonra `pnpm indexnow /slug`; tümü için `pnpm indexnow`
   (sitemap'ten). Anahtar `public/<anahtar>.txt`.
 - Performans & güvenlik: public HTML için edge cache (`Cache-Control` + Cloudflare Cache Rules, deploy'da purge), CSP ve güvenlik başlıkları, form honeypot + IP hız sınırı.

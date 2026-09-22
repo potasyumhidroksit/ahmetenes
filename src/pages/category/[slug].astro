@@ -48,8 +48,7 @@ const filteredPosts = posts.map((post) => ({
 			<span class="archive-label">{t("Kategori")}</span>
 			<h1 class="archive-title">{term.label}</h1>
 			<p class="archive-count">
-				{filteredPosts.length}
-				{locale === "en" && filteredPosts.length === 1 ? "post" : t("yazı")}
+				{`${filteredPosts.length} ${locale === "en" && filteredPosts.length === 1 ? "post" : t("yazı")}`}
 			</p>
 		</header>
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 # Yedekleme: EmDash SQLite + yüklenen medya + gizli anahtarlar + kaynak kod.
-# Son 14 yedeği tutar. Eski Next.js git arşivi de saklanır.
+# Son 14 yedeği yerelde, 30 günü şifreli R2'de tutar. Eski Next.js git arşivi de saklanır.
 # Kritik adımlardan biri başarısız olursa ntfy'e bildirir ve hata ile çıkar
 # (systemd birimi "failed" görünür).
 DEST="/root/backups/ahmetenes"
@@ -49,6 +49,17 @@ git clone --quiet --bare /root/repos/ahmetenes-nextjs.git "$WORK/legacy-repo-git
 cd "$DEST"
 tar czf "$TS.tar.gz" "$TS"
 rm -rf "$WORK"
+
+# 6) Sunucu disi kopya: /usr/local/sbin/r2-offsite.sh ile ayni sifreli R2
+#    uzagi (rclone crypt). O betik bu dizini kopyalamiyordu; site verisi
+#    yalnizca canli veriyle ayni diskteydi. 30 gunden eskiler uzakta silinir.
+REMOTE="ahmetenes-crypt:ahmetenes-backup/ahmetenes-site"
+if command -v rclone >/dev/null 2>&1 && rclone listremotes 2>/dev/null | grep -q '^ahmetenes-crypt:$'; then
+  rclone copy "$DEST/$TS.tar.gz" "$REMOTE" --retries 3 --low-level-retries 5 >/dev/null 2>&1 || fail "R2 sunucu dışı kopya"
+  rclone delete "$REMOTE" --min-age 30d >/dev/null 2>&1 || true
+else
+  fail "rclone/ahmetenes-crypt yok: sunucu dışı kopya alınamadı"
+fi
 trap - ERR
 
 # son 14 yedek tut

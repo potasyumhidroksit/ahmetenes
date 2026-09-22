@@ -18,6 +18,7 @@
     "analytics": "node scripts/analytics.mjs",
     "optimize-images": "node scripts/optimize-images.mjs",
     "indexnow": "node scripts/indexnow.mjs",
+    "announce": "node scripts/announce.mjs",
     "deploy": "bash deploy.sh"
   },
   "dependencies": {

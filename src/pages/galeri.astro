@@ -9,7 +9,7 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
 const origin = Astro.url.origin;
 const year = new Date().getFullYear();
 // Google Gorseller: yaratici/telif/kredi bilgisiyle kareler (image metadata).
-const creator = { "@type": "Person", name: "Ahmet Enes", url: origin };
+const creator = { "@type": "Person", "@id": origin + "/#person", name: "Ahmet Enes", url: origin };
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "ImageGallery",

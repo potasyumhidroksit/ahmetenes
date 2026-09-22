@@ -39,6 +39,28 @@ const content = Array.isArray(rawContent) && !getEditMeta(rawContent)
 		.map((block) => (block.style === "h1" ? { ...block, style: "h2" } : block))
 	: rawContent;
 const description = firstParagraphPreview(rawContent) || undefined;
+// Hakkimda: Google ProfilePage (yaratici profili); galeri/yazi JSON-LD'si ile
+// ayni kisiye baglanir.
+const origin = Astro.url.origin;
+const profileJsonLd = slug === "hakkimda"
+	? {
+			"@context": "https://schema.org",
+			"@type": "ProfilePage",
+			url: origin + "/hakkimda",
+			dateModified: page.data.updatedAt?.toISOString(),
+			mainEntity: {
+				"@type": "Person",
+				"@id": origin + "/#person",
+				name: "Ahmet Enes",
+				jobTitle: "Fotoğrafçı",
+				url: origin,
+				image: origin + "/avatar.webp",
+				description,
+				email: "mailto:info@ahmetenes.com",
+				sameAs: ["https://instagram.com/eneswideshut"],
+			},
+		}
+	: undefined;
 const updated = slug === "now" && page.data.updatedAt
 	? page.data.updatedAt.toLocaleDateString("tr-TR", { year: "numeric", month: "long", day: "numeric" })
 	: null;
@@ -47,6 +69,7 @@ const updated = slug === "now" && page.data.updatedAt
 <Base
 	title={page.data.title}
 	description={description}
+	jsonLd={profileJsonLd}
 	content={{ collection: "pages", id: page.data.id, slug }}
 >
 	<article class="page-article">

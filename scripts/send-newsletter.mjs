@@ -79,10 +79,11 @@ for (const email of list) {
       to: [email],
       subject: title,
       html,
-      // List-Unsubscribe-Post (RFC 8058) yok: Astro checkOrigin koken disi
-      // form POST'unu 403'ler; tek tik cikis vaat edip calismamasindan iyi.
+      // RFC 8058 tek tik cikis: saglayici token'li URL'e Origin'siz POST atar;
+      // uretimde dogrulandi (200). Yetki imzali token'dadir.
       headers: {
         "List-Unsubscribe": "<mailto:info@ahmetenes.com?subject=unsubscribe>, <" + unsub + ">",
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
       },
     }),
   });

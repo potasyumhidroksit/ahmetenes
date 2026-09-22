@@ -94,7 +94,7 @@ function toPhoto(item: CuratedItem): GalleryPhoto {
     featured: item.featured,
     exif: item.exif,
     src: "/api/immich/preview/" + item.id + "?w=800",
-    srcSet: [240, 480, 800, 1200, 1600].map((w) => ({ w, src: "/api/immich/preview/" + item.id + "?w=" + w })),
+    srcSet: [240, 480, 640, 800, 1200, 1600].map((w) => ({ w, src: "/api/immich/preview/" + item.id + "?w=" + w })),
     fullSrc: "/api/immich/preview/" + item.id + "?w=1600",
   };
 }

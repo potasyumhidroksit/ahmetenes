@@ -1,4 +1,10 @@
-export type GearItem = { name: string; detail: string; category: string };
+export type GearItem = {
+  name: string;
+  detail: string;
+  category: string;
+  /** Galeri karelerinin EXIF'inde bu ekipmani tanitan kalip (gövde ya da objektif). */
+  exif?: { field: "camera" | "lens"; match: RegExp };
+};
 
 export const gearCategories: { id: string; label: string }[] = [
   { id: "kamera", label: "Kamera" },
@@ -10,9 +16,9 @@ export const gearCategories: { id: string; label: string }[] = [
 ];
 
 export const equipment: GearItem[] = [
-  { name: "Fujifilm X-T5", detail: "Mirrorless Kamera · APS-C 1.5x", category: "kamera" },
-  { name: "Sigma Art 17-40mm F1.8", detail: "F1.8 DC Art Zoom Objektif", category: "lens" },
-  { name: "Sigma 56mm F1.4", detail: "F1.4 DC DN Contemporary Objektif", category: "lens" },
+  { name: "Fujifilm X-T5", detail: "Mirrorless Kamera · APS-C 1.5x", category: "kamera", exif: { field: "camera", match: /X-T5/i } },
+  { name: "Sigma Art 17-40mm F1.8", detail: "F1.8 DC Art Zoom Objektif", category: "lens", exif: { field: "lens", match: /17-40mm/i } },
+  { name: "Sigma 56mm F1.4", detail: "F1.4 DC DN Contemporary Objektif", category: "lens", exif: { field: "lens", match: /56mm F1\.4/i } },
   { name: "K&F Concept 67mm Difüzyon", detail: "Sinematik yumuşatma filtresi", category: "filtre" },
   { name: "Marumi DHG ND32 67mm", detail: "ND32 nötr yoğunluk filtresi", category: "filtre" },
   { name: "Hoya PRO ND 16 55mm", detail: "ND16 nötr yoğunluk filtresi", category: "filtre" },

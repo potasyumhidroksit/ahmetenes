@@ -1,9 +1,25 @@
 ---
 import Content from "../layouts/Content.astro";
-import { equipment, gearCategories } from "../lib/equipment";
+import { equipment, gearCategories, type GearItem } from "../lib/equipment";
+import { loadGallery } from "../lib/gallery";
+
+export const prerender = false;
+
+// Galeri karelerinin EXIF'i ile eslesen ekipmanlarin yaninda o ekipmanla
+// cekilmis kareler gosterilir; kucuk resim galeride o kareyi acar.
+const photos = await loadGallery();
+const shotsFor = (item: GearItem) => {
+  if (!item.exif) return [];
+  const { field, match } = item.exif;
+  return photos.filter((p) => match.test(p.exif?.[field] ?? ""));
+};
+const thumb = (p: (typeof photos)[number]) => (p.srcSet.find((s) => s.w === 240) ?? p.srcSet[0])?.src ?? p.src;
 
 const groups = gearCategories
-  .map((cat) => ({ cat, items: equipment.filter((e) => e.category === cat.id) }))
+  .map((cat) => ({
+    cat,
+    items: equipment.filter((e) => e.category === cat.id).map((item) => ({ item, shots: shotsFor(item) })),
+  }))
   .filter((g) => g.items.length > 0);
 ---
 <Content title="Ekipman" description="Kadrajın arkasındaki araçlar.">
@@ -17,10 +33,24 @@ const groups = gearCategories
         <section class="gear-group">
           <h2>{cat.label}</h2>
           <ul>
-            {items.map((item) => (
+            {items.map(({ item, shots }) => (
               <li>
                 <strong>{item.name}</strong>
                 <span>{item.detail}</span>
+                {shots.length > 0 && (
+                  <div class="gear-shots">
+                    <span class="gear-shots-count">Galeride {shots.length} kare</span>
+                    <ul>
+                      {shots.slice(0, 6).map((p) => (
+                        <li>
+                          <a href={"/galeri#kare-" + p.id} title={p.title} aria-label={p.title + " — galeride aç"}>
+                            <img src={thumb(p)} alt="" width="56" height="56" loading="lazy" decoding="async" />
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -36,11 +66,21 @@ const groups = gearCategories
     font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.18em;
     color: var(--color-muted); margin: 0 0 1rem;
   }
-  .gear-group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.85rem; }
-  .gear-group li {
+  .gear-group > ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.85rem; }
+  .gear-group > ul > li {
     display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 0.9rem;
     padding-bottom: 0.85rem; border-bottom: 1px solid var(--color-border-subtle);
   }
   .gear-group strong { font-weight: 500; color: var(--color-text); }
-  .gear-group span { font-size: 0.875rem; color: var(--color-muted); }
+  .gear-group > ul > li > span { font-size: 0.875rem; color: var(--color-muted); }
+  .gear-shots { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.9rem; margin-top: 0.35rem; }
+  .gear-shots-count { font-size: 0.75rem; letter-spacing: 0.04em; color: var(--color-muted); }
+  .gear-shots ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .gear-shots a { display: block; border-radius: 6px; overflow: hidden; outline-offset: 2px; }
+  .gear-shots img {
+    display: block; width: 56px; height: 56px; object-fit: cover;
+    background: var(--color-bg-subtle); transition: transform 0.25s ease, opacity 0.25s ease;
+  }
+  .gear-shots a:hover img { transform: scale(1.06); }
+  @media (prefers-reduced-motion: reduce) { .gear-shots img { transition: none; } }
 </style>

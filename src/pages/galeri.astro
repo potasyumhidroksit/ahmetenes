@@ -29,6 +29,7 @@ const fullSrcset = (p: (typeof photos)[number]) =>
       {photos.map((p, index) => (
         <button
           type="button"
+          id={"kare-" + p.id}
           class="gallery-item"
           data-gallery-item
           data-category={p.category}
@@ -108,6 +109,8 @@ const fullSrcset = (p: (typeof photos)[number]) =>
 
     const fill = (item: HTMLButtonElement) => {
       if (!img || !title || !meta || !story) return;
+      // Paylasilabilir baglanti: /galeri#kare-<id> bu kareyi dogrudan acar.
+      history.replaceState(null, "", "#" + item.id);
       img.srcset = item.dataset.fullSrcset || "";
       img.src = item.dataset.full || "";
       img.alt = item.dataset.title || "";
@@ -139,12 +142,18 @@ const fullSrcset = (p: (typeof photos)[number]) =>
     });
 
     dialog.addEventListener("close", () => {
+      history.replaceState(null, "", location.pathname + location.search);
       if (lastFocus) lastFocus.focus();
     });
+
+    const linked = location.hash.startsWith("#kare-") ? document.getElementById(location.hash.slice(1)) : null;
+    if (linked instanceof HTMLButtonElement && linked.matches("[data-gallery-item]")) linked.click();
     dialog.addEventListener("click", (event) => {
       if (event.target === dialog) dialog.close();
     });
-    dialog.addEventListener("keydown", (event) => {
+    // Belge duzeyinde: derin baglantiyla acilista odak body'de kalabiliyor.
+    document.addEventListener("keydown", (event) => {
+      if (!dialog.open) return;
       if (event.key === "ArrowRight") { event.preventDefault(); step(1); }
       if (event.key === "ArrowLeft") { event.preventDefault(); step(-1); }
     });

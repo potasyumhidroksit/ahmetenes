@@ -74,7 +74,7 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
         purge() {
           curl -s -X POST "https://api.cloudflare.com/client/v4/zones/5079525e40cebf813550cbf2bd411b46/purge_cache" \
             -H "X-Auth-Email: $CF_EMAIL" -H "X-Auth-Key: $CF_GLOBAL_KEY" \
-            -H 'Content-Type: application/json' --data "$1" | grep -q '"success":true'
+            -H 'Content-Type: application/json' --data "$1" | grep -Eq '"success": *true'
         }
         if purge '{"hosts":["ahmetenes.com","www.ahmetenes.com"]}'; then
           echo "→ Cloudflare edge cache temizlendi (ahmetenes.com)."

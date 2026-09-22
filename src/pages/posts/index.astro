@@ -23,6 +23,10 @@ const commentCounts = new Map(
 <Base title={t("Yazılar")} description={t("Notlar, fikirler ve üzerine düşündüklerim.")}>
   <section class="archive-section posts-page" data-view="single">
     <script is:inline>try{var v=localStorage.getItem("posts-view");if(["list","grid","single"].indexOf(v)>-1)document.currentScript.parentElement.dataset.view=v}catch(e){}</script>
+    <header class="archive-header">
+      <h1>{t("Yazılar")}</h1>
+      <p>{posts.length} yazı · ışık, kompozisyon, sokak ve ekipman üzerine notlar</p>
+    </header>
     <div class="posts-toolbar">
       <div class="view-switcher" role="group" aria-label={t("Yazı görünümü")}>
         <button type="button" data-view-option="list" aria-pressed="false">

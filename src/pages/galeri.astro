@@ -47,7 +47,7 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
             decoding="async"
             {...(p.width && p.height ? { width: p.width, height: p.height } : {})}
           />
-          <span class="gallery-item-caption">{p.title}</span>
+          <span class="gallery-item-caption" aria-hidden="true">{p.title}</span>
         </button>
       ))}
     </div>

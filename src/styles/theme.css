@@ -37,7 +37,7 @@ html[data-public-theme="personabio-content"] {
   --font-body: var(--font-personabio), sans-serif;
   --font-heading: var(--font-body);
   --color-bg: light-dark(#fff, #1c2229); --color-bg-subtle: light-dark(#f2f2f2, #11151a); --color-surface: light-dark(#f5f5f6, #252c35);
-  --color-text: light-dark(#536163, #e0e6eb); --color-text-secondary: light-dark(#667174, #b2bcc4); --color-muted: light-dark(#707a7c, #a3afb9);
+  --color-text: light-dark(#536163, #e0e6eb); --color-text-secondary: light-dark(#667174, #b2bcc4); --color-muted: light-dark(#606b6e, #a3afb9);
   --color-brand: light-dark(#1d2128, #e5e9ed); --color-brand-hover: light-dark(#424b52, #fff); --color-on-brand: light-dark(#fff, #1c2229);
   --color-border: light-dark(#e4e6e7, #3b434d); --color-border-subtle: light-dark(#eceeef, #303841);
   --font-weight-heading: 500; --font-weight-display: 500;

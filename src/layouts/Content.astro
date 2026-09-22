@@ -154,7 +154,16 @@ const pageCtx = createPublicPageContext({
       document.documentElement.dataset.mobileMenuOpen = String(open && mobile.matches);
       nav.inert = mobile.matches && !open;
       if (!open) nav.querySelectorAll<HTMLDetailsElement>("details[open]").forEach((details) => details.open = false);
-      if (open) requestAnimationFrame(() => drawerClose.focus());
+      // Cekmece visibility gecisinin ilk karesinde hala gizli; gorunur
+      // olana dek (en fazla ~0.5 sn) bekleyip odakla, yoksa odak body'ye duser.
+      if (open) {
+        let frames = 0;
+        const focusClose = () => {
+          if (getComputedStyle(nav).visibility === "visible" || frames++ > 30) drawerClose.focus();
+          else requestAnimationFrame(focusClose);
+        };
+        requestAnimationFrame(focusClose);
+      }
       else if (restoreFocus && wasOpen) requestAnimationFrame(() => toggle.focus());
     };
     setOpen(false);

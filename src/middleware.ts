@@ -38,12 +38,37 @@ function withCache(response: Response): Response {
   });
 }
 
+/**
+ * Zafiyet tarayicilarinin yoklamalari (.git, .env, *.php, wp-*, /proc/...).
+ * 404 kaydinin neredeyse tamami bunlardi; her biri tam 404 sayfasini DB
+ * sorgulariyla render edip _emdash_404_log'a satir ekliyordu. Sitede bu
+ * kaliplarda mesru yol yok; /.well-known/ haric.
+ */
+const PROBE_SEGMENT = /(?:^|\/)\.(?!well-known(?:\/|$))[^/]/;
+const PROBE_PATH = /^\/(?:wp-|wordpress|cgi-bin|proc\/|@fs\/|var\/run\/|vendor\/|actuator|telescope|server-status)|\.(?:php\d?|aspx?|jsp|cgi|env|ini|sql|bak|old|swp|ya?ml|log|git)(?:$|\/)/i;
+
+function isProbe(pathname: string): boolean {
+  let path = pathname;
+  try {
+    path = decodeURIComponent(pathname);
+  } catch {
+    // bozuk kodlama: ham yolu kullan
+  }
+  return PROBE_SEGMENT.test(path) || PROBE_PATH.test(path);
+}
+
 /** Extend the built-in catalog, retaining EmDash authentication and upstream entries.
  * Runs after next() so core auth, permissions and CSRF checks always execute first.
  * Local catalog handling is deliberately restricted to administrator accounts.
  */
 async function handleRequest(context: APIContext, next: () => Promise<Response>): Promise<Response> {
   const {url, request} = context;
+  if (isProbe(url.pathname)) {
+    return new Response("Not found", {
+      status: 404,
+      headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=3600" },
+    });
+  }
   // Tek kanonik URL: /hakkimda/ -> /hakkimda (aksi halde canonical sonda
   // egik cizgiyle uretiliyor ve ayni sayfa iki URL'de indeksleniyordu).
   if (

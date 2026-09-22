@@ -8,13 +8,20 @@ import {
   IMMICH_API_KEY,
   type ImmichKind,
 } from "../../../../lib/immich";
+import { loadGallery } from "../../../../lib/gallery";
 
 export const prerender = false;
 
-const KINDS: ImmichKind[] = ["thumbnail", "preview", "original"];
+// Guvenlik: yalnizca sitenin kullandigi turler ("original" tam cozunurluklu
+// kareleri disari aciyordu), yalnizca galerideki kareler (sahibin Immich
+// kutuphanesinin geri kalani degil) ve sabit genislikler (her w icin diske
+// yeni onbellek dosyasi yazilip CPU harcaniyordu).
+const KINDS: ImmichKind[] = ["thumbnail", "preview"];
+const WIDTHS = [240, 480, 800, 1200, 1600];
+const snapWidth = (w: number) => WIDTHS.find((x) => x >= w) ?? WIDTHS[WIDTHS.length - 1];
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CACHE_DIR = process.env.IMG_CACHE_DIR || "/app/data/imgcache";
-const DEFAULT_W: Record<ImmichKind, number> = { thumbnail: 512, preview: 1600, original: 2200 };
+const DEFAULT_W: Record<ImmichKind, number> = { thumbnail: 480, preview: 1600, original: 1600 };
 
 function imageResponse(body: Buffer, type: string, kind: ImmichKind): Response {
   return new Response(new Uint8Array(body), {
@@ -35,12 +42,16 @@ export const GET: APIRoute = async ({ params, request }) => {
   if (!IMMICH_API_KEY) {
     return new Response("Server misconfigured", { status: 500 });
   }
+  const allowed = new Set((await loadGallery()).map((p) => p.id));
+  if (!allowed.has(id)) {
+    return new Response("Not found", { status: 404 });
+  }
 
   const query = new URL(request.url).searchParams;
   // fmt=og: sosyal paylasim icin 1200x630 JPEG (WebP og:image her yerde gorunmuyor).
   const og = query.get("fmt") === "og";
   const parsedW = Number(query.get("w"));
-  const w = og ? 1200 : Number.isInteger(parsedW) && parsedW >= 64 && parsedW <= 2600 ? parsedW : DEFAULT_W[kind];
+  const w = og ? 1200 : snapWidth(Number.isInteger(parsedW) && parsedW > 0 ? parsedW : DEFAULT_W[kind]);
   const type = og ? "image/jpeg" : "image/webp";
   const cachePath = path.join(CACHE_DIR, kind + "-" + id + (og ? "-og.jpg" : "-w" + w + ".webp"));
 

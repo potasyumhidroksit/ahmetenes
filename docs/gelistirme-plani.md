@@ -130,3 +130,25 @@ Kapsam: EmDash + Astro (Node/SQLite), canlı site
 - Faz 5: gizlilik dostu analitik (beacon + CLI); healthcheck konteyner/DB/sitemap kontrolu; systemd timer dogrulamasi.
 
 Repo: https://github.com/potasyumhidroksit/ahmetenes
+
+## 2026-09-23 oturumu — repo dışındaki altyapı değişiklikleri
+
+Kod değişiklikleri git geçmişinde; aşağıdakiler repoda görünmez:
+
+- **DNS (Cloudflare, ahmetenes.com TXT/SPF):** `include:_spf.resend.com` kaldırıldı. Bu ad
+  NXDOMAIN'di; SPF değerlendirmesi orada permerror ile kesiliyor, ardından gelen
+  `ip4:92.5.98.67` (mx.ahmetenes.com) hiç okunmuyordu. Resend'in SPF'i zaten
+  `send.ahmetenes.com`'da (`include:amazonses.com`). Yeni kayıt:
+  `v=spf1 include:_spf.mx.cloudflare.net include:_spf.google.com include:amazonses.com ip4:92.5.98.67 ~all`
+- **logrotate:** `/etc/logrotate.d/ahmetenes` — `/var/log/ahmetenes-health.log` günlük, 14 gün.
+- **Sağlık durumu:** `/var/lib/ahmetenes-health/` (son arıza imzası, sertifika uyarı günü).
+- **Yedek:** `scripts/backup.sh` her yedeği `ahmetenes-crypt:ahmetenes-backup/ahmetenes-site`'a
+  (rclone crypt, R2) kopyalar; `r2-offsite.sh` bu dizini almıyordu.
+- **Docker:** `ahmetenes:rollback-20260922` etiketi (oturum öncesi imaj).
+
+### Sahibin kararına kalanlar
+- Yazıların gerçek yayın tarihleri (30 May, 6/13/20/27 Haz 2026) — taşımada hepsi
+  21 Eylül oldu; panelden düzeltilmeli (doğrudan DB güncellemesi yapılmadı).
+- Cloudflare Bot Fight Mode / JS detections: mobilde ana iş parçacığını 0.5-3 sn meşgul
+  ediyor ve Lighthouse "en iyi uygulamalar"ı 81'de tutuyor; zone genelinde bir güvenlik ayarı.
+- *.ahmetenes.tr kaynak sertifikaları 22 Eylül'de doldu (Cloudflare "Full" modunda maskeleniyor).

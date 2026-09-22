@@ -141,6 +141,7 @@ const publishDate =
 	type="article"
 	publishedTime={post.data.publishedAt?.toISOString() ?? null}
 	modifiedTime={post.data.updatedAt.toISOString()}
+	author={bylines[0]?.byline.displayName || "Ahmet Enes"}
 	content={{ collection: "posts", id: post.data.id, slug }}
 >
 	<div class="reading-progress" aria-hidden="true"><span data-reading-progress></span></div>

@@ -220,6 +220,8 @@ html[data-public-theme] body :is(
   &.search-button, &.button-primary, &:is(.not-found a, .content-empty a) {
     --button-surface: light-dark(#1d2128, #e5e9ed);
   }
+  /* Fotograf ustundeki kontroller (lightbox): her zeminde okunur koyu perde. */
+  &.button-scrim { --button-surface: rgb(0 0 0 / 45%); }
 
   @media (hover: hover) {
     &:not(:disabled):not([aria-disabled="true"]):hover {

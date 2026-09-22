@@ -10,6 +10,9 @@ const exifLine = (p: (typeof photos)[number]) =>
     .filter(Boolean)
     .join(" · ");
 const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " + s.w + "w").join(", ");
+// Lightbox: ekran genisligine gore 800-1600px (mobilde 1600px indirmesin).
+const fullSrcset = (p: (typeof photos)[number]) =>
+  p.srcSet.filter((s) => s.w >= 800).map((s) => s.src + " " + s.w + "w").join(", ");
 ---
 <Content title="Galeri" description="Kareler — filtrelenebilir portfolyo.">
   <section class="archive-section gallery-page">
@@ -30,6 +33,7 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
           data-gallery-item
           data-category={p.category}
           data-full={p.fullSrc}
+          data-full-srcset={fullSrcset(p)}
           data-title={p.title}
           data-exif={exifLine(p)}
           data-location={p.location}
@@ -54,12 +58,13 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
   </section>
 
   <dialog class="lightbox" data-lightbox aria-label="Galeri önizleme">
-    <button type="button" class="lightbox-nav lightbox-prev" data-lightbox-prev aria-label="Önceki kare">‹</button>
-    <button type="button" class="lightbox-nav lightbox-next" data-lightbox-next aria-label="Sonraki kare">›</button>
-    <button type="button" class="lightbox-close" data-lightbox-close aria-label="Kapat">×</button>
+    <button type="button" class="lightbox-nav lightbox-prev button-scrim" data-lightbox-prev aria-label="Önceki kare">‹</button>
+    <button type="button" class="lightbox-nav lightbox-next button-scrim" data-lightbox-next aria-label="Sonraki kare">›</button>
+    <button type="button" class="lightbox-close button-scrim" data-lightbox-close aria-label="Kapat">×</button>
     <figure>
-      <img data-lightbox-img src="" alt="" />
+      <img data-lightbox-img src="" alt="" sizes="(max-width: 1100px) 94vw, 1100px" />
       <figcaption>
+        <span class="lightbox-count" data-lightbox-count></span>
         <strong data-lightbox-title></strong>
         <span data-lightbox-meta></span>
         <p data-lightbox-story></p>
@@ -86,17 +91,35 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
     const title = dialog.querySelector<HTMLElement>("[data-lightbox-title]");
     const meta = dialog.querySelector<HTMLElement>("[data-lightbox-meta]");
     const story = dialog.querySelector<HTMLElement>("[data-lightbox-story]");
+    const count = dialog.querySelector<HTMLElement>("[data-lightbox-count]");
+    const sizes = img?.getAttribute("sizes") || "100vw";
     const visibleItems = () => Array.from(items).filter((el) => !el.hidden);
     let current = -1;
     let lastFocus: HTMLElement | null = null;
 
+    // Komsu kareleri arka planda isit: ok/kaydirma aninda gecsin.
+    const preload = (item?: HTMLButtonElement) => {
+      if (!item) return;
+      const pre = new Image();
+      pre.sizes = sizes;
+      if (item.dataset.fullSrcset) pre.srcset = item.dataset.fullSrcset;
+      pre.src = item.dataset.full || "";
+    };
+
     const fill = (item: HTMLButtonElement) => {
       if (!img || !title || !meta || !story) return;
+      img.srcset = item.dataset.fullSrcset || "";
       img.src = item.dataset.full || "";
       img.alt = item.dataset.title || "";
       title.textContent = item.dataset.title || "";
       meta.textContent = [item.dataset.exif, item.dataset.location, item.dataset.year].filter(Boolean).join(" · ");
       story.textContent = item.dataset.story || "";
+      const list = visibleItems();
+      if (count) count.textContent = list.length > 1 ? `${current + 1} / ${list.length}` : "";
+      if (list.length > 1) {
+        preload(list[(current + 1) % list.length]);
+        preload(list[(current - 1 + list.length) % list.length]);
+      }
     };
 
     const step = (delta: number) => {
@@ -125,6 +148,18 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
       if (event.key === "ArrowRight") { event.preventDefault(); step(1); }
       if (event.key === "ArrowLeft") { event.preventDefault(); step(-1); }
     });
+    // Dokunmatik: yatay kaydirma ile onceki/sonraki kare.
+    let touchX = 0;
+    let touchY = 0;
+    dialog.addEventListener("touchstart", (event) => {
+      touchX = event.changedTouches[0].clientX;
+      touchY = event.changedTouches[0].clientY;
+    }, { passive: true });
+    dialog.addEventListener("touchend", (event) => {
+      const dx = event.changedTouches[0].clientX - touchX;
+      const dy = event.changedTouches[0].clientY - touchY;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+    }, { passive: true });
     dialog.querySelector("[data-lightbox-close]")?.addEventListener("click", () => dialog.close());
     dialog.querySelector("[data-lightbox-prev]")?.addEventListener("click", () => step(-1));
     dialog.querySelector("[data-lightbox-next]")?.addEventListener("click", () => step(1));
@@ -166,15 +201,17 @@ const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " +
   .lightbox img { width: 100%; max-height: 78vh; object-fit: contain; border-radius: var(--radius); background: #000; }
   .lightbox figcaption { color: #e6e9ec; display: grid; gap: 0.25rem; }
   .lightbox figcaption span { font-size: 0.8rem; color: #a3afb9; }
+  .lightbox .lightbox-count { font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
+  .lightbox .lightbox-count:empty { display: none; }
   .lightbox figcaption p { margin: 0.4rem 0 0; font-size: 0.9rem; color: #cfd6dc; max-width: 70ch; }
   .lightbox-close {
     position: absolute; top: 0.5rem; right: 0.75rem; z-index: 2;
-    font-size: 1.6rem; line-height: 1; color: #fff; background: transparent; border: 0; cursor: pointer;
+    width: 2.5rem; height: 2.5rem; font-size: 1.6rem; line-height: 1; color: #fff; border: 0; cursor: pointer;
   }
   .lightbox-nav {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
     font-size: 2.2rem; line-height: 1; padding: 0.3rem 0.8rem; color: #fff;
-    background: rgba(0,0,0,0.35); border: 0; border-radius: 999px; cursor: pointer;
+    border: 0; border-radius: 999px; cursor: pointer;
   }
   .lightbox-prev { left: 0.5rem; }
   .lightbox-next { right: 0.5rem; }

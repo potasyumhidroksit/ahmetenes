@@ -43,7 +43,7 @@ const cover = photos.find((p) => p.featured) ?? photos[0];
 const fullSrcset = (p: (typeof photos)[number]) =>
   p.srcSet.filter((s) => s.w >= 800).map((s) => s.src + " " + s.w + "w").join(", ");
 ---
-<Content title="Galeri" description="Kareler — filtrelenebilir portfolyo." image={cover ? origin + cover.fullSrc : undefined} jsonLd={jsonLd}>
+<Content title="Galeri" description="Kareler — filtrelenebilir portfolyo." image={cover ? origin + "/api/immich/preview/" + cover.id + "?fmt=og" : undefined} jsonLd={jsonLd}>
   <section class="archive-section gallery-page">
     <header class="archive-header">
       <h1>Galeri</h1>

@@ -36,13 +36,17 @@ export const GET: APIRoute = async ({ params, request }) => {
     return new Response("Server misconfigured", { status: 500 });
   }
 
-  const parsedW = Number(new URL(request.url).searchParams.get("w"));
-  const w = Number.isInteger(parsedW) && parsedW >= 64 && parsedW <= 2600 ? parsedW : DEFAULT_W[kind];
-  const cachePath = path.join(CACHE_DIR, kind + "-" + id + "-w" + w + ".webp");
+  const query = new URL(request.url).searchParams;
+  // fmt=og: sosyal paylasim icin 1200x630 JPEG (WebP og:image her yerde gorunmuyor).
+  const og = query.get("fmt") === "og";
+  const parsedW = Number(query.get("w"));
+  const w = og ? 1200 : Number.isInteger(parsedW) && parsedW >= 64 && parsedW <= 2600 ? parsedW : DEFAULT_W[kind];
+  const type = og ? "image/jpeg" : "image/webp";
+  const cachePath = path.join(CACHE_DIR, kind + "-" + id + (og ? "-og.jpg" : "-w" + w + ".webp"));
 
   try {
     const cached = await fs.readFile(cachePath);
-    if (cached) return imageResponse(cached, "image/webp", kind);
+    if (cached) return imageResponse(cached, type, kind);
   } catch {
     // önbellek yoksa devam
   }
@@ -56,18 +60,20 @@ export const GET: APIRoute = async ({ params, request }) => {
     const input = Buffer.from(await upstream.arrayBuffer());
 
     try {
-      const out = await sharp(input, { failOn: "none" })
-        .rotate()
-        .resize({ width: w })
-        .webp({ quality: 82 })
-        .toBuffer();
+      const pipeline = sharp(input, { failOn: "none" }).rotate();
+      const out = og
+        ? await pipeline
+            .resize({ width: 1200, height: 630, fit: "cover", position: sharp.strategy.attention })
+            .jpeg({ quality: 82, mozjpeg: true })
+            .toBuffer()
+        : await pipeline.resize({ width: w }).webp({ quality: 82 }).toBuffer();
       try {
         await fs.mkdir(CACHE_DIR, { recursive: true });
         await fs.writeFile(cachePath, out);
       } catch {
         // önbelleğe yazılamazsa yanıtı döndür
       }
-      return imageResponse(out, "image/webp", kind);
+      return imageResponse(out, type, kind);
     } catch {
       return new Response(new Uint8Array(input), {
         headers: {

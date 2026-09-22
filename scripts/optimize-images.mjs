@@ -15,7 +15,9 @@ const SOURCE_DIRS = ["blog"];
 const WIDTHS = [640, 960, 1280];
 const MAX_WIDTH = 1600;
 const QUALITY = 78;
-const VARIANT_RE = /-\d+w\.webp$/;
+const VARIANT_RE = /-(?:\d+w\.webp|og\.jpg)$/;
+// Sosyal paylasim: 1200x630 JPEG (WebP og:image'i LinkedIn/WhatsApp'ta guvenilir degil).
+const OG = { width: 1200, height: 630, quality: 82 };
 const MANIFEST = path.join(ROOT, "src/data/image-manifest.json");
 
 async function* walk(dir) {
@@ -60,7 +62,19 @@ for (const sub of SOURCE_DIRS) {
     }
 
     const src = "/" + path.relative(PUBLIC_DIR, file).split(path.sep).join("/");
-    manifest[src] = { width, height, variants };
+    const entry = { width, height, variants };
+    if (path.basename(base) === "cover") {
+      const target = `${base}-og.jpg`;
+      if (!(await isFresh(target, file))) {
+        await sharp(file).rotate()
+          .resize({ width: OG.width, height: OG.height, fit: "cover", position: sharp.strategy.attention })
+          .jpeg({ quality: OG.quality, mozjpeg: true })
+          .toFile(target);
+        generated++;
+      }
+      entry.og = src.replace(/\.[^.]+$/, "-og.jpg");
+    }
+    manifest[src] = entry;
   }
 }
 

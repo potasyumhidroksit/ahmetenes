@@ -1,6 +1,6 @@
 import manifest from "../data/image-manifest.json";
 
-type ManifestEntry = { width: number; height: number; variants: number[] };
+type ManifestEntry = { width: number; height: number; variants: number[]; og?: string };
 
 export type LocalImage = {
   src: string;
@@ -34,4 +34,10 @@ export function localImage(image: unknown): LocalImage | undefined {
     `${src} ${entry.width}w`,
   ].join(", ");
   return { src, srcset, width: entry.width, height: entry.height };
+}
+
+/** Kapak icin uretilmis 1200x630 JPEG paylasim gorseli (varsa). */
+export function ogImage(image: unknown): string | undefined {
+  const src = imageSrc(image);
+  return src ? entries[src]?.og : undefined;
 }

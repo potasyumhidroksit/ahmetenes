@@ -16,7 +16,7 @@ import PostShare from "../../components/PostShare.astro";
 import NewsletterForm from "../../components/NewsletterForm.astro";
 import ResponsiveImage from "../../components/ResponsiveImage.astro";
 import BlogImage from "../../components/BlogImage.astro";
-import { imageSrc } from "../../lib/responsive-image";
+import { imageSrc, ogImage } from "../../lib/responsive-image";
 import { getReadingTime } from "../../utils/reading-time";
 import { resolveBlogSiteIdentity } from "../../utils/site-identity";
 
@@ -71,7 +71,8 @@ function getImageUrl(img: unknown): string | undefined {
 	}
 	return undefined;
 }
-const featuredImageUrl = getImageUrl(post.data.featured_image);
+// Paylasim: kapagin 1200x630 JPEG surumu varsa o (WebP her platformda gorunmuyor).
+const featuredImageUrl = getImageUrl(ogImage(post.data.featured_image) ?? post.data.featured_image);
 const { siteTitle } = resolveBlogSiteIdentity(await getSiteSettings());
 const localizedSiteTitle = locale === "tr" ? localizeTurkish(siteTitle) : t(siteTitle);
 

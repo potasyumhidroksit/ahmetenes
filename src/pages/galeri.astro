@@ -38,6 +38,9 @@ const cover = photos.find((p) => p.featured) ?? photos[0];
 // Karesi olmayan kategori cipi gosterilmez (bos sonuc); ciplerde kare sayisi.
 const countFor = (id: string) => (id === "tumu" ? photos.length : photos.filter((p) => p.category === id).length);
 const filters = galleryCategories.map((cat) => ({ ...cat, count: countFor(cat.id) })).filter((cat) => cat.count > 0);
+// Ziyaretciye anlamli alt baslik: "sehir, sokak, doga, portre ve gece".
+const themeNames = filters.filter((cat) => cat.id !== "tumu").map((cat) => cat.label.toLocaleLowerCase("tr-TR"));
+const themes = themeNames.length > 1 ? themeNames.slice(0, -1).join(", ") + " ve " + themeNames.at(-1) : themeNames[0] ?? "";
 // Lightbox: ekran genisligine gore 800-1600px (mobilde 1600px indirmesin).
 const fullSrcset = (p: (typeof photos)[number]) =>
   p.srcSet.filter((s) => s.w >= 800).map((s) => s.src + " " + s.w + "w").join(", ");
@@ -46,7 +49,7 @@ const fullSrcset = (p: (typeof photos)[number]) =>
   <section class="archive-section gallery-page">
     <header class="archive-header">
       <h1>Galeri</h1>
-      <p>{photos.length} kare · Immich albümünden</p>
+      <p>{photos.length} kare{themes && " · " + themes}</p>
     </header>
     <div class="gallery-filters" role="group" aria-label="Kategori filtresi">
       {filters.map((cat) => (

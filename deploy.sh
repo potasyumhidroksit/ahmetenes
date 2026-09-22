@@ -2,6 +2,11 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# Saglik kontrolu dagitim sirasinda (konteyner yeniden baslarken) alarm vermesin.
+DEPLOY_FLAG=/var/tmp/ahmetenes-deploying
+touch "$DEPLOY_FLAG"
+trap 'rm -f "$DEPLOY_FLAG"' EXIT
+
 # Ortam: önce sunucu düzeyi dosya (auto-deploy), sonra yerel .env.local
 if [ -f /root/ahmetenes-emdash.env ]; then
   set -a; . /root/ahmetenes-emdash.env; set +a

@@ -35,6 +35,9 @@ const jsonLd = {
   })),
 };
 const cover = photos.find((p) => p.featured) ?? photos[0];
+// Karesi olmayan kategori cipi gosterilmez (bos sonuc); ciplerde kare sayisi.
+const countFor = (id: string) => (id === "tumu" ? photos.length : photos.filter((p) => p.category === id).length);
+const filters = galleryCategories.map((cat) => ({ ...cat, count: countFor(cat.id) })).filter((cat) => cat.count > 0);
 // Lightbox: ekran genisligine gore 800-1600px (mobilde 1600px indirmesin).
 const fullSrcset = (p: (typeof photos)[number]) =>
   p.srcSet.filter((s) => s.w >= 800).map((s) => s.src + " " + s.w + "w").join(", ");
@@ -46,8 +49,10 @@ const fullSrcset = (p: (typeof photos)[number]) =>
       <p>{photos.length} kare · Immich albümünden</p>
     </header>
     <div class="gallery-filters" role="group" aria-label="Kategori filtresi">
-      {galleryCategories.map((cat) => (
-        <button type="button" data-filter={cat.id} aria-pressed={cat.id === "tumu" ? "true" : "false"}>{cat.label}</button>
+      {filters.map((cat) => (
+        <button type="button" data-filter={cat.id} aria-pressed={cat.id === "tumu" ? "true" : "false"}>
+          {cat.label} <span class="gallery-filter-count">{cat.count}</span>
+        </button>
       ))}
     </div>
     <div class="gallery-grid" data-gallery>
@@ -207,6 +212,7 @@ const fullSrcset = (p: (typeof photos)[number]) =>
     color: var(--color-muted); background: transparent;
     border: 1px solid var(--color-border); border-radius: 999px;
   }
+  .gallery-filter-count { margin-left: 0.2rem; opacity: 0.6; font-variant-numeric: tabular-nums; }
   .gallery-filters button[aria-pressed="true"] { color: light-dark(#1d2128, #fff); border-color: var(--glass-border-active); font-weight: 600; }
   /* Sutun (masonry) duzeni: dikey kareler satirda bosluk birakmaz. */
   .gallery-grid { columns: 3 260px; column-gap: 1rem; }

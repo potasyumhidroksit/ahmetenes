@@ -23,7 +23,7 @@ const exif = photo ? exifLine(photo) : "";
 				<img
 					src={local.src}
 					srcset={local.srcset}
-					sizes="(max-width: 760px) calc(100vw - 48px), 680px"
+					sizes="(max-width: 736px) calc(100vw - 76px), min(800px, calc(100vw - 128px))"
 					width={local.width}
 					height={local.height}
 					alt={node.alt ?? ""}
@@ -35,7 +35,7 @@ const exif = photo ? exifLine(photo) : "";
 			<img
 				src={local.src}
 				srcset={local.srcset}
-				sizes="(max-width: 760px) calc(100vw - 48px), 680px"
+				sizes="(max-width: 736px) calc(100vw - 76px), min(800px, calc(100vw - 128px))"
 				width={local.width}
 				height={local.height}
 				alt={node.alt ?? ""}

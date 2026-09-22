@@ -157,7 +157,7 @@ const publishDate =
 		{
 			post.data.featured_image && (
 				<div class="article-hero" {...post.edit.featured_image}>
-					<ResponsiveImage image={post.data.featured_image} sizes="(max-width: 760px) 100vw, min(1200px, 90vw)" priority />
+					<ResponsiveImage image={post.data.featured_image} sizes="(max-width: 736px) calc(100vw - 76px), min(1160px, calc(100vw - 128px))" priority />
 				</div>
 			)
 		}

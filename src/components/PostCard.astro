@@ -52,7 +52,7 @@ const formattedDate = date
 		{
 			featuredImage ? (
 				<div class="card-image" aria-hidden={coverBackground ? "true" : undefined}>
-					<ResponsiveImage image={featuredImage} sizes={coverBackground ? "(max-width: 760px) 100vw, 900px" : "(max-width: 760px) 100vw, 400px"} priority={priority} />
+					<ResponsiveImage image={featuredImage} sizes={coverBackground ? "(max-width: 736px) calc(100vw - 78px), min(1160px, calc(100vw - 130px))" : "(max-width: 736px) calc(100vw - 100px), 420px"} priority={priority} />
 				</div>
 			) : (
 				<div class="card-placeholder" aria-hidden="true"><span>{t("Notlar & düşünceler")}</span><span>↗</span></div>

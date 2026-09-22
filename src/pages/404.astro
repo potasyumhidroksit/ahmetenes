@@ -1,22 +1,52 @@
 ---
 import Base from "../layouts/Content.astro";
 import { localeFromUrl, localePath, translate } from "../utils/i18n";
+import { localizedPosts } from "../utils/localized-posts";
 const locale = localeFromUrl(Astro.url);
 const t = (text: string) => translate(locale, text);
+
+// Kirik baglantiyla gelen okura cikis yollari: arama, son yazilar, galeri.
+const { entries: latest } = await localizedPosts(locale, { orderBy: { published_at: "desc" }, limit: 3 });
 ---
 
-<Base title={t("Sayfa bulunamadı")}>
+<Base title={t("Sayfa bulunamadı")} robots="noindex">
 	<div class="not-found">
 		<h1>404</h1>
 		<p>{t("Aradığınız sayfa bulunamadı.")}</p>
 		<a href={localePath("/", locale)}>{t("Ana sayfaya dön")}</a>
+	</div>
+
+	<div class="not-found-more">
+		<form class="not-found-search" method="get" action={localePath("/search", locale)} role="search">
+			<input type="search" name="q" placeholder="Yazılarda ara..." aria-label="Yazılarda ara" />
+			<button type="submit" class="button-primary">Ara</button>
+		</form>
+
+		{latest.length > 0 && (
+			<section aria-labelledby="not-found-latest">
+				<h2 id="not-found-latest">Son yazılar</h2>
+				<ul>
+					{latest.map((post) => (
+						<li><a href={localePath(`/${post.id}`, locale)}>{post.data.title}</a></li>
+					))}
+				</ul>
+			</section>
+		)}
+
+		<p class="not-found-links">
+			<a href={localePath("/posts", locale)}>Tüm yazılar</a>
+			<span aria-hidden="true">·</span>
+			<a href={localePath("/galeri", locale)}>Galeri</a>
+			<span aria-hidden="true">·</span>
+			<a href={localePath("/iletisim", locale)}>İletişim</a>
+		</p>
 	</div>
 </Base>
 
 <style>
 	.not-found {
 		text-align: center;
-		padding: var(--spacing-24) var(--spacing-6);
+		padding: var(--spacing-24) var(--spacing-6) var(--spacing-12);
 	}
 
 	.not-found h1 {
@@ -30,7 +60,34 @@ const t = (text: string) => translate(locale, text);
 		margin-bottom: var(--spacing-6);
 	}
 
-	.not-found a {
-		color: var(--color-text);
+	/* ".not-found a" dugmesini tema (theme.css) sekillendirir; burada renk
+	   verilmez, yoksa paket sirasina gore acik zeminde acik yazi kalabiliyor. */
+
+	.not-found-more {
+		max-width: 520px;
+		margin: 0 auto;
+		padding: 0 var(--spacing-6) var(--spacing-16);
+		display: grid;
+		gap: 2rem;
 	}
+
+	.not-found-search { display: flex; gap: 0.5rem; }
+	.not-found-search input {
+		flex: 1; min-width: 0; font: inherit; color: var(--color-text); background: var(--color-bg);
+		border: 1px solid var(--color-border); border-radius: var(--radius); padding: 0.65rem 0.85rem;
+	}
+	.not-found-search input:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 1px; }
+	.not-found-search button {
+		font: inherit; font-weight: 600; cursor: pointer; color: var(--color-on-brand);
+		border: 0; border-radius: var(--radius); padding: 0.65rem 1.2rem;
+	}
+
+	.not-found-more h2 {
+		font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.18em;
+		color: var(--color-muted); margin: 0 0 0.75rem;
+	}
+	.not-found-more ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+	.not-found-more li a, .not-found-links a { color: var(--color-text); text-decoration: none; }
+	.not-found-more li a:hover, .not-found-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+	.not-found-links { display: flex; justify-content: center; gap: 0.75rem; margin: 0; color: var(--color-muted); font-size: 0.9rem; }
 </style>

@@ -1,20 +1,28 @@
 import type { APIRoute } from "astro";
-import { removeSubscriber } from "../../../lib/newsletter";
+import { removeSubscriber, verifyEmailToken } from "../../../lib/newsletter";
+import { statusPage } from "../../../lib/status-page";
 
 export const prerender = false;
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Eskiden ?email= ile herkes herkesi bultenden cikarabiliyordu. Artik imzali
+// token gerekir. GET yalnizca onay dugmesi gosterir (e-posta tarayicilarinin
+// on-yuklemesi kimseyi cikarmasin); cikis ayni kokenli POST ile yapilir.
+const invalid = () =>
+  statusPage("Bağlantı geçersiz", "<p>Bu çıkış bağlantısı geçersiz. Yardım için info@ahmetenes.com.</p>", 400);
 
-export const GET: APIRoute = async ({ url }) => {
-  const email = (url.searchParams.get("email") || "").trim().toLowerCase();
-  if (!EMAIL_RE.test(email)) return new Response("Geçersiz e-posta.", { status: 400 });
+export const GET: APIRoute = ({ url }) => {
+  const token = url.searchParams.get("token") || "";
+  if (!verifyEmailToken(token, "unsubscribe")) return invalid();
+  return statusPage(
+    "Bültenden çık",
+    `<p>Yeni yazı duyurularını artık almak istemiyor musun?</p>
+<form method="post" action="/api/newsletter/unsubscribe?token=${encodeURIComponent(token)}"><button type="submit">Bültenden çık</button></form>`,
+  );
+};
+
+export const POST: APIRoute = async ({ url }) => {
+  const email = verifyEmailToken(url.searchParams.get("token") || "", "unsubscribe");
+  if (!email) return invalid();
   await removeSubscriber(email);
-  const html =
-    "<html><body style='font-family:system-ui,sans-serif;background:#fff;color:#1c2229;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0'>" +
-    "<div style='text-align:center;padding:24px'>" +
-    "<h1 style='font-family:Georgia,serif;font-weight:400'>Bültenden çıktın</h1>" +
-    "<p style='color:#707a7c'>Bir daha yazı duyurusu almayacaksın.</p>" +
-    "<p><a href='https://ahmetenes.com' style='color:#0066cc'>ahmetenes.com</a></p>" +
-    "</div></body></html>";
-  return new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } });
+  return statusPage("Bültenden çıktın", "<p>Bir daha yazı duyurusu almayacaksın.</p>");
 };

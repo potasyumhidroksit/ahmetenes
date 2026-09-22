@@ -78,23 +78,35 @@ export async function getSubscribers(): Promise<Subscriber[]> {
   return load();
 }
 
-export function signEmailToken(email: string, ttlMs: number): string {
-  const exp = Date.now() + ttlMs;
-  const payload = email + "." + exp;
-  const sig = createHmac("sha256", SECRET).update(payload).digest("hex");
-  return payload + "." + sig;
+/**
+ * Imzali e-posta token'i: "<email>.<bitis>.<imza>". Imza amaca (confirm /
+ * unsubscribe) baglidir; biri digerinin yerine kullanilamaz.
+ */
+export type TokenPurpose = "confirm" | "unsubscribe";
+
+function tokenSignature(purpose: TokenPurpose, payload: string): string {
+  return createHmac("sha256", SECRET).update(purpose + "|" + payload).digest("hex");
 }
 
-export function verifyEmailToken(token: string): string | null {
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-  const payload = parts[0] + "." + parts[1];
-  const sig = parts[2];
-  const expected = createHmac("sha256", SECRET).update(payload).digest("hex");
-  const exp = Number(parts[1]);
+export function signEmailToken(email: string, ttlMs: number, purpose: TokenPurpose = "confirm"): string {
+  const payload = email + "." + (Date.now() + ttlMs);
+  return payload + "." + tokenSignature(purpose, payload);
+}
+
+export function verifyEmailToken(token: string, purpose: TokenPurpose = "confirm"): string | null {
+  // Sagdan ayristir: e-posta adresi (alan adi) nokta icerir. Eskiden "." ile
+  // bolup tam 3 parca bekleniyordu; her gecerli token reddediliyordu.
+  const sigAt = token.lastIndexOf(".");
+  if (sigAt <= 0) return null;
+  const payload = token.slice(0, sigAt);
+  const sig = token.slice(sigAt + 1);
+  const expAt = payload.lastIndexOf(".");
+  if (expAt <= 0) return null;
+  const email = payload.slice(0, expAt);
+  const exp = Number(payload.slice(expAt + 1));
   if (!Number.isFinite(exp) || exp < Date.now()) return null;
   const a = Buffer.from(sig);
-  const b = Buffer.from(expected);
+  const b = Buffer.from(tokenSignature(purpose, payload));
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
-  return parts[0];
+  return email;
 }

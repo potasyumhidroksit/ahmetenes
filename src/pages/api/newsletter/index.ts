@@ -35,7 +35,7 @@ export const POST: APIRoute = async ({ request, url }) => {
   }
 
   if (result.ok && result.pending && RESEND_API_KEY) {
-    const token = signEmailToken(email, 7 * 24 * 60 * 60 * 1000);
+    const token = signEmailToken(email, 7 * 24 * 60 * 60 * 1000, "confirm");
     // Link Host basligindan degil, yapilandirilmis site adresinden uretilir.
     const confirmUrl = new URL(
       "/api/newsletter/confirm?token=" + encodeURIComponent(token),

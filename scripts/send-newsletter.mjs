@@ -2,6 +2,7 @@
 // pnpm send-newsletter "Başlık" "slug" ["özet"]
 // Onaylı bülten abonelerine yeni yazı duyurusu gönderir (Resend).
 import { readFileSync, existsSync } from "node:fs";
+import { createHmac } from "node:crypto";
 
 const DATA = process.env.NEWSLETTER_FILE || "/var/www/ahmetenes-data/newsletter.json";
 const SITE = "https://ahmetenes.com";
@@ -17,6 +18,13 @@ try {
 }
 
 const API_KEY = process.env.RESEND_API_KEY;
+// Sunucudaki src/lib/newsletter.ts ile ayni sir ve sema ("unsubscribe" amacli).
+const SECRET = process.env.NEWSLETTER_SECRET || process.env.EMDASH_AUTH_SECRET || "newsletter-secret";
+const UNSUB_TTL = 2 * 365 * 24 * 60 * 60 * 1000;
+function unsubscribeToken(email) {
+  const payload = email + "." + (Date.now() + UNSUB_TTL);
+  return payload + "." + createHmac("sha256", SECRET).update("unsubscribe|" + payload).digest("hex");
+}
 const FROM = process.env.RESEND_FROM || "mail@ahmetenes.com";
 
 const [title, slug, excerpt = ""] = process.argv.slice(2);
@@ -54,7 +62,7 @@ if (list.length === 0) {
 
 let sent = 0;
 for (const email of list) {
-  const unsub = SITE + "/api/newsletter/unsubscribe?email=" + encodeURIComponent(email);
+  const unsub = SITE + "/api/newsletter/unsubscribe?token=" + encodeURIComponent(unsubscribeToken(email));
   const html =
     '<div style="font-family:system-ui,-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#fff;color:#1c2229">' +
     '<div style="font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#0066cc;margin-bottom:20px">Ahmet Enes</div>' +
@@ -71,9 +79,10 @@ for (const email of list) {
       to: [email],
       subject: title,
       html,
+      // List-Unsubscribe-Post (RFC 8058) yok: Astro checkOrigin koken disi
+      // form POST'unu 403'ler; tek tik cikis vaat edip calismamasindan iyi.
       headers: {
         "List-Unsubscribe": "<mailto:info@ahmetenes.com?subject=unsubscribe>, <" + unsub + ">",
-        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
       },
     }),
   });

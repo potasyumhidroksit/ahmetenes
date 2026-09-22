@@ -321,6 +321,31 @@
       "source": "/admin",
       "destination": "/_emdash/admin",
       "type": 301
+    },
+    {
+      "source": "/feed",
+      "destination": "/rss.xml",
+      "type": 301
+    },
+    {
+      "source": "/rss",
+      "destination": "/rss.xml",
+      "type": 301
+    },
+    {
+      "source": "/about",
+      "destination": "/hakkimda",
+      "type": 301
+    },
+    {
+      "source": "/contact",
+      "destination": "/iletisim",
+      "type": 301
+    },
+    {
+      "source": "/gallery",
+      "destination": "/galeri",
+      "type": 301
     }
   ],
   "widgetAreas": [],

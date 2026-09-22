@@ -44,6 +44,17 @@ function withCache(response: Response): Response {
  */
 async function handleRequest(context: APIContext, next: () => Promise<Response>): Promise<Response> {
   const {url, request} = context;
+  // Tek kanonik URL: /hakkimda/ -> /hakkimda (aksi halde canonical sonda
+  // egik cizgiyle uretiliyor ve ayni sayfa iki URL'de indeksleniyordu).
+  if (
+    (request.method === "GET" || request.method === "HEAD") &&
+    url.pathname.length > 1 &&
+    url.pathname.endsWith("/") &&
+    !url.pathname.startsWith("/_emdash") &&
+    !url.pathname.startsWith("/api/")
+  ) {
+    return context.redirect(url.pathname.replace(/\/+$/, "") + url.search, 301);
+  }
   const path = url.pathname.replace(/\/$/, "");
   if (path === "/_emdash/admin/themes") return context.redirect("/_emdash/admin/themes/marketplace",302);
   const preview = path === "/_emdash/api/themes/preview" && request.method === "POST";

@@ -1,4 +1,4 @@
 ---
-import PostsArchive from "../posts/index.astro";
+// /posts ile ayni icerik; kopya sayfa olmasin.
+return Astro.redirect("/posts", 301);
 ---
-<PostsArchive />

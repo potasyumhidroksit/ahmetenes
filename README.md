@@ -46,6 +46,8 @@ Panel: `http://localhost:4321/_emdash/admin`
 - **İletişim/Bülten:** Resend; aboneler `data/newsletter.json` (double opt-in, HMAC imzalı token).
 - Bülten: `pnpm newsletter list` (aboneler), `pnpm newsletter export [dosya.csv]` (CSV), `pnpm send-newsletter "Başlık" "slug" ["özet"]` (gönderim, `List-Unsubscribe` başlıklı).
 - Analitik (gizlilik dostu; IP/çerez saklanmaz): `pnpm analytics [gün]`
+- IndexNow (Bing/Yandex hızlı indeksleme): yeni yazıdan sonra `pnpm indexnow /slug`; tümü için `pnpm indexnow`
+  (sitemap'ten). Anahtar `public/<anahtar>.txt`.
 - Performans & güvenlik: public HTML için edge cache (`Cache-Control` + Cloudflare Cache Rules, deploy'da purge), CSP ve güvenlik başlıkları, form honeypot + IP hız sınırı.
 
 ## Dağıtım (VPS)

@@ -127,8 +127,10 @@ if (query && locale === "tr") {
 		color: var(--color-text);
 	}
 
-	.search-input:focus {
-		outline: none;
+	/* Klavye odagi diger girislerle tutarli: 1px kenarlik degisimi yetersizdi. */
+	.search-input:focus-visible {
+		outline: 2px solid var(--color-brand);
+		outline-offset: 1px;
 		border-color: var(--color-brand);
 	}
 

@@ -538,6 +538,11 @@ const publishDate =
 		padding-top: var(--spacing-10);
 	}
 
+	/* Yorumlar kapaliyken bolum yalnizca bir <script> icerir; bos 40px birakmasin. */
+	.article-comments:not(:has(> :not(script))) {
+		display: none;
+	}
+
 	.article-comments :global(.ec-comments) {
 		--ec-comment-border: 1px solid var(--color-border);
 	}

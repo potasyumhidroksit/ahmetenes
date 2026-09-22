@@ -4,6 +4,7 @@ export const prerender = false;
 import { search } from "emdash";
 import Base from "../layouts/Content.astro";
 import { localizedPosts } from "../utils/localized-posts";
+import { excerptAround, fold, highlight, plainText, searchTerms } from "../lib/search-text";
 
 import { localeFromUrl, localePath, translate } from "../utils/i18n";
 const locale = localeFromUrl(Astro.url);
@@ -17,18 +18,27 @@ const query = Astro.url.searchParams.get("q")?.trim() || "";
 type SearchResult = { id: string; slug?: string | null; title?: string | null; snippet?: string | null };
 let results: SearchResult[] = [];
 if (query && locale === "tr") {
+	// Katlamali (ışık = isik), tum kelimeleri iceren, basligi one alan arama.
+	// Yalnizca okunur metin aranir; eskiden _type/_key/gorsel URL'leri de
+	// aranip "span", "webp" gibi sorgular tum yazilari donduruyordu.
+	const terms = searchTerms(query);
 	const { entries } = await localizedPosts("tr", { limit: 100, orderBy: { published_at: "desc" } });
-	const needle = query.toLocaleLowerCase("tr-TR");
-	const textContent = (value: unknown): string => {
-		if (typeof value === "string") return value;
-		if (Array.isArray(value)) return value.map(textContent).join(" ");
-		if (!value || typeof value !== "object" || value instanceof Date) return "";
-		return Object.values(value).map(textContent).join(" ");
-	};
 	results = entries
-		.filter((entry) => textContent([entry.data.title, entry.data.excerpt, entry.data.content]).toLocaleLowerCase("tr-TR").includes(needle))
+		.map((entry) => {
+			const title = entry.data.title ?? "";
+			const excerpt = entry.data.excerpt ?? "";
+			const body = plainText(entry.data.content);
+			const [ft, fe, fb] = [fold(title), fold(excerpt), fold(body)];
+			if (!terms.every((term) => ft.includes(term) || fe.includes(term) || fb.includes(term))) return null;
+			const score = terms.reduce((sum, term) => sum + (ft.includes(term) ? 10 : 0) + (fe.includes(term) ? 3 : 0) + (fb.includes(term) ? 1 : 0), 0);
+			const inExcerpt = terms.some((term) => fe.includes(term));
+			const snippetText = inExcerpt || !excerpt ? excerpt || excerptAround(body, terms) || "" : excerptAround(body, terms) || excerpt;
+			return { score, result: { id: entry.data.id, slug: entry.id, title, snippet: highlight(snippetText, terms) } };
+		})
+		.filter((hit): hit is NonNullable<typeof hit> => hit !== null)
+		.sort((a, b) => b.score - a.score)
 		.slice(0, 30)
-		.map((entry) => ({ id: entry.data.id, slug: entry.id, title: entry.data.title, snippet: entry.data.excerpt }));
+		.map((hit) => hit.result);
 } else if (query) {
 	results = (await search(query, { collections: ["posts"], limit: 30, locale: "en" })).items;
 }

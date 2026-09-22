@@ -13,6 +13,7 @@ import { Comments, CommentForm } from "emdash/ui/comments";
 import Base from "../../layouts/Content.astro";
 import PostCard from "../../components/PostCard.astro";
 import PostShare from "../../components/PostShare.astro";
+import NewsletterForm from "../../components/NewsletterForm.astro";
 import ResponsiveImage from "../../components/ResponsiveImage.astro";
 import BlogImage from "../../components/BlogImage.astro";
 import { imageSrc } from "../../lib/responsive-image";
@@ -214,6 +215,11 @@ const publishDate =
 						<span class="taxonomy-value">{commentCountLabel(locale, commentCount)}</span>
 					</a>}
 				</footer>
+				<NewsletterForm
+					variant="card"
+					heading="Yeni yazılardan haberdar ol"
+					text="Işık, kompozisyon, sokak ve ekipman üzerine yeni notlar e-postana gelsin. Onay e-postasıyla kayıt; istediğin an çıkabilirsin."
+				/>
 				<div class="article-comments" id="comments" data-comment-locale={locale} data-comment-count={commentCount}>
 					<Comments collection="posts" contentId={post.data.id} threaded />
 					<CommentForm collection="posts" contentId={post.data.id} />

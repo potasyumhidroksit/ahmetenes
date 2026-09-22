@@ -1,0 +1,93 @@
+---
+// Bülten kaydı (double opt-in, /api/newsletter). Sayfada birden çok kez
+// kullanılabilir; her form kendi durum satırını günceller.
+interface Props {
+	heading: string;
+	text: string;
+	/** "card": yazı sonu kutusu; "plain": çevre düzenin içinde sade blok */
+	variant?: "card" | "plain";
+}
+
+const { heading, text, variant = "plain" } = Astro.props;
+---
+<section class:list={["newsletter", `newsletter--${variant}`]} aria-label={heading}>
+	<h2 class="newsletter-title">{heading}</h2>
+	<p class="newsletter-text">{text}</p>
+	<form class="newsletter-form" data-newsletter novalidate>
+		<input type="email" name="email" required placeholder="eposta@ornek.com" autocomplete="email" aria-label="E-posta adresin" />
+		<div class="newsletter-hp" aria-hidden="true">
+			<label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+		</div>
+		<button type="submit" class="button-primary">Kaydol</button>
+		<p class="newsletter-status" data-newsletter-status role="status" aria-live="polite"></p>
+	</form>
+</section>
+
+<script>
+	document.querySelectorAll<HTMLFormElement>("[data-newsletter]").forEach((form) => {
+		const status = form.querySelector<HTMLElement>("[data-newsletter-status]");
+		const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+		if (!status) return;
+		form.addEventListener("submit", async (event) => {
+			event.preventDefault();
+			if (!form.reportValidity()) return;
+			if (button) button.disabled = true;
+			const fd = new FormData(form);
+			status.textContent = "Gönderiliyor...";
+			status.dataset.state = "pending";
+			try {
+				const res = await fetch("/api/newsletter", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ email: String(fd.get("email") || ""), website: String(fd.get("website") || "") }),
+				});
+				const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; message?: string };
+				if (res.ok && data.ok) {
+					status.textContent = data.message || "Teşekkürler!";
+					status.dataset.state = "ok";
+					form.reset();
+				} else {
+					status.textContent = data.error || data.message || "Bir şeyler ters gitti, tekrar dene.";
+					status.dataset.state = "error";
+				}
+			} catch {
+				status.textContent = "Bağlantı kurulamadı, tekrar dene.";
+				status.dataset.state = "error";
+			} finally {
+				if (button) button.disabled = false;
+			}
+		});
+	});
+</script>
+
+<style>
+	.newsletter-title { font-size: 1rem; margin: 0 0 0.35rem; }
+	.newsletter-text { margin: 0 0 0.9rem; color: var(--color-muted); font-size: 0.875rem; }
+	.newsletter-form { display: grid; gap: 0.6rem; }
+	.newsletter-form input {
+		font: inherit; color: var(--color-text); background: var(--color-bg);
+		border: 1px solid var(--color-border); border-radius: var(--radius);
+		padding: 0.7rem 0.85rem; min-width: 0;
+	}
+	.newsletter-form input:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 1px; }
+	.newsletter-form button {
+		justify-self: start; font: inherit; font-weight: 600; cursor: pointer;
+		color: var(--color-on-brand); border: 0; border-radius: var(--radius); padding: 0.7rem 1.3rem;
+	}
+	.newsletter-form button:disabled { opacity: 0.6; cursor: progress; }
+	.newsletter-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+	.newsletter-status { grid-column: 1 / -1; min-height: 1.2em; font-size: 0.85rem; color: var(--color-muted); margin: 0; }
+	.newsletter-status[data-state="ok"] { color: light-dark(#1a7f37, #6fd08c); }
+	.newsletter-status[data-state="error"] { color: light-dark(#c0392b, #ff8a80); }
+
+	.newsletter--card {
+		margin-top: 40px; padding: 24px;
+		background: var(--color-surface); border: 1px solid var(--color-border-subtle);
+		border-radius: var(--radius-lg);
+	}
+	.newsletter--card .newsletter-title { font-size: 1.125rem; }
+	@media (min-width: 560px) {
+		.newsletter--card .newsletter-form { grid-template-columns: minmax(0, 1fr) auto; }
+		.newsletter--card .newsletter-form button { justify-self: stretch; }
+	}
+</style>

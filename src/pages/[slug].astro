@@ -1,5 +1,6 @@
 ---
 import { notFound } from "../utils/http";
+import { resolveShortLink, shortLinkRedirect } from "../utils/short-link";
 import { decodeSlug } from "emdash";
 import { localizedEntry } from "../utils/localized-content";
 import { localeFromUrl } from "../utils/i18n";
@@ -19,6 +20,11 @@ if (!page.entry) {
   if (Astro.cache?.enabled) Astro.cache.set(post.cacheHint);
   postExists = Boolean(post.entry);
 }
-if (!page.entry && !postExists) return notFound(Astro);
+if (!page.entry && !postExists) {
+  // Sayfa/yazı değilse kısa link olabilir (ahmetenes.com/ne-izlesem → 9816-links).
+  const target = await resolveShortLink(slug);
+  if (target) return shortLinkRedirect(target);
+  return notFound(Astro);
+}
 ---
 {page.entry ? <Page /> : <Post />}

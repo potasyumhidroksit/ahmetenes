@@ -49,7 +49,7 @@ const groups = gearCategories
                       {shots.slice(0, 6).map((p) => (
                         <li>
                           <a href={"/galeri#kare-" + p.id} title={p.title} aria-label={p.title + " — galeride aç"}>
-                            <img src={thumb(p)} alt="" width="56" height="56" loading="lazy" decoding="async" />
+                            <img src={thumb(p)} alt="" width="56" height="56" loading="lazy" decoding="async" style={p.color ? `background-color:${p.color}` : undefined} />
                           </a>
                         </li>
                       ))}

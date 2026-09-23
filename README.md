@@ -50,7 +50,13 @@ Panel: `http://localhost:4321/_emdash/admin`
 - `seed/seed.json` — koleksiyonlar, menüler, taksonomiler, sayfalar ve yazılar.
 - **Yazılar** `content/yazilar/*.md` (frontmatter: title, slug, excerpt, category, tags). `node scripts/yazilar.mjs seed`
   seed'i günceller (sıra, byline, eksik kategori/etiket); deploy'da yalnızca eksik yazılar oluşturulur (mevcutlar
-  panelden düzenlenir). Kapaksız yazılar için fotoğrafsız paylaşım görselleri:
+  panelden ya da CLI ile düzenlenir: `node scripts/yazilar.mjs json <dizin>` → `emdash content update posts <slug>
+  --rev <rev> --file <dizin>/<slug>.json -u https://ahmetenes.com`, ardından `bash scripts/cdn-refresh.sh`).
+  **Okuma sırası:** `scripts/yazilar.mjs` içindeki `ORDER` listesi `sira` alanını belirler; /posts bu sırayla
+  listelenir, yazı sayfasında önceki/sonraki gezinmesi çıkar. **Kapak:** `public/blog/<slug>/cover.webp` varsa
+  otomatik `featured_image` olur. Gövde görseli: `![alt](/blog/<slug>/x.webp "altyazı")`. Açık lisanslı
+  fotoğrafların atfı (yazar, lisans, kaynak) `src/data/image-credits.json`'da; kapak altında, figcaption'da ve
+  RSS'te gösterilir. Kapaksız yazılar için fotoğrafsız paylaşım görselleri:
   `PLAYWRIGHT=<playwright-core yolu> node scripts/og-yazilar.mjs` → `public/og/<slug>.jpg`.
   Panel işlemleri CLI ile: `emdash login --url https://ahmetenes.com` (tarayıcıdan kod onayı), sonra `emdash content …`.
 - Blog görselleri `public/blog/<slug>/` altında. Yeni görsel ekledikten sonra `pnpm optimize-images`

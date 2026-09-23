@@ -43,6 +43,8 @@ interface Props {
 	exactTitle?: boolean;
 	/** Paylasim gorselinin alternatif metni (varsayilan: sayfa basligi) */
 	imageAlt?: string;
+	/** 404 sayfasi: ziyaret sayilmaz, kirik baglanti olarak kaydedilir */
+	notFound?: boolean;
 }
 
 const {
@@ -60,6 +62,7 @@ const {
 	jsonLd,
 	exactTitle = false,
 	imageAlt,
+	notFound = false,
 } = Astro.props;
 const [settingsResult, menuResult, socialResult, profileResult] = await Promise.all([
   getSiteSettingsWithCacheHint(), getMenuWithCacheHint("primary", { locale }), getMenuWithCacheHint("social", { locale }), getEmDashEntry("bio_profiles", "personabio", { locale }),
@@ -145,11 +148,13 @@ const pageCtx = createPublicPageContext({
     </div>
     <SearchDialog />
     <EmDashBodyEnd page={pageCtx} />
-    <script is:inline>
+    <script is:inline define:vars={{ notFound }}>
       try {
-        // Otomasyon (Lighthouse, headless test) ziyaret sayilmaz.
+        // Otomasyon (Lighthouse, headless test) ziyaret sayilmaz. 404'te yol +
+        // geldigi sitenin adi (referrer) kirik baglanti olarak gider.
         if (location.pathname.indexOf("/_emdash") !== 0 && !navigator.webdriver) {
-          fetch("/api/analytics", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: location.pathname }), keepalive: true }).catch(function () {});
+          var hit = notFound ? { path: location.pathname, missing: true, ref: document.referrer } : { path: location.pathname };
+          fetch("/api/analytics", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(hit), keepalive: true }).catch(function () {});
         }
       } catch (e) {}
     </script>

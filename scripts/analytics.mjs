@@ -20,3 +20,8 @@ for (const k of recent) console.log(k + ": " + days[k]);
 const top = Object.entries(paths).sort((a, b) => b[1] - a[1]).slice(0, 10);
 console.log("--- en cok goruntulenen yollar ---");
 for (const [p, c] of top) console.log(c + "  " + p);
+const missing = Object.entries(d.missing || {}).sort((a, b) => b[1].n - a[1].n).slice(0, 10);
+if (missing.length) {
+  console.log("--- kirik baglantilar (404) ---");
+  for (const [p, m] of missing) console.log(m.n + "  " + p + "  (son " + m.last + (m.ref ? ", kaynak " + m.ref : "") + ")");
+}

@@ -9,7 +9,7 @@ const t = (text: string) => translate(locale, text);
 const { entries: latest } = await localizedPosts(locale, { orderBy: { published_at: "desc" }, limit: 3 });
 ---
 
-<Base title={t("Sayfa bulunamadı")} robots="noindex">
+<Base title={t("Sayfa bulunamadı")} robots="noindex" notFound>
 	<div class="not-found">
 		<h1>404</h1>
 		<p>{t("Aradığınız sayfa bulunamadı.")}</p>

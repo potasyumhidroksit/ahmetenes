@@ -2,7 +2,7 @@
 // Yalnizca yoneticiye (EmDash oturumu, rol >= 50) acik ziyaret ozeti. Digerleri
 // 404 alir; kimlikli yanitlar middleware'de no-store (edge'de saklanmaz).
 import Content from "../layouts/Content.astro";
-import { getAnalytics } from "../lib/analytics";
+import { getAnalytics, isOwnHost } from "../lib/analytics";
 import { getSubscribers } from "../lib/newsletter";
 import { notFound } from "../utils/http";
 
@@ -13,7 +13,7 @@ const user = Astro.locals.user as { role?: number } | undefined;
 if (!user || (user.role ?? 0) < ROLE_ADMIN) return notFound(Astro);
 Astro.response.headers.set("Cache-Control", "private, no-store");
 
-const { days, paths } = await getAnalytics();
+const { days, paths, missing } = await getAnalytics();
 const subscribers = await getSubscribers();
 const confirmed = subscribers.filter((s) => s.confirmed).length;
 
@@ -27,6 +27,11 @@ const max = Math.max(1, ...series.map((d) => d.count));
 const sum = (n: number) => series.slice(-n).reduce((a, d) => a + d.count, 0);
 const total = Object.values(days).reduce((a, b) => a + b, 0);
 const topPaths = Object.entries(paths).sort((a, b) => b[1] - a[1]).slice(0, 15);
+// 404'e dusen yollar: once site ici (duzeltilebilir) baglantilar, sonra sikliga gore.
+const missingPaths = Object.entries(missing)
+  .map(([path, hit]) => ({ path, ...hit, internal: isOwnHost(hit.ref) }))
+  .sort((a, b) => Number(b.internal) - Number(a.internal) || b.n - a.n || b.last.localeCompare(a.last))
+  .slice(0, 20);
 const label = (key: string) =>
   new Date(key + "T12:00:00Z").toLocaleDateString("tr-TR", { day: "numeric", month: "short" });
 ---
@@ -66,6 +71,26 @@ const label = (key: string) =>
         ))}
       </tbody>
     </table>
+
+    {missingPaths.length > 0 && (
+      <>
+        <h2 class="stats-gap">Kırık bağlantılar</h2>
+        <p class="stats-note">404'e düşen yollar (ziyaret sayılmaz). "Site içi" kaynaklılar sitedeki bir bağlantıdan geliyor; yönlendirme ya da düzeltme gerekir.</p>
+        <table class="stats-table">
+          <thead><tr><th scope="col">Yol</th><th scope="col">Kaynak</th><th scope="col">Son</th><th scope="col">Sayı</th></tr></thead>
+          <tbody>
+            {missingPaths.map((m) => (
+              <tr>
+                <td><code>{m.path}</code></td>
+                <td class:list={{ "stats-internal": m.internal }}>{m.internal ? "site içi" : m.ref ?? "doğrudan"}</td>
+                <td>{label(m.last)}</td>
+                <td>{m.n.toLocaleString("tr-TR")}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </>
+    )}
   </section>
 </Content>
 
@@ -87,4 +112,9 @@ const label = (key: string) =>
   .stats-table th { font-weight: 500; color: var(--color-muted); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
   .stats-table a { color: var(--color-text); text-decoration: none; }
   .stats-table a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .stats-table code { font-size: 0.85em; word-break: break-all; }
+  .stats-table td:nth-child(2):not(:last-child), .stats-table td:nth-child(3):not(:last-child) { color: var(--color-muted); padding-right: 1rem; white-space: nowrap; }
+  .stats-table td.stats-internal { color: var(--color-text); font-weight: 600; }
+  .stats-page .stats-gap { margin-top: 2.5rem; }
+  .stats-note { font-size: 0.85rem; color: var(--color-muted); margin: -0.5rem 0 1rem; }
 </style>

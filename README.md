@@ -37,7 +37,8 @@ Panel: `http://localhost:4321/_emdash/admin`
 - `/medya` — Pulse "şu an çalıyor / son dinlenen" + Sinedexter film/dizi/bölüm istatistikleri
 - `/iletisim` — iletişim formu (Resend) + bülten kaydı (double opt-in); JS'siz de çalışır
 - `/search` — Türkçe katlamalı arama (ışık = isik), noindex
-- `/istatistik` — yalnızca panelde oturum açmış yönetici (diğerlerine 404)
+- `/istatistik` — yalnızca panelde oturum açmış yönetici (diğerlerine 404); ziyaretler, en çok
+  görüntülenenler ve **kırık bağlantılar** (404'e düşen yollar + geldikleri site; "site içi" olanlar düzeltilmeli)
 
 ## İçerik ve servis entegrasyonları
 

@@ -26,6 +26,35 @@ function isCacheable(pathname: string): boolean {
   return true;
 }
 
+/**
+ * Istek anonim mi? Oturum (astro-session), gorsel duzenleme cerezi ya da
+ * taslak onizleme parametresi varsa EmDash sayfayi editore ozel render eder
+ * (arac cubugu, duzenleme isaretleri). Bunlar edge'de onbellege alinirsa
+ * herkese sunulur: Cloudflare cerezleri onbellek anahtarina katmaz ve
+ * Cloudflare-CDN-Cache-Control, EmDash'in "private, no-store"unu ezer.
+ */
+function isAnonymous(context: APIContext): boolean {
+  const { cookies, url, locals } = context;
+  return (
+    !locals.user &&
+    !cookies.has("astro-session") &&
+    !cookies.has("emdash-edit-mode") &&
+    !url.searchParams.has("_preview")
+  );
+}
+
+/** Kimlikli/onizleme yanitlari hicbir katmanda saklanmasin. */
+function withNoStore(response: Response): Response {
+  const headers = new Headers(response.headers);
+  headers.set("Cache-Control", "private, no-store");
+  headers.set("Cloudflare-CDN-Cache-Control", "no-store");
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 /** Yanit govdesini bozmadan onbellek basliklarini ekler. */
 function withCache(response: Response): Response {
   const headers = new Headers(response.headers);
@@ -96,7 +125,9 @@ async function handleRequest(context: APIContext, next: () => Promise<Response>)
   // Herkese acik HTML sayfalar icin edge/tarayici onbellegi. Edge'de en fazla
   // s-maxage kadar bayat kalir; deploy'da Cloudflare purge edilir.
   const contentType = response.headers.get("content-type") || "";
-  if (
+  if (contentType.includes("text/html") && !url.pathname.startsWith("/_emdash") && !isAnonymous(context)) {
+    response = withNoStore(response);
+  } else if (
     request.method === "GET" &&
     response.status === 200 &&
     contentType.includes("text/html") &&

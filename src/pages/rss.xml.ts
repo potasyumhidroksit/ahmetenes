@@ -17,6 +17,10 @@ export const GET: APIRoute = async ({ site, url }) => {
 		limit: 20,
 	});
 
+	// Sabit "son derleme": en son yazi degisikligi (her istekte "simdi" olunca
+	// okuyucular akisi her seferinde degismis sanip yeniden indiriyordu).
+	const lastChange = new Date(Math.max(0, ...posts.map((post) => (post.data.updatedAt ?? post.data.publishedAt ?? new Date(0)).getTime())));
+
 	const items = posts
 		.map((post) => {
 			if (!post.data.publishedAt) return null;
@@ -62,7 +66,7 @@ export const GET: APIRoute = async ({ site, url }) => {
       <title>${escapeXml(translate(locale, siteTitle))}</title>
       <link>${siteUrl}</link>
     </image>
-    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <lastBuildDate>${lastChange.toUTCString()}</lastBuildDate>
 ${items}
   </channel>
 </rss>`;
@@ -71,6 +75,7 @@ ${items}
 		headers: {
 			"Content-Type": "application/rss+xml; charset=utf-8",
 			"Cache-Control": "public, max-age=3600",
+			"Last-Modified": lastChange.toUTCString(),
 		},
 	});
 };

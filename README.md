@@ -23,13 +23,21 @@ pnpm build
 İlk istekte şema + içerik seed'i (`seed/seed.json`) otomatik uygulanır.
 Panel: `http://localhost:4321/_emdash/admin`
 
+> Yerelde canlı `.env`'i kullanıyorsan `RESEND_API_KEY`, `RESEND_FROM` ve `CONTACT_TO`'yu
+> **unset** et: aksi halde iletişim/bülten testleri gerçek e-posta gönderir.
+
 ## Sayfalar
 
-- `/` profil kartı; `/posts` + `/<slug>` yazılar; `/hakkimda`
-- `/galeri` — Immich "sitede" albümü: filtre çipleri, ızgara, lightbox (EXIF)
-- `/ekipman` — gövde / objektif / filtre / ses / ışık / aksesuar listesi
-- `/medya` — Pulse "şu an çalıyor" kartı + Sinedexter film/dizi/bölüm istatistikleri
-- `/iletisim` — iletişim formu (Resend) + bülten kaydı (double opt-in)
+- `/` profil kartı; `/posts` + `/<slug>` yazılar (karelerin altında EXIF + "Galeride aç");
+  `/hakkimda`, `/now` (panelden düzenlenen sayfalar)
+- `/galeri` — Immich "sitede" albümü: filtre çipleri (kare sayılı), sütun ızgara, lightbox
+  (EXIF, hikâye, kaydırma, "Yazıda: …"); `/galeri#kare-<id>` kareyi doğrudan açar
+- `/ekipman` — gövde / objektif / filtre / ses / ışık / aksesuar; gövde ve objektiflerin
+  yanında EXIF'e göre onlarla çekilmiş kareler
+- `/medya` — Pulse "şu an çalıyor / son dinlenen" + Sinedexter film/dizi/bölüm istatistikleri
+- `/iletisim` — iletişim formu (Resend) + bülten kaydı (double opt-in); JS'siz de çalışır
+- `/search` — Türkçe katlamalı arama (ışık = isik), noindex
+- `/istatistik` — yalnızca panelde oturum açmış yönetici (diğerlerine 404)
 
 ## İçerik ve servis entegrasyonları
 
@@ -42,6 +50,10 @@ Panel: `http://localhost:4321/_emdash/admin`
   EmDash'in varsayılan `Image` bileşenine düşer).
 - **Galeri:** Immich `/timeline` API'si; görseller `/api/immich/<kind>/<id>?w=` proxy'sinden akar
   (API anahtarı sunucuda kalır, sharp ile boyutlandırılır, `IMG_CACHE_DIR` altında önbelleklenir).
+  Vekil yalnızca albümdeki kareleri, `preview`/`thumbnail` türlerini ve 240/480/640/800/1200/1600
+  genişliklerini sunar; `?fmt=og` 1200×630 JPEG paylaşım görseli. Başlık/kategori/hikâye:
+  `/var/www/ahmetenes-data/gallery-meta.json`. Yazı görseli ↔ galeri karesi eşlemesi:
+  `src/data/blog-image-sources.json`.
 - **Medya:** Pulse (`/api/pulse` same-origin proxy) + Sinedexter `/api/stats`.
 - **İletişim/Bülten:** Resend; aboneler `data/newsletter.json` (double opt-in, HMAC imzalı token).
 - Bülten: `pnpm newsletter list` (aboneler), `pnpm newsletter export [dosya.csv]` (CSV), `pnpm send-newsletter "Başlık" "slug" ["özet"]` (gönderim, `List-Unsubscribe` başlıklı).
@@ -60,6 +72,12 @@ Panel: `http://localhost:4321/_emdash/admin`
 bash deploy.sh    # imaj derler, konteyneri 127.0.0.1:5193'te yeniden başlatır
 ```
 
+`deploy.sh` sırasıyla: sağlık kontrolüne "dağıtım sürüyor" bayrağı koyar; önceki imajın hash'li
+`/_astro` varlıklarını yeni imaja taşır (edge'de kalmış eski HTML stilsiz kalmasın, 14 gün);
+imajı derler ve konteyneri değiştirir; `/` 200 olunca Cloudflare'de yalnızca ahmetenes.com
+host'larını iki turda (20 sn arayla) temizler; galeri görsel önbelleğini arka planda ısıtır.
+Geri almak için: `git revert <commit>` + `bash deploy.sh`.
+
 - Konteyner: `ahmetenes` (imaj `ahmetenes:latest`), arkasında Cloudflare proxy.
 - Kalıcı veri: `/var/www/ahmetenes-data` (SQLite `data.db`, `uploads/`, `newsletter.json`, `imgcache/`) → konteynerde `/app/data`.
 - Gizli anahtarlar: `/root/ahmetenes-emdash.env` (git dışı).
@@ -68,6 +86,18 @@ bash deploy.sh    # imaj derler, konteyneri 127.0.0.1:5193'te yeniden başlatır
   `RESEND_FROM`, `CONTACT_TO`, `DATA_DIR`, `IMG_CACHE_DIR`.
 
 Konteyner açılışta `docker-entrypoint.sh` ile seed'i idempotent uygular, sonra sunucuyu başlatır.
+
+## Operasyon
+
+- **Sağlık kontrolü** (`ahmetenes-health.timer`, 5 dk; `scripts/healthcheck.sh`): konteyner, ana sayfa,
+  hash'li CSS'ler (stilsiz sayfa), galeride en az bir kare, RSS XML, sitemap, Sinedexter/Immich/Pulse.
+  ntfy (`ahmetenes-alerts`) yalnızca durum değişince + süren arızada saatte bir; düzelince "düzeldi".
+  Sertifika uyarısı günde bir, tek mesaj. Günlük: `/var/log/ahmetenes-health.log` (logrotate 14 gün).
+- **Yedek** (`ahmetenes-backup.timer`, 04:00; `scripts/backup.sh`): SQLite `.backup` (tutarlı anlık
+  görüntü) + `integrity_check`, medya/bülten/galeri künyesi, env, git bundle. Yerelde 14, şifreli R2'de
+  (`ahmetenes-crypt:ahmetenes-backup/ahmetenes-site`) 30 gün. Hata → ntfy + systemd failed.
+- **Önbellek:** anonim HTML edge'de 5 dk (+SWR); oturum/önizleme/düzenleme istekleri ve
+  `/istatistik` hiçbir katmanda saklanmaz; 404'ler 60 sn; bot yoklamaları render'sız 404 (1 sa).
 
 ## Eski site
 

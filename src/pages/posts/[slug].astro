@@ -114,13 +114,26 @@ const bodyContent = heroSrc && Array.isArray(post.data.content) && !getEditMeta(
 // no extra query needed.
 
 
-// Fetch a few extra recent posts in case the current post is among them.
+// "Ilgini Cekebilir": ortak kategori (2 puan) ve etiket (1 puan) sayisina
+// gore; esitlikte en yeni. Yalnizca en yeniyi gostermek konu disi yazilari
+// one cikariyordu.
 const { entries: recentPosts, cacheHint: recentHint } = await localizedPosts(locale, {
 	orderBy: { published_at: "desc" },
-	limit: 4,
+	limit: 50,
 });
 if (Astro.cache?.enabled) Astro.cache.set(recentHint);
-const otherPosts = recentPosts.filter((p) => p.id !== post.id).slice(0, 3);
+const termSlugs = (list: { slug: string }[] | undefined) => new Set((list ?? []).map((term) => term.slug));
+const ownCategories = termSlugs(post.data.terms?.category);
+const ownTags = termSlugs(post.data.terms?.tag);
+const relevance = (p: (typeof recentPosts)[number]) =>
+	2 * [...termSlugs(p.data.terms?.category)].filter((slug) => ownCategories.has(slug)).length +
+	[...termSlugs(p.data.terms?.tag)].filter((slug) => ownTags.has(slug)).length;
+const otherPosts = recentPosts
+	.filter((p) => p.id !== post.id)
+	.map((p, order) => ({ p, order, score: relevance(p) }))
+	.sort((a, b) => b.score - a.score || a.order - b.order)
+	.slice(0, 3)
+	.map(({ p }) => p);
 
 // Single batched query for related-posts tags, rather than one
 // getEntryTerms() call per related post.

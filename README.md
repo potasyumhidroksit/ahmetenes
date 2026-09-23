@@ -36,6 +36,8 @@ Panel: `http://localhost:4321/_emdash/admin`
   yanında EXIF'e göre onlarla çekilmiş kareler
 - `/medya` — Pulse "şu an çalıyor / son dinlenen" + Sinedexter film/dizi/bölüm istatistikleri
 - `/iletisim` — iletişim formu (Resend) + bülten kaydı (double opt-in); JS'siz de çalışır
+- `/gizlilik` — KVKK bilgilendirmesi; sitenin gerçek veri işleyişini anlatır. Veri akışı değişirse
+  (yeni form, üçüncü taraf, saklama süresi) bu sayfayı ve içindeki tarihi güncelle
 - `/search` — Türkçe katlamalı arama (ışık = isik), noindex
 - `/istatistik` — yalnızca panelde oturum açmış yönetici (diğerlerine 404); ziyaretler, en çok
   görüntülenenler ve **kırık bağlantılar** (404'e düşen yollar + geldikleri site; "site içi" olanlar düzeltilmeli)
@@ -55,7 +57,8 @@ Panel: `http://localhost:4321/_emdash/admin`
   genişliklerini sunar; `?fmt=og` 1200×630 JPEG paylaşım görseli. Başlık/kategori/hikâye:
   `/var/www/ahmetenes-data/gallery-meta.json`. Yazı görseli ↔ galeri karesi eşlemesi:
   `src/data/blog-image-sources.json`.
-- **Medya:** Pulse (`/api/pulse` same-origin proxy) + Sinedexter `/api/stats`.
+- **Medya:** Pulse (`/api/pulse` same-origin proxy; albüm kapağı `/api/pulse/art/<id>` ile siteden,
+  128px WebP) + Sinedexter `/api/stats`. Sayfalar Cloudflare dışında üçüncü tarafa bağlanmaz.
 - **İletişim/Bülten:** Resend; aboneler `data/newsletter.json` (double opt-in, HMAC imzalı token).
 - Bülten: `pnpm newsletter list` (aboneler), `pnpm newsletter export [dosya.csv]` (CSV), `pnpm send-newsletter "Başlık" "slug" ["özet"]` (gönderim, `List-Unsubscribe` başlıklı).
 - Analitik (gizlilik dostu; IP/çerez saklanmaz): panelde oturum açıkken https://ahmetenes.com/istatistik
@@ -76,7 +79,9 @@ bash deploy.sh    # imaj derler, konteyneri 127.0.0.1:5193'te yeniden başlatır
 `deploy.sh` sırasıyla: sağlık kontrolüne "dağıtım sürüyor" bayrağı koyar; önceki imajın hash'li
 `/_astro` varlıklarını yeni imaja taşır (edge'de kalmış eski HTML stilsiz kalmasın, 14 gün);
 imajı derler ve konteyneri değiştirir; `/` 200 olunca Cloudflare'de yalnızca ahmetenes.com
-host'larını iki turda (20 sn arayla) temizler; galeri görsel önbelleğini arka planda ısıtır.
+host'larını iki turda (20 sn arayla) temizler, sitemap'teki sayfaları ısıtır (katmanlı önbellekte
+purge nesneyi yalnızca "süresi dolmuş" işaretler; ısıtılmazsa ilk ziyaretçi eski HTML'i görür) ve
+galeri görsel önbelleğini arka planda ısıtır.
 Geri almak için: `git revert <commit>` + `bash deploy.sh`.
 
 - Konteyner: `ahmetenes` (imaj `ahmetenes:latest`), arkasında Cloudflare proxy.

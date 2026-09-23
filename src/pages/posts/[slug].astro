@@ -9,6 +9,7 @@ import {
 	getEditMeta,
 } from "emdash";
 import { PortableText } from "emdash/ui";
+import { extractFootnotes } from "../../lib/footnotes";
 import { Comments, CommentForm } from "emdash/ui/comments";
 import Base from "../../layouts/Content.astro";
 import PostCard from "../../components/PostCard.astro";
@@ -109,6 +110,10 @@ const heroSrc = imageSrc(post.data.featured_image);
 const bodyContent = heroSrc && Array.isArray(post.data.content) && !getEditMeta(post.data.content)
 	? post.data.content.filter((block) => !(block._type === "image" && (block as { asset?: { url?: string } }).asset?.url === heroSrc))
 	: post.data.content;
+// Dipnotlar: [^n] -> ust simge baglanti, "[^n]: ..." paragraflari sonda liste.
+const { body: articleBody, notes: footnotes } = getEditMeta(post.data.content)
+	? { body: bodyContent, notes: [] }
+	: extractFootnotes(bodyContent);
 
 // This post's tags are already hydrated onto the entry by getEmDashEntry —
 // no extra query needed.
@@ -229,7 +234,19 @@ const publishDate =
 				</header>
 
 				<div class="article-content">
-					<PortableText value={bodyContent} components={{ type: { image: BlogImage } }} />
+					<PortableText value={articleBody} components={{ type: { image: BlogImage } }} />
+					{footnotes.length > 0 && (
+						<section class="footnotes" aria-labelledby="dipnotlar">
+							<h2 id="dipnotlar">Dipnotlar</h2>
+							<ol>
+								{footnotes.map((note) => (
+									<li id={"dipnot-" + note.n} value={note.n}>
+										<PortableText value={[note.block]} />
+									</li>
+								))}
+							</ol>
+						</section>
+					)}
 				</div>
 
 				<PostShare title={post.data.title} url={new URL(Astro.url.pathname, Astro.url.origin).href} locale={locale} />
@@ -461,6 +478,16 @@ const publishDate =
 	}
 
 	/* Article content typography */
+	.article-content :global(a[href^="#dipnot-"]) {
+		font-size: 0.72em; vertical-align: super; line-height: 0; padding: 0 0.1em; text-decoration: none;
+	}
+	.footnotes { margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid var(--color-border-subtle); font-size: 0.9rem; color: var(--color-muted); }
+	.footnotes h2 { font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; margin: 0 0 0.75rem; }
+	.footnotes ol { margin: 0; padding-left: 1.4em; }
+	.footnotes li { scroll-margin-top: 1.5rem; }
+	.footnotes li :global(p) { margin: 0 0 0.5rem; }
+	.footnotes li:target { color: var(--color-text); }
+
 	.article-content {
 		font-size: var(--font-size-lg);
 		line-height: var(--leading-relaxed);

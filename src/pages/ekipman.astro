@@ -2,6 +2,7 @@
 import Content from "../layouts/Content.astro";
 import { equipment, gearCategories, type GearItem } from "../lib/equipment";
 import { loadGallery } from "../lib/gallery";
+import { metaDescription } from "../utils/meta-description";
 
 export const prerender = false;
 
@@ -15,6 +16,10 @@ const shotsFor = (item: GearItem) => {
 };
 const thumb = (p: (typeof photos)[number]) => (p.srcSet.find((s) => s.w === 240) ?? p.srcSet[0])?.src ?? p.src;
 
+// Aciklama ekipman listesinden: once govde ve objektifler.
+const mainGear = equipment.filter((e) => e.category === "kamera" || e.category === "lens").map((e) => e.name);
+const description = metaDescription(`Fotoğraf ekipmanım: ${mainGear.join(", ")}, filtreler, ses ve ışık; her objektifle çekilmiş galeri kareleriyle.`);
+
 const groups = gearCategories
   .map((cat) => ({
     cat,
@@ -22,7 +27,7 @@ const groups = gearCategories
   }))
   .filter((g) => g.items.length > 0);
 ---
-<Content title="Ekipman" description="Kadrajın arkasındaki araçlar.">
+<Content title="Ekipman" description={description}>
   <section class="archive-section gear-page">
     <header class="archive-header">
       <h1>Ekipman</h1>

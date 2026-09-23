@@ -38,7 +38,15 @@ const content = Array.isArray(rawContent) && !getEditMeta(rawContent)
 		.filter((block, index) => !(index === 0 && block.style === "h1" && blockText(block).toLocaleLowerCase("tr") === page.data.title.toLocaleLowerCase("tr")))
 		.map((block) => (block.style === "h1" ? { ...block, style: "h2" } : block))
 	: rawContent;
-const description = firstParagraphPreview(rawContent) || undefined;
+// Ilk paragraf kisa kalirsa (ör. /now) ara basliklarla zenginlestir.
+const headings = (Array.isArray(rawContent) ? rawContent : [])
+	.filter((block) => block.style === "h2")
+	.map((block) => blockText(block))
+	.filter(Boolean);
+const lead = firstParagraphPreview(rawContent);
+const description = (lead.length < 70 && headings.length
+	? `${lead.replace(/[.:]$/, "")}: ${headings.join(", ")}.`
+	: lead) || undefined;
 // Hakkimda: Google ProfilePage (yaratici profili); galeri/yazi JSON-LD'si ile
 // ayni kisiye baglanir.
 const origin = Astro.url.origin;

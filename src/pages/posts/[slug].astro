@@ -88,6 +88,9 @@ const seo = getSeoMeta(post, {
 	defaultOgImage: featuredImageUrl,
 });
 
+// Arama sonucunda ~60 karakterden sonrasi kesilir: uzun basliklarda site eki dusulur.
+const documentTitle = seo.title.length > 60 ? (post.data.title || seo.title) : seo.title;
+
 // Bylines are already hydrated by getEmDashEntry
 const bylines = post.data.bylines ?? [];
 
@@ -141,7 +144,8 @@ const publishDate =
 ---
 
 <Base
-	title={seo.title}
+	title={documentTitle}
+	exactTitle
 	pageTitle={seo.ogTitle}
 	description={seo.description}
 	image={seo.ogImage}

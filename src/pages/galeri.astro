@@ -55,7 +55,7 @@ const themes = themeNames.length > 1 ? themeNames.slice(0, -1).join(", ") + " ve
 const fullSrcset = (p: (typeof photos)[number]) =>
   p.srcSet.filter((s) => s.w >= 800).map((s) => s.src + " " + s.w + "w").join(", ");
 ---
-<Content title="Galeri" description="Kareler — filtrelenebilir portfolyo." image={cover ? origin + "/api/immich/preview/" + cover.id + "?fmt=og" : undefined} jsonLd={jsonLd}>
+<Content title="Galeri" description={`Fotoğraf portfolyosu: ${themes || "şehir ve sokak"} kareleri. Her karenin çekim bilgisi (gövde, objektif, diyafram), konumu ve kısa hikâyesiyle.`} image={cover ? origin + "/api/immich/preview/" + cover.id + "?fmt=og" : undefined} jsonLd={jsonLd}>
   <section class="archive-section gallery-page">
     <header class="archive-header">
       <h1>Galeri</h1>

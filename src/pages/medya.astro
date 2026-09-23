@@ -9,7 +9,7 @@ const [stats, pulse] = await Promise.all([getSinedexterStats(), getPulseStatus()
 const track = pulse.track;
 const number = (value: number) => (stats.ok ? value.toLocaleString("tr-TR") : "—");
 ---
-<Content title="Medya" description="Şu an çalanlar ve izleme istatistikleri.">
+<Content title="Medya" description={stats.ok ? `Şu an dinlediğim müzik (Pulse) ve izleme istatistiklerim (Sinedexter): ${number(stats.films)} film, ${number(stats.series)} dizi, ${number(stats.episodes)} bölüm.` : "Şu an dinlediğim müzik (Pulse) ve Sinedexter'daki film ve dizi izleme istatistiklerim."}>
   <section class="archive-section media-page">
     <header class="archive-header">
       <h1>Medya</h1>

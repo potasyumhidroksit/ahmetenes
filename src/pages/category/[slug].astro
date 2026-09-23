@@ -11,6 +11,7 @@ import { getReadingTime } from "../../utils/reading-time";
 import { localizedTerm as getTerm } from "../../utils/localized-content";
 import { localizedPosts } from "../../utils/localized-posts";
 import { localeFromUrl, translate } from "../../utils/i18n";
+import { metaDescription } from "../../utils/meta-description";
 import { localizeTurkish } from "../../utils/turkish-content";
 const locale = localeFromUrl(Astro.url);
 const t = (text: string) => translate(locale, text);
@@ -36,13 +37,16 @@ const tagsByEntry = await getTermsForEntries(
 	posts.map((p) => p.data.id),
 	"tag",
 );
+// Aciklama arsivdeki yazi basliklarindan (ince/tekrar eden aciklama yerine).
+const archiveDescription = (label: string, kind: string) =>
+	metaDescription(`${label} ${kind} yazılar: ${posts.map((post) => post.data.title).join("; ")}.`);
 const filteredPosts = posts.map((post) => ({
 	post,
 	tags: tagsByEntry.get(post.data.id) ?? [],
 }));
 ---
 
-<Base title={locale === "tr" ? `${term.label} yazıları` : `${term.label} posts`} description={locale === "tr" ? `${term.label} kategorisindeki yazılar` : `Posts in ${term.label}`} robots={filteredPosts.length < 2 ? "noindex, follow" : undefined}>
+<Base title={locale === "tr" ? `${term.label} yazıları` : `${term.label} posts`} description={locale === "tr" ? archiveDescription(term.label, "kategorisindeki") : `Posts in ${term.label}`} robots={filteredPosts.length < 2 ? "noindex, follow" : undefined}>
 	<section class="archive-section">
 		<header class="archive-header">
 			<span class="archive-label">{t("Kategori")}</span>

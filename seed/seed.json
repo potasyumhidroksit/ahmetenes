@@ -313,6 +313,36 @@
       "type": 301
     },
     {
+      "source": "/blog/fotografciliga-baslarken",
+      "destination": "/kompozisyon-temelleri-ucte-bir-kurali",
+      "type": 301
+    },
+    {
+      "source": "/fotografciliga-baslarken",
+      "destination": "/kompozisyon-temelleri-ucte-bir-kurali",
+      "type": 301
+    },
+    {
+      "source": "/blog/minimal-kompozisyonda-bosluk",
+      "destination": "/kompozisyon-temelleri-ucte-bir-kurali",
+      "type": 301
+    },
+    {
+      "source": "/minimal-kompozisyonda-bosluk",
+      "destination": "/kompozisyon-temelleri-ucte-bir-kurali",
+      "type": 301
+    },
+    {
+      "source": "/blog/fujifilm-x-t5-ile-sokak-kareleri",
+      "destination": "/sokak-fotografciliginda-gorunmez-olmak",
+      "type": 301
+    },
+    {
+      "source": "/fujifilm-x-t5-ile-sokak-kareleri",
+      "destination": "/sokak-fotografciliginda-gorunmez-olmak",
+      "type": 301
+    },
+    {
       "source": "/blog/[slug]",
       "destination": "/[slug]",
       "type": 301

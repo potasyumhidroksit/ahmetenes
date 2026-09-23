@@ -66,8 +66,9 @@ Panel: `http://localhost:4321/_emdash/admin`
 - Yeni yazı yayınladıktan sonra: `pnpm announce <slug>` (RSS'ten başlık/özet, IndexNow, bülten önizlemesi);
   bülteni de göndermek için `pnpm announce <slug> --send`. Göndermeden e-postayı görmek için:
   `NEWSLETTER_PREVIEW=/tmp/bulten.html pnpm send-newsletter "Başlık" "slug" "özet" "kapak.jpg"`.
-- IndexNow (Bing/Yandex hızlı indeksleme): yeni yazıdan sonra `pnpm indexnow /slug`; tümü için `pnpm indexnow`
-  (sitemap'ten). Anahtar `public/<anahtar>.txt`.
+- IndexNow (Bing/Yandex hızlı indeksleme): panelde bir yazı/sayfa **yayınlanınca ya da yayından kalkınca
+  otomatik** bildirilir (`src/plugins/publish-ping.ts`, yalnızca canlıda; `docker logs ahmetenes | grep publish-ping`).
+  Elle: `pnpm indexnow /slug`; tümü için `pnpm indexnow` (sitemap'ten). Anahtar `public/<anahtar>.txt`.
 - Performans & güvenlik: public HTML için edge cache (`Cache-Control` + Cloudflare Cache Rules, deploy'da purge), CSP ve güvenlik başlıkları, form honeypot + IP hız sınırı.
 
 ## Dağıtım (VPS)

@@ -100,29 +100,35 @@ const number = (value: number) => (stats.ok ? value.toLocaleString("tr-TR") : "â
     if (barEl) barEl.style.transform = `scaleX(${pct / 100})`;
   }
 
-  async function tick() {
+  // Calarken 5 sn'de bir, calmiyorken 30 sn'de bir yokla (mobilde pil/veri).
+  // Nesil sayaci: sekme gizlenip hizla geri gelirse iki yoklama zinciri olusmaz.
+  let generation = 0;
+  let poll: ReturnType<typeof setTimeout> | undefined;
+  let clock: ReturnType<typeof setInterval> | undefined;
+  async function tick(gen: number) {
     try {
       const res = await fetch("/api/pulse", { cache: "no-store" });
-      if (res.ok) {
+      if (res.ok && gen === generation) {
         last = { data: await res.json(), at: Date.now() };
         render();
       }
     } catch {
       // sessizce bekle
     }
+    if (gen === generation) poll = setTimeout(() => tick(gen), last?.data.playing ? 5000 : 30000);
   }
 
-  let poll: ReturnType<typeof setInterval> | null = null;
-  let clock: ReturnType<typeof setInterval> | null = null;
   const start = () => {
-    tick();
-    poll ??= setInterval(tick, 5000);
+    generation++;
+    clearTimeout(poll);
+    tick(generation);
     clock ??= setInterval(render, 1000);
   };
   const stop = () => {
-    if (poll) clearInterval(poll);
-    if (clock) clearInterval(clock);
-    poll = clock = null;
+    generation++;
+    clearTimeout(poll);
+    clearInterval(clock);
+    clock = undefined;
   };
   start();
   document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));

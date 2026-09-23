@@ -760,38 +760,12 @@
               ]
             },
             {
-              "_type": "block",
+              "_type": "image",
               "_key": "ki",
-              "style": "normal",
-              "markDefs": [
-                {
-                  "_key": "kf",
-                  "_type": "link",
-                  "href": "/blog/kompozisyon-temelleri-ucte-bir-kurali/cover.webp"
-                }
-              ],
-              "children": [
-                {
-                  "_type": "span",
-                  "_key": "ke",
-                  "text": "!",
-                  "marks": []
-                },
-                {
-                  "_type": "span",
-                  "_key": "kg",
-                  "text": "Saat kulesi — dikey çizgiler ve kapanan perspektif",
-                  "marks": [
-                    "kf"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "_key": "kh",
-                  "text": " Bir iskeleden geçen yürüyüş yolunun ufukta kaybolan figüre doğru uzanması, gözü kaçınılmaz olarak oraya çeker.",
-                  "marks": []
-                }
-              ]
+              "alt": "Saat kulesi — dikey çizgiler ve kapanan perspektif",
+              "asset": {
+                "url": "/blog/kompozisyon-temelleri-ucte-bir-kurali/cover.webp"
+              }
             },
             {
               "_type": "block",

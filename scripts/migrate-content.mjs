@@ -66,7 +66,12 @@ for (const p of POSTS) {
     await download(id, join(dir, name));
     localFor.set(id, "/blog/" + slug + "/" + name);
   }
-  const rewritten = body.replace(immichRe, (full, id) => localFor.get(id) || full);
+  const rewritten = body
+    .replace(immichRe, (full, id) => localFor.get(id) || full)
+    // Satir ici gorsel + metin ("![alt](url) Metin"): markdownToPortableText
+    // gorseli yalnizca kendi paragrafindaysa gorsel yapar; aksi halde "!" +
+    // baglanti uretiyordu. Gorseli ayri paragrafa al.
+    .replace(/^(!\[[^\]]*\]\([^)]+\))[ \t]+(\S.*)$/gm, "$1\n\n$2");
   posts.push({
     id: slug,
     slug,

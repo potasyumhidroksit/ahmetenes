@@ -25,6 +25,8 @@ export type ImmichAsset = {
   width: number;
   height: number;
   type: string;
+  /** Kucuk bulanik onizleme kodu (base64); ortalama renk icin */
+  thumbhash?: string | null;
   exifInfo?: {
     model?: string | null;
     lensModel?: string | null;
@@ -81,4 +83,23 @@ export async function getAssetBatch(ids: string[]): Promise<Map<string, ImmichAs
   const uniq = [...new Set(ids)];
   const entries = await Promise.all(uniq.map(async (id) => [id, await getAsset(id)] as const));
   return new Map(entries);
+}
+
+/**
+ * Thumbhash'ten ortalama renk (#rrggbb). Evan Wallace'in thumbhash referans
+ * uygulamasindaki thumbHashToAverageRGBA'nin uyarlamasi (MIT).
+ */
+export function thumbhashAverageColor(thumbhash: string | null | undefined): string | undefined {
+  if (!thumbhash) return undefined;
+  const hash = Buffer.from(thumbhash, "base64");
+  if (hash.length < 5) return undefined;
+  const header = hash[0] | (hash[1] << 8) | (hash[2] << 16);
+  const l = (header & 63) / 63;
+  const p = ((header >> 6) & 63) / 31.5 - 1;
+  const q = ((header >> 12) & 63) / 31.5 - 1;
+  const b = l - (2 / 3) * p;
+  const r = (3 * l - b + q) / 2;
+  const g = r - q;
+  const hex = (v: number) => Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, "0");
+  return "#" + hex(r) + hex(g) + hex(b);
 }

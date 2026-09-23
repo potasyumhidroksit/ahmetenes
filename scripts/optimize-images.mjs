@@ -62,7 +62,10 @@ for (const sub of SOURCE_DIRS) {
     }
 
     const src = "/" + path.relative(PUBLIC_DIR, file).split(path.sep).join("/");
-    const entry = { width, height, variants };
+    // Yuklenirken yer tutucu: gorselin baskin rengi.
+    const { dominant } = await sharp(file).stats();
+    const color = "#" + [dominant.r, dominant.g, dominant.b].map((v) => v.toString(16).padStart(2, "0")).join("");
+    const entry = { width, height, variants, color };
     if (path.basename(base) === "cover") {
       const target = `${base}-og.jpg`;
       if (!(await isFresh(target, file))) {

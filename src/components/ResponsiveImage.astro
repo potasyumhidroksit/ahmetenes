@@ -29,6 +29,7 @@ const local = localImage(image);
 		loading={priority ? "eager" : "lazy"}
 		decoding="async"
 		fetchpriority={priority ? "high" : undefined}
+		style={local.color ? `background-color:${local.color}` : undefined}
 	/>
 ) : (
 	<Image image={image} alt={alt} priority={priority} class={className} />

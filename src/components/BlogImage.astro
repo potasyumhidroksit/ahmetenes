@@ -29,6 +29,7 @@ const exif = photo ? exifLine(photo) : "";
 					alt={node.alt ?? ""}
 					loading="lazy"
 					decoding="async"
+					style={local.color ? `background-color:${local.color}` : undefined}
 				/>
 			</a>
 		) : (
@@ -41,6 +42,7 @@ const exif = photo ? exifLine(photo) : "";
 				alt={node.alt ?? ""}
 				loading="lazy"
 				decoding="async"
+					style={local.color ? `background-color:${local.color}` : undefined}
 			/>
 		)}
 		{(node.caption || photo) && (

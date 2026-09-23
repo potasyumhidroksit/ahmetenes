@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { getAlbumAssetIds, getAssetBatch, SITEDE_ALBUM_ID, type ImmichAsset } from "./immich";
+import { getAlbumAssetIds, getAssetBatch, SITEDE_ALBUM_ID, thumbhashAverageColor, type ImmichAsset } from "./immich";
 
 export type GalleryCategory = { id: string; label: string };
 
@@ -29,6 +29,8 @@ export type GalleryPhoto = {
   location?: string;
   year?: string;
   featured?: boolean;
+  /** Yuklenirken yer tutucu renk (Immich thumbhash ortalamasi) */
+  color?: string;
   exif?: {
     camera?: string;
     lens?: string;
@@ -52,6 +54,7 @@ type CuratedItem = {
   featured?: boolean;
   width?: number;
   height?: number;
+  color?: string;
   exif?: GalleryPhoto["exif"];
 };
 
@@ -92,6 +95,7 @@ function toPhoto(item: CuratedItem): GalleryPhoto {
     location: item.location,
     year: item.year,
     featured: item.featured,
+    color: item.color,
     exif: item.exif,
     src: "/api/immich/preview/" + item.id + "?w=800",
     srcSet: [240, 480, 640, 800, 1200, 1600].map((w) => ({ w, src: "/api/immich/preview/" + item.id + "?w=" + w })),
@@ -109,6 +113,7 @@ function mergeCurated(item: CuratedItem, asset?: ImmichAsset): CuratedItem {
     width: w || item.width,
     height: h || item.height,
     layout: w && h ? (w >= h ? "wide" : "tall") : item.layout,
+    color: thumbhashAverageColor(asset.thumbhash) ?? item.color,
     year: live.dateTimeOriginal ? String(new Date(live.dateTimeOriginal).getUTCFullYear()) : item.year,
     exif: {
       camera: live.model || item.exif?.camera,
@@ -133,6 +138,7 @@ function assetToCurated(a: ImmichAsset): CuratedItem {
     layout: w >= h ? "wide" : "tall",
     width: a.width || undefined,
     height: a.height || undefined,
+    color: thumbhashAverageColor(a.thumbhash),
     exif: a.exifInfo
       ? {
           camera: a.exifInfo.model || undefined,

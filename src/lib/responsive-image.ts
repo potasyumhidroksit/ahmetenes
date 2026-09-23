@@ -1,12 +1,14 @@
 import manifest from "../data/image-manifest.json";
 
-type ManifestEntry = { width: number; height: number; variants: number[]; og?: string };
+type ManifestEntry = { width: number; height: number; variants: number[]; og?: string; color?: string };
 
 export type LocalImage = {
   src: string;
   srcset: string;
   width: number;
   height: number;
+  /** Yuklenirken arka plan (baskin renk) */
+  color?: string;
 };
 
 const entries = manifest as Record<string, ManifestEntry>;
@@ -33,7 +35,7 @@ export function localImage(image: unknown): LocalImage | undefined {
     ...entry.variants.map((w) => `${base}-${w}w.webp ${w}w`),
     `${src} ${entry.width}w`,
   ].join(", ");
-  return { src, srcset, width: entry.width, height: entry.height };
+  return { src, srcset, width: entry.width, height: entry.height, color: entry.color };
 }
 
 /** Kapak icin uretilmis 1200x630 JPEG paylasim gorseli (varsa). */

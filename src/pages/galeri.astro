@@ -85,7 +85,7 @@ const fullSrcset = (p: (typeof photos)[number]) =>
           data-story={p.story}
           data-post-href={postFor(p.id)?.href}
           data-post-title={postFor(p.id)?.title}
-          style={p.width && p.height ? "aspect-ratio: " + p.width + " / " + p.height : undefined}
+          style={[p.width && p.height ? "aspect-ratio: " + p.width + " / " + p.height : "", p.color ? "background-color: " + p.color : ""].filter(Boolean).join("; ") || undefined}
         >
           <img
             src={p.src}

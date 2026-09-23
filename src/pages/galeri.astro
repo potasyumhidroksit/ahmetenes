@@ -1,10 +1,20 @@
 ---
 import Content from "../layouts/Content.astro";
 import { exifLine, loadGallery, galleryCategories } from "../lib/gallery";
+import { postSlugsByPhoto } from "../lib/blog-photo";
+import { localizedPosts } from "../utils/localized-posts";
 
 export const prerender = false;
 
 const photos = await loadGallery();
+// Karenin gectigi yazi (varsa): lightbox'ta "Yazıda: ..." baglantisi.
+const { entries: posts } = await localizedPosts("tr", { orderBy: { published_at: "desc" } });
+const titleBySlug = new Map(posts.map((post) => [post.id, post.data.title]));
+const slugsByPhoto = postSlugsByPhoto();
+const postFor = (id: string) => {
+  const slug = (slugsByPhoto.get(id) ?? []).find((s) => titleBySlug.has(s));
+  return slug ? { href: "/" + slug, title: titleBySlug.get(slug) ?? "" } : null;
+};
 const srcset = (p: (typeof photos)[number]) => p.srcSet.map((s) => s.src + " " + s.w + "w").join(", ");
 const origin = Astro.url.origin;
 const year = new Date().getFullYear();
@@ -73,6 +83,8 @@ const fullSrcset = (p: (typeof photos)[number]) =>
           data-location={p.location}
           data-year={p.year}
           data-story={p.story}
+          data-post-href={postFor(p.id)?.href}
+          data-post-title={postFor(p.id)?.title}
           style={p.width && p.height ? "aspect-ratio: " + p.width + " / " + p.height : undefined}
         >
           <img
@@ -102,6 +114,7 @@ const fullSrcset = (p: (typeof photos)[number]) =>
         <strong data-lightbox-title></strong>
         <span data-lightbox-meta></span>
         <p data-lightbox-story></p>
+        <a class="lightbox-post" data-lightbox-post hidden></a>
       </figcaption>
     </figure>
   </dialog>
@@ -126,6 +139,7 @@ const fullSrcset = (p: (typeof photos)[number]) =>
     const meta = dialog.querySelector<HTMLElement>("[data-lightbox-meta]");
     const story = dialog.querySelector<HTMLElement>("[data-lightbox-story]");
     const count = dialog.querySelector<HTMLElement>("[data-lightbox-count]");
+    const postLink = dialog.querySelector<HTMLAnchorElement>("[data-lightbox-post]");
     const sizes = img?.getAttribute("sizes") || "100vw";
     const visibleItems = () => Array.from(items).filter((el) => !el.hidden);
     let current = -1;
@@ -150,6 +164,11 @@ const fullSrcset = (p: (typeof photos)[number]) =>
       title.textContent = item.dataset.title || "";
       meta.textContent = [item.dataset.exif, item.dataset.location, item.dataset.year].filter(Boolean).join(" · ");
       story.textContent = item.dataset.story || "";
+      if (postLink) {
+        postLink.hidden = !item.dataset.postHref;
+        postLink.href = item.dataset.postHref || "";
+        postLink.textContent = item.dataset.postTitle ? "Yazıda: " + item.dataset.postTitle + " →" : "";
+      }
       const list = visibleItems();
       if (count) count.textContent = list.length > 1 ? `${current + 1} / ${list.length}` : "";
       if (list.length > 1) {
@@ -245,6 +264,9 @@ const fullSrcset = (p: (typeof photos)[number]) =>
   .lightbox figcaption { color: #e6e9ec; display: grid; gap: 0.25rem; }
   .lightbox figcaption span { font-size: 0.8rem; color: #a3afb9; }
   .lightbox .lightbox-count { font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
+  .lightbox-post { justify-self: start; margin-top: 0.4rem; font-size: 0.9rem; color: #e6e9ec; text-underline-offset: 3px; }
+  .lightbox-post:hover { color: #fff; }
+  .lightbox-post[hidden] { display: none; }
   .lightbox .lightbox-count:empty { display: none; }
   .lightbox figcaption p { margin: 0.4rem 0 0; font-size: 0.9rem; color: #cfd6dc; max-width: 70ch; }
   .lightbox-close {

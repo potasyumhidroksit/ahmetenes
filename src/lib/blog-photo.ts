@@ -15,3 +15,17 @@ export async function galleryPhotoFor(image: unknown): Promise<GalleryPhoto | un
 }
 
 export const galleryHref = (p: GalleryPhoto) => "/galeri#kare-" + p.id;
+
+/** Ters esleme: galeri karesi -> gectigi yazilarin slug'lari (kapak once). */
+export function postSlugsByPhoto(): Map<string, string[]> {
+  const out = new Map<string, string[]>();
+  const entries = Object.entries(map).sort(([a], [b]) => Number(b.endsWith("/cover.webp")) - Number(a.endsWith("/cover.webp")));
+  for (const [src, id] of entries) {
+    const slug = src.match(/^\/blog\/([^/]+)\//)?.[1];
+    if (!slug) continue;
+    const list = out.get(id) ?? [];
+    if (!list.includes(slug)) list.push(slug);
+    out.set(id, list);
+  }
+  return out;
+}

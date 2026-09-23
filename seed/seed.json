@@ -907,24 +907,44 @@
               "style": "normal",
               "markDefs": [
                 {
-                  "_key": "k12",
+                  "_key": "fn1l",
                   "_type": "link",
-                  "href": "https://en.wikipedia.org/wiki/John_Thomas_Smith_(painter"
+                  "href": "https://en.wikipedia.org/wiki/John_Thomas_Smith_(painter)"
                 }
               ],
               "children": [
                 {
                   "_type": "span",
-                  "_key": "k13",
-                  "text": "^1]: Üçte bir kuralı, 1797'de İngiliz ressam [John Thomas Smith",
+                  "_key": "fn1a",
+                  "text": "[^1]: Üçte bir kuralı, 1797'de İngiliz ressam ",
+                  "marks": []
+                },
+                {
+                  "_type": "span",
+                  "_key": "fn1b",
+                  "text": "John Thomas Smith",
                   "marks": [
-                    "k12"
+                    "fn1l"
                   ]
                 },
                 {
                   "_type": "span",
-                  "_key": "k14",
-                  "text": ") tarafından yayımlanan *Remarks on Rural Scenery* adlı kitapta yer alan bir çizim ilkesine dayanır; fotoğrafa aktarılması ise çok daha sonra, 20. yüzyılın ortalarına rastlar.",
+                  "_key": "fn1c",
+                  "text": " tarafından yayımlanan ",
+                  "marks": []
+                },
+                {
+                  "_type": "span",
+                  "_key": "fn1d",
+                  "text": "Remarks on Rural Scenery",
+                  "marks": [
+                    "em"
+                  ]
+                },
+                {
+                  "_type": "span",
+                  "_key": "fn1e",
+                  "text": " adlı kitapta yer alan bir çizim ilkesine dayanır; fotoğrafa aktarılması ise çok daha sonra, 20. yüzyılın ortalarına rastlar.",
                   "marks": []
                 }
               ]
@@ -937,22 +957,8 @@
               "children": [
                 {
                   "_type": "span",
-                  "_key": "k16",
-                  "text": "[^2]: Perspektif ve açının anlam üzerindeki etkisi sinema dilinde de aynıdır;",
-                  "marks": []
-                }
-              ]
-            },
-            {
-              "_type": "block",
-              "_key": "k19",
-              "style": "normal",
-              "markDefs": [],
-              "children": [
-                {
-                  "_type": "span",
-                  "_key": "k18",
-                  "text": "    aşağı açı (low angle) karakteri güçlü gösterirken, yukarı açı (high angle) karakteri zayıflatır.",
+                  "_key": "fn2a",
+                  "text": "[^2]: Perspektif ve açının anlam üzerindeki etkisi sinema dilinde de aynıdır; aşağı açı (low angle) karakteri güçlü gösterirken, yukarı açı (high angle) karakteri zayıflatır.",
                   "marks": []
                 }
               ]

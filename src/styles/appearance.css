@@ -260,3 +260,18 @@ html[data-public-theme] .personabio-footer .appearance-icons svg { width: 18px; 
   html[data-public-theme] .personabio-footer .appearance-icons button,
   html[data-public-theme] .personabio-footer .appearance-icons button::after { transition: none; }
 }
+
+/* Baski / PDF: yalnizca yazi. Menu, paylasim, bulten, oneriler, altbilgi ve
+   atlama baglantisi kagida basilmaz; acik renk, gorsel/baslik bolunmez. */
+@media print {
+  html[data-public-theme] { color-scheme: light; }
+  .content-header, .content-menu-backdrop, .content-skip, .post-share, .newsletter, .more-posts,
+  .content-preferences-footer, .reading-progress, .article-comments, #site-search-dialog,
+  #emdash-toolbar, .photo-nav, .photo-back { display: none !important; }
+  body, .content-shell, .content-panel { background: #fff !important; color: #111 !important; box-shadow: none !important; border: 0 !important; }
+  .content-panel { padding: 0 !important; margin: 0 !important; }
+  a { color: inherit !important; }
+  .article-content a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; word-break: break-all; }
+  img, figure { break-inside: avoid; }
+  h1, h2, h3 { break-after: avoid; }
+}

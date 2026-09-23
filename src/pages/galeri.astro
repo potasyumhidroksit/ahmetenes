@@ -70,8 +70,8 @@ const fullSrcset = (p: (typeof photos)[number]) =>
     </div>
     <div class="gallery-grid" data-gallery>
       {photos.map((p, index) => (
-        <button
-          type="button"
+        <a
+          href={"/galeri/" + p.id}
           id={"kare-" + p.id}
           class="gallery-item"
           data-gallery-item
@@ -98,7 +98,7 @@ const fullSrcset = (p: (typeof photos)[number]) =>
             {...(p.width && p.height ? { width: p.width, height: p.height } : {})}
           />
           <span class="gallery-item-caption" aria-hidden="true">{p.title}</span>
-        </button>
+        </a>
       ))}
     </div>
   </section>
@@ -124,7 +124,9 @@ const fullSrcset = (p: (typeof photos)[number]) =>
 <script>
   import { flashLabel, shareOrCopy } from "../scripts/share";
 
-  const items = document.querySelectorAll<HTMLButtonElement>("[data-gallery-item]");
+  // Kareler /galeri/<id> baglantisidir (JS'siz, yeni sekmede acma, tarayicilar);
+  // normal tiklama lightbox'i acar.
+  const items = document.querySelectorAll<HTMLAnchorElement>("[data-gallery-item]");
   document.querySelectorAll<HTMLButtonElement>("[data-filter]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const filter = btn.dataset.filter || "tumu";
@@ -149,7 +151,7 @@ const fullSrcset = (p: (typeof photos)[number]) =>
     let lastFocus: HTMLElement | null = null;
 
     // Komsu kareleri arka planda isit: ok/kaydirma aninda gecsin.
-    const preload = (item?: HTMLButtonElement) => {
+    const preload = (item?: HTMLAnchorElement) => {
       if (!item) return;
       const pre = new Image();
       pre.sizes = sizes;
@@ -157,7 +159,7 @@ const fullSrcset = (p: (typeof photos)[number]) =>
       pre.src = item.dataset.full || "";
     };
 
-    const fill = (item: HTMLButtonElement) => {
+    const fill = (item: HTMLAnchorElement) => {
       if (!img || !title || !meta || !story) return;
       // Adres cubugu karenin kendi sayfasi (/galeri/<id>): kopyalanan baglanti
       // o karenin onizlemesiyle paylasilir. Eski #kare-<id> baglantilari da acar.
@@ -189,7 +191,10 @@ const fullSrcset = (p: (typeof photos)[number]) =>
     };
 
     items.forEach((item) => {
-      item.addEventListener("click", () => {
+      item.addEventListener("click", (event) => {
+        // Cmd/Ctrl/Shift/orta tik: tarayici bağlantıyı yeni sekmede/pencerede acar.
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
         current = visibleItems().indexOf(item);
         lastFocus = item;
         fill(item);
@@ -203,7 +208,7 @@ const fullSrcset = (p: (typeof photos)[number]) =>
     });
 
     const linked = location.hash.startsWith("#kare-") ? document.getElementById(location.hash.slice(1)) : null;
-    if (linked instanceof HTMLButtonElement && linked.matches("[data-gallery-item]")) linked.click();
+    if (linked instanceof HTMLAnchorElement && linked.matches("[data-gallery-item]")) linked.click();
     dialog.addEventListener("click", (event) => {
       if (event.target === dialog) dialog.close();
     });

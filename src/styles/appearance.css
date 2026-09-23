@@ -1,4 +1,8 @@
 html[data-public-theme] { color-scheme: dark; }
+/* Form ogeleri yazi tipini miras almaz (tarayici varsayilani Arial): galeri
+   kareleri <button>, basliklari Arial'la ciziliyordu. :where -> ozgulluk 0,
+   bilesenlerin kendi kurallari yine gecerli. */
+:where(button, input, select, textarea) { font-family: inherit; }
 .content-menu-toggle { display: none; }
 .content-menu-toggle svg { width: 22px; height: 22px; }
 .content-menu-toggle .menu-close { display: none; }

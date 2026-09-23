@@ -3,6 +3,7 @@ import { getSiteSettings } from "emdash";
 
 import { localeFromUrl, localePath, translate } from "../utils/i18n";
 import { localizedPosts } from "../utils/localized-posts";
+import ogPosts from "../data/og-posts.json";
 import { portableTextToHtml } from "../lib/portable-text-html";
 import { imageSrc, localImage } from "../lib/responsive-image";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
@@ -34,9 +35,13 @@ export const GET: APIRoute = async ({ site, url }) => {
 			const cover = imageSrc(post.data.featured_image);
 			const coverUrl = cover ? (cover.startsWith("http") ? cover : `${siteUrl}${cover}`) : "";
 			const size = localImage(cover);
+			// Kapaksiz yazi: tipografik paylasim gorseli (1200x630 JPEG).
+			const ogFallback = !coverUrl && (ogPosts as string[]).includes(post.id) ? `${siteUrl}/og/${post.id}.jpg` : "";
 			const media = coverUrl
 				? `\n      <media:content url="${escapeXml(coverUrl)}" medium="image" type="image/webp"${size ? ` width="${size.width}" height="${size.height}"` : ""}/>`
-				: "";
+				: ogFallback
+					? `\n      <media:content url="${escapeXml(ogFallback)}" medium="image" type="image/jpeg" width="1200" height="630"/>`
+					: "";
 			const labels = [...(post.data.terms?.category ?? []), ...(post.data.terms?.tag ?? [])].map((term) => term.label);
 			const terms = [...new Set(labels)]
 				.map((label) => `\n      <category>${escapeXml(label)}</category>`)

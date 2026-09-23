@@ -87,7 +87,7 @@ const canonical = canonicalProp ?? new URL(Astro.url.pathname, Astro.url.origin)
 const ogImage = image ?? Astro.url.origin + "/og-default.jpg";
 // Uretilen paylasim gorselleri (og-default, kapak -og.jpg, galeri fmt=og) 1200x630.
 const shareAlt = imageAlt ?? (image ? (pageTitle ?? title) : `${siteTitle} — fotoğraf ve notlar`);
-const ogSize = /(?:og-default\.jpg|-og\.jpg|[?&]fmt=og)$/.test(ogImage) ? [1200, 630] : null;
+const ogSize = /(?:og-default\.jpg|-og\.jpg|\/og\/[a-z0-9-]+\.jpg|[?&]fmt=og)$/.test(ogImage) ? [1200, 630] : null;
 // Build public page context for plugin contributions
 // SEO data is passed here and rendered securely by EmDashHead
 const pageCtx = createPublicPageContext({

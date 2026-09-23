@@ -10,6 +10,7 @@ import {
 } from "emdash";
 import { PortableText } from "emdash/ui";
 import { extractFootnotes } from "../../lib/footnotes";
+import ogPosts from "../../data/og-posts.json";
 import { Comments, CommentForm } from "emdash/ui/comments";
 import Base from "../../layouts/Content.astro";
 import PostCard from "../../components/PostCard.astro";
@@ -75,7 +76,10 @@ function getImageUrl(img: unknown): string | undefined {
 	return undefined;
 }
 // Paylasim: kapagin 1200x630 JPEG surumu varsa o (WebP her platformda gorunmuyor).
-const featuredImageUrl = getImageUrl(ogImage(post.data.featured_image) ?? post.data.featured_image);
+// Kapaksiz yazi: fotografsiz tipografik paylasim gorseli (scripts/og-yazilar.mjs).
+const featuredImageUrl =
+	getImageUrl(ogImage(post.data.featured_image) ?? post.data.featured_image) ??
+	((ogPosts as string[]).includes(slug) ? `${Astro.url.origin}/og/${slug}.jpg` : undefined);
 const { siteTitle } = resolveBlogSiteIdentity(await getSiteSettings());
 const localizedSiteTitle = locale === "tr" ? localizeTurkish(siteTitle) : t(siteTitle);
 

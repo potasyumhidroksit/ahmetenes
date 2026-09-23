@@ -13,7 +13,7 @@ const SITE = "https://ahmetenes.com";
 const pw = await import(process.env.PLAYWRIGHT ? pathToFileURL(path.join(process.env.PLAYWRIGHT, "index.mjs")).href : "playwright-core");
 const chromium = pw.chromium ?? pw.default.chromium;
 
-const LABELS = { teknik: "Teknik", sokak: "Sokak", sanat: "Sanat", ekipman: "Ekipman", gezi: "Gezi" };
+const LABELS = { baslangic: "Başlangıç", teknik: "Teknik", sokak: "Sokak", sanat: "Sanat", ekipman: "Ekipman", gezi: "Gezi" };
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
 // Sitenin kullandigi DM Sans dosyalari (latin + latin-ext).

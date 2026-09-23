@@ -2,6 +2,7 @@
 // yalnizca anlamli etiketler (p, h2, liste, alinti, vurgu, baglanti, gorsel).
 // Bilinmeyen blok turleri atlanir.
 import { localImage } from "./responsive-image";
+import { imageCreditHtml } from "./image-credit";
 
 type Span = { _type?: string; text?: string; marks?: string[] };
 type MarkDef = { _key?: string; _type?: string; href?: string };
@@ -72,7 +73,9 @@ function renderImage(block: Block, siteUrl: string): string {
   }
   const abs = absolute(src, siteUrl);
   if (!abs) return "";
-  const caption = block.caption ? `<figcaption>${esc(block.caption)}</figcaption>` : "";
+  const credit = imageCreditHtml(url);
+  const captionText = [block.caption ? esc(block.caption) : "", credit].filter(Boolean).join("<br>");
+  const caption = captionText ? `<figcaption>${captionText}</figcaption>` : "";
   return `<figure><img src="${esc(abs)}" alt="${esc(block.alt ?? "")}"${size}>${caption}</figure>`;
 }
 

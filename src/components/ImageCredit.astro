@@ -1,0 +1,30 @@
+---
+// Acik lisansli fotograf atfi: "Fotograf: Yazar · CC BY-SA 4.0 · Wikimedia Commons"
+import { imageCredit } from "../lib/image-credit";
+
+interface Props {
+	image: unknown;
+	class?: string;
+}
+
+const credit = imageCredit(Astro.props.image);
+---
+{credit && (
+	<span class:list={["image-credit", Astro.props.class]}>
+		<span>Fotoğraf: {credit.creator ? (credit.creatorUrl || credit.url ? <a href={credit.creatorUrl ?? credit.url} rel="noopener">{credit.creator}</a> : credit.creator) : <a href={credit.url} rel="noopener">kaynak</a>}</span>
+		<span aria-hidden="true"> · </span>
+		{credit.licenseUrl ? <a href={credit.licenseUrl} rel="license noopener">{credit.license}</a> : <span>{credit.license}</span>}
+		{credit.source && (
+			<>
+				<span aria-hidden="true"> · </span>
+				{credit.url ? <a href={credit.url} rel="noopener">{credit.source}</a> : <span>{credit.source}</span>}
+			</>
+		)}
+	</span>
+)}
+
+<style>
+	.image-credit { font-size: 0.75rem; color: var(--color-muted); overflow-wrap: anywhere; }
+	.image-credit a { color: inherit; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 2px; }
+	.image-credit a:hover { color: var(--color-text); text-decoration-color: currentColor; }
+</style>

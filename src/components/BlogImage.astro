@@ -6,6 +6,8 @@ import { PTImage } from "emdash/ui";
 import { localImage } from "../lib/responsive-image";
 import { galleryHref, galleryPhotoFor } from "../lib/blog-photo";
 import { exifLine } from "../lib/gallery";
+import ImageCredit from "./ImageCredit.astro";
+import { imageCredit } from "../lib/image-credit";
 
 interface Props {
 	node: { _type: "image"; asset?: { url?: string }; alt?: string; caption?: string };
@@ -15,6 +17,7 @@ const { node } = Astro.props;
 const local = localImage(node?.asset?.url);
 const photo = local ? await galleryPhotoFor(local.src) : undefined;
 const exif = photo ? exifLine(photo) : "";
+const credit = local && !photo ? imageCredit(local.src) : undefined;
 ---
 {local ? (
 	<figure class="emdash-image">
@@ -45,9 +48,10 @@ const exif = photo ? exifLine(photo) : "";
 					style={local.color ? `background-color:${local.color}` : undefined}
 			/>
 		)}
-		{(node.caption || photo) && (
+		{(node.caption || photo || credit) && (
 			<figcaption>
 				{node.caption && <span>{node.caption}</span>}
+				{credit && <ImageCredit image={local.src} />}
 				{photo && (
 					<span class="blog-photo-meta">
 						{exif && <span class="blog-photo-exif">{exif}</span>}

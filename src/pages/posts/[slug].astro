@@ -20,8 +20,11 @@ import { galleryHref, galleryPhotoFor } from "../../lib/blog-photo";
 import { exifLine } from "../../lib/gallery";
 import ResponsiveImage from "../../components/ResponsiveImage.astro";
 import BlogImage from "../../components/BlogImage.astro";
+import ImageCredit from "../../components/ImageCredit.astro";
+import { imageCredit } from "../../lib/image-credit";
 import { imageSrc, ogImage } from "../../lib/responsive-image";
 import { getReadingTime } from "../../utils/reading-time";
+import { readingNeighbors } from "../../utils/reading-order";
 import { resolveBlogSiteIdentity } from "../../utils/site-identity";
 
 import { localizedEntry as getEmDashEntry } from "../../utils/localized-content";
@@ -131,6 +134,8 @@ const { entries: recentPosts, cacheHint: recentHint } = await localizedPosts(loc
 	limit: 50,
 });
 if (Astro.cache?.enabled) Astro.cache.set(recentHint);
+// Okuma sirasinda onceki/sonraki yazi (yeni baslayan icin rehberli ilerleyis).
+const reading = readingNeighbors(recentPosts, post.id);
 const termSlugs = (list: { slug: string }[] | undefined) => new Set((list ?? []).map((term) => term.slug));
 const ownCategories = termSlugs(post.data.terms?.category);
 const ownTags = termSlugs(post.data.terms?.tag);
@@ -190,10 +195,14 @@ const publishDate =
 			)
 		}
 		{
-			heroPhoto && (
+			heroPhoto ? (
 				<p class="article-hero-caption">
 					<span>{heroPhoto.title}{exifLine(heroPhoto) && <> · {exifLine(heroPhoto)}</>}</span>
 					<a href={galleryHref(heroPhoto)}>Galeride aç →</a>
+				</p>
+			) : post.data.featured_image && imageCredit(post.data.featured_image) && (
+				<p class="article-hero-caption">
+					<ImageCredit image={post.data.featured_image} />
 				</p>
 			)
 		}
@@ -252,6 +261,26 @@ const publishDate =
 						</section>
 					)}
 				</div>
+
+				{reading && (reading.prev || reading.next) && (
+					<nav class="reading-nav" aria-label="Okuma sırası">
+						<p class="reading-nav-label">Okuma sırası · {reading.position}/{reading.total}</p>
+						<div class="reading-nav-links">
+							{reading.prev ? (
+								<a class="reading-nav-link reading-nav-prev" href={localePath(`/${reading.prev.id}`, locale)} rel="prev">
+									<span class="reading-nav-dir">← Önceki</span>
+									<span class="reading-nav-title">{reading.prev.data.title}</span>
+								</a>
+							) : <span />}
+							{reading.next && (
+								<a class="reading-nav-link reading-nav-next" href={localePath(`/${reading.next.id}`, locale)} rel="next">
+									<span class="reading-nav-dir">Sonraki →</span>
+									<span class="reading-nav-title">{reading.next.data.title}</span>
+								</a>
+							)}
+						</div>
+					</nav>
+				)}
 
 				<PostShare title={post.data.title} url={new URL(Astro.url.pathname, Astro.url.origin).href} locale={locale} />
 
@@ -388,6 +417,20 @@ const publishDate =
     .taxonomy-comments { margin-left: 0; }
   }
   #comments { scroll-margin-top: 24px; }
+  .reading-nav { margin-top: 40px; }
+  .reading-nav-label { margin: 0 0 10px; font-size: 0.8125rem; color: var(--color-muted); font-variant-numeric: tabular-nums; }
+  .reading-nav-links { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .reading-nav-link { display: grid; gap: 4px; padding: 14px 16px; border: 1px solid var(--glass-border-active); border-radius: var(--radius-lg, 12px); color: var(--color-text); text-decoration: none; transition: border-color 0.15s ease, background-color 0.15s ease; }
+  .reading-nav-link:hover { border-color: var(--color-text-secondary); background: var(--color-surface); }
+  .reading-nav-link:focus-visible { outline: 2px solid light-dark(#536163, #ccd7df); outline-offset: 3px; }
+  .reading-nav-next { text-align: right; grid-column: 2; }
+  .reading-nav-dir { font-size: 0.8125rem; color: var(--color-text-secondary); }
+  .reading-nav-title { font-size: 0.9375rem; line-height: 1.35; font-weight: 500; }
+  @media (max-width: 600px) {
+    .reading-nav-links { grid-template-columns: 1fr; }
+    .reading-nav-next { grid-column: auto; text-align: left; }
+    .reading-nav-links > span:empty { display: none; }
+  }
 	/* Article container */
 	.article {
 		max-width: var(--wide-width);

@@ -6,6 +6,7 @@ import { localizedPosts } from "../utils/localized-posts";
 import ogPosts from "../data/og-posts.json";
 import { portableTextToHtml } from "../lib/portable-text-html";
 import { imageSrc, localImage } from "../lib/responsive-image";
+import { imageCredit } from "../lib/image-credit";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
 
 export const GET: APIRoute = async ({ site, url }) => {
@@ -37,8 +38,10 @@ export const GET: APIRoute = async ({ site, url }) => {
 			const size = localImage(cover);
 			// Kapaksiz yazi: tipografik paylasim gorseli (1200x630 JPEG).
 			const ogFallback = !coverUrl && (ogPosts as string[]).includes(post.id) ? `${siteUrl}/og/${post.id}.jpg` : "";
+			const credit = imageCredit(cover);
+			const creditXml = credit ? `<media:credit>${escapeXml([credit.creator, credit.license, credit.source].filter(Boolean).join(" · "))}</media:credit>` : "";
 			const media = coverUrl
-				? `\n      <media:content url="${escapeXml(coverUrl)}" medium="image" type="image/webp"${size ? ` width="${size.width}" height="${size.height}"` : ""}/>`
+				? `\n      <media:content url="${escapeXml(coverUrl)}" medium="image" type="image/webp"${size ? ` width="${size.width}" height="${size.height}"` : ""}${creditXml ? `>${creditXml}</media:content>` : "/>"}`
 				: ogFallback
 					? `\n      <media:content url="${escapeXml(ogFallback)}" medium="image" type="image/jpeg" width="1200" height="630"/>`
 					: "";

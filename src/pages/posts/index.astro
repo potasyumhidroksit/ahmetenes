@@ -7,12 +7,15 @@ import PostCard from "../../components/PostCard.astro";
 import Base from "../../layouts/Content.astro";
 import { getReadingTime } from "../../utils/reading-time";
 import { getCommentCount } from "emdash";
+import { byReadingOrder } from "../../utils/reading-order";
 
 // Sort in the database rather than in JS — lets the DB use its index on
 // published_at and avoids a full-table scan on the client.
-const { entries: posts, cacheHint } = await localizedPosts(locale, {
+const { entries: datedPosts, cacheHint } = await localizedPosts(locale, {
 	orderBy: { published_at: "desc" },
 });
+// Liste okuma sirasinda: yeni baslayan biri yukaridan asagi okuyabilsin.
+const posts = byReadingOrder(datedPosts);
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
 const commentCounts = new Map(
@@ -26,6 +29,7 @@ const commentCounts = new Map(
     <header class="archive-header">
       <h1>{t("Yazılar")}</h1>
       <p>{posts.length} yazı · ışık, kompozisyon, sokak ve ekipman üzerine notlar</p>
+      <p class="archive-order-note">Okuma sırasına göre dizili: fotoğrafa yeni başlıyorsan yukarıdan aşağı ilerle.</p>
     </header>
     <div class="posts-toolbar">
       <div class="view-switcher" role="group" aria-label={t("Yazı görünümü")}>
@@ -76,6 +80,7 @@ const commentCounts = new Map(
 
 <style>
   .posts-page :global(.card-read > span) { display: none; }
+  .archive-order-note { margin-top: 0.5rem; font-size: 0.875rem; color: var(--color-muted); }
   .posts-toolbar {
     display: flex;
     justify-content: flex-end;

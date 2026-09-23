@@ -3,25 +3,36 @@
 //   node scripts/yazilar.mjs json <cikti-dizini>   yazi basina CLI'ya uygun JSON
 //   node scripts/yazilar.mjs seed                  seed/seed.json'daki yazilari degistirir
 // Frontmatter: title, slug, excerpt, category, tags: [a, b]
-import { readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
+// Kapak: public/blog/<slug>/cover.webp varsa featured_image olur.
+// Govde gorseli: ![alt](/blog/<slug>/x.webp "altyazi")
+import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { markdownToPortableText } from "emdash/client";
 
-// Yayin sirasi, en yeniden eskiye (listede ustte gorunecek olan once).
+// Okuma sirasi: yeni baslayan biri icin en mantikli ilk yazi en ustte. /posts
+// bu siraya gore listelenir (sira alani); seed yayin tarihini de buna gore
+// damgalar (ilk yazi en yeni).
 const ORDER = [
-  "sikici-fotograftan-derinlikli-kareye",
-  "iso-gurultu-isik-ve-sinyal",
-  "turist-gibi-cekmeyi-birakmak",
-  "renk-teorisi-ve-doygunluk",
-  "fotografciligin-dort-evresi",
-  "keskin-fotograf-enstantane-odak-titresim",
-  "sokakta-35mm-yaklasmak-beklemek",
-  "raw-duzenleme-is-akisi",
+  "fotografciliga-baslangic-yol-haritasi",
+  "pozlama-ucgeni-diyafram-enstantane-iso",
+  "ilk-kamera-ve-objektif-secimi",
+  "yeni-baslayanlarin-sik-yaptigi-hatalar",
   "olcum-histogram-ve-manuel-mod-efsanesi",
+  "keskin-fotograf-enstantane-odak-titresim",
+  "isigi-okumak-yon-kalite-saat",
+  "sikici-fotograftan-derinlikli-kareye",
+  "odak-uzakligi-ve-perspektif",
+  "raw-jpeg-ve-lightroom",
+  "raw-duzenleme-is-akisi",
+  "renk-teorisi-ve-doygunluk",
+  "iso-gurultu-isik-ve-sinyal",
+  "sokakta-35mm-yaklasmak-beklemek",
+  "turist-gibi-cekmeyi-birakmak",
   "gece-hareket-ve-filtreler",
+  "fotografciligin-dort-evresi",
 ];
-const LABELS = { gezi: "Gezi", pozlama: "Pozlama", duzenleme: "Düzenleme", keskinlik: "Keskinlik", renk: "Renk", gelisim: "Gelişim" };
+const LABELS = { baslangic: "Başlangıç", gezi: "Gezi", pozlama: "Pozlama", duzenleme: "Düzenleme", keskinlik: "Keskinlik", renk: "Renk", gelisim: "Gelişim" };
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIR = path.join(ROOT, "content/yazilar");
@@ -49,7 +60,18 @@ export function loadPosts() {
     .map((file) => {
       const { fm, body } = parse(readFileSync(path.join(DIR, file), "utf8"));
       for (const k of ["title", "slug", "excerpt", "category"]) if (!fm[k]) throw new Error(`${file}: ${k} eksik`);
-      return { file, ...fm, tags: fm.tags ?? [], content: markdownToPortableText(body) };
+      const content = markdownToPortableText(body).map((block) => {
+        // markdownToPortableText gorsel basligini URL'e katiyor: altyaziya tasi.
+        const m = block._type === "image" && block.asset?.url?.match(/^(\S+)\s+"(.*)"$/);
+        return m ? { ...block, asset: { ...block.asset, url: m[1] }, caption: m[2] } : block;
+      });
+      const cover = `/blog/${fm.slug}/cover.webp`;
+      const sira = ORDER.indexOf(fm.slug) + 1;
+      return {
+        file, ...fm, tags: fm.tags ?? [], content,
+        featured_image: existsSync(path.join(ROOT, "public", cover)) ? cover : undefined,
+        sira: sira || undefined,
+      };
     });
 }
 
@@ -61,7 +83,7 @@ const posts = loadPosts();
 if (cmd === "json") {
   mkdirSync(out, { recursive: true });
   for (const p of posts) {
-    writeFileSync(path.join(out, p.slug + ".json"), JSON.stringify({ title: p.title, excerpt: p.excerpt, content: p.content }, null, 2));
+    writeFileSync(path.join(out, p.slug + ".json"), JSON.stringify({ title: p.title, excerpt: p.excerpt, content: p.content, featured_image: p.featured_image, sira: p.sira }, null, 2));
   }
   console.log(posts.length + " yazi ->", out);
 } else if (cmd === "seed") {
@@ -74,7 +96,7 @@ if (cmd === "json") {
     id: p.slug,
     slug: p.slug,
     status: "published",
-    data: { title: p.title, excerpt: p.excerpt, content: p.content },
+    data: { title: p.title, excerpt: p.excerpt, content: p.content, featured_image: p.featured_image, sira: p.sira },
     taxonomies: { category: [p.category], tag: p.tags },
     bylines: [{ byline: "enes" }],
   }));
@@ -88,6 +110,6 @@ if (cmd === "json") {
   writeFileSync(file, JSON.stringify(seed, null, 2) + "\n");
   console.log("seed: " + posts.length + " yazi");
 } else {
-  for (const p of posts) console.log(p.slug, "|", p.category, "|", p.tags.join(","), "|", p.content.length, "blok");
+  for (const p of posts) console.log(p.sira ?? "-", p.slug, "|", p.featured_image ? "kapak" : "-", "|", p.category, "|", p.tags.join(","), "|", p.content.length, "blok");
 }
 }

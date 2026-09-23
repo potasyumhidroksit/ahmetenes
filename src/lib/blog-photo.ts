@@ -14,7 +14,8 @@ export async function galleryPhotoFor(image: unknown): Promise<GalleryPhoto | un
   return photos.find((p) => p.id === id);
 }
 
-export const galleryHref = (p: GalleryPhoto) => "/galeri#kare-" + p.id;
+/** Karenin kendi sayfasi (EXIF, hikaye, onceki/sonraki). */
+export const galleryHref = (p: GalleryPhoto) => "/galeri/" + p.id;
 
 /** Ters esleme: galeri karesi -> gectigi yazilarin slug'lari (kapak once). */
 export function postSlugsByPhoto(): Map<string, string[]> {

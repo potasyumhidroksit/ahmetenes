@@ -1,0 +1,152 @@
+---
+// Tek kare sayfasi: paylasilinca kareye ozel onizleme (og:image), Google
+// Gorseller icin kendi URL'si ve ImageObject verisi. Galerideki lightbox
+// adres cubugunu bu adrese cevirir; eski /galeri#kare-<id> baglantilari da calisir.
+import Content from "../../layouts/Content.astro";
+import { postSlugsByPhoto } from "../../lib/blog-photo";
+import { exifLine, galleryCategories, loadGallery } from "../../lib/gallery";
+import { notFound } from "../../utils/http";
+import { localizedPosts } from "../../utils/localized-posts";
+import { metaDescription } from "../../utils/meta-description";
+
+export const prerender = false;
+
+const photos = await loadGallery();
+const index = photos.findIndex((p) => p.id === Astro.params.id);
+if (index === -1) return notFound(Astro);
+const photo = photos[index];
+const prev = index > 0 ? photos[index - 1] : null;
+const next = index < photos.length - 1 ? photos[index + 1] : null;
+
+const { entries: posts } = await localizedPosts("tr", { orderBy: { published_at: "desc" } });
+const titleBySlug = new Map(posts.map((post) => [post.id, post.data.title]));
+const postSlug = (postSlugsByPhoto().get(photo.id) ?? []).find((slug) => titleBySlug.has(slug));
+
+const origin = Astro.url.origin;
+const pageUrl = origin + "/galeri/" + photo.id;
+const exif = exifLine(photo);
+const meta = [photo.location, photo.year].filter(Boolean).join(" · ");
+const category = galleryCategories.find((cat) => cat.id === photo.category)?.label;
+const description = metaDescription(
+	photo.story || [photo.title, exif, photo.location].filter(Boolean).join(" · ") + " — Ahmet Enes'in galerisinden bir kare.",
+);
+const srcset = photo.srcSet.filter((s) => s.w >= 480).map((s) => s.src + " " + s.w + "w").join(", ");
+// contentUrl 1600px genislige olceklenmis onizleme; boyutlar ona gore.
+const shown = photo.width && photo.height
+	? { width: Math.min(1600, photo.width), height: Math.round((Math.min(1600, photo.width) * photo.height) / photo.width) }
+	: null;
+
+const creator = { "@type": "Person", "@id": origin + "/#person", name: "Ahmet Enes", url: origin };
+const exifData = (
+	[
+		["Gövde", photo.exif?.camera],
+		["Objektif", photo.exif?.lens],
+		["Odak uzaklığı", photo.exif?.focal],
+		["Diyafram", photo.exif?.aperture ? "f/" + photo.exif.aperture : undefined],
+		["Enstantane", photo.exif?.shutter],
+		["ISO", photo.exif?.iso],
+	] as const
+)
+	.filter(([, value]) => value)
+	.map(([name, value]) => ({ "@type": "PropertyValue", name, value }));
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@graph": [
+		{
+			"@type": "ImageObject",
+			"@id": pageUrl + "#kare",
+			url: pageUrl,
+			contentUrl: origin + photo.fullSrc,
+			thumbnailUrl: origin + photo.src,
+			name: photo.title,
+			...(photo.story ? { description: photo.story } : {}),
+			...(shown ?? {}),
+			...(photo.location ? { contentLocation: { "@type": "Place", name: photo.location } } : {}),
+			...(exifData.length ? { exifData } : {}),
+			creator,
+			creditText: "Ahmet Enes",
+			copyrightHolder: creator,
+			copyrightNotice: "© " + (photo.year || new Date().getFullYear()) + " Ahmet Enes",
+		},
+		{
+			"@type": "BreadcrumbList",
+			itemListElement: [
+				{ "@type": "ListItem", position: 1, name: "Galeri", item: origin + "/galeri" },
+				{ "@type": "ListItem", position: 2, name: photo.title, item: pageUrl },
+			],
+		},
+	],
+};
+---
+<Content
+	title={photo.title}
+	description={description}
+	image={origin + "/api/immich/preview/" + photo.id + "?fmt=og"}
+	imageAlt={photo.alt ?? photo.title}
+	jsonLd={jsonLd}
+>
+	<article class="photo-page">
+		<a class="photo-back" href="/galeri">← Galeri</a>
+
+		<figure class="photo-figure">
+			<img
+				src={photo.fullSrc}
+				srcset={srcset}
+				sizes="(max-width: 1100px) calc(100vw - 48px), 1040px"
+				alt={photo.alt ?? photo.title}
+				fetchpriority="high"
+				decoding="async"
+				style={photo.color ? `background-color:${photo.color}` : undefined}
+				{...(photo.width && photo.height ? { width: photo.width, height: photo.height } : {})}
+			/>
+		</figure>
+
+		<header class="photo-header">
+			<h1>{photo.title}</h1>
+			{(exif || meta) && (
+				<p class="photo-meta">
+					{exif && <span>{exif}</span>}
+					{meta && <span>{meta}</span>}
+					{category && <span>{category}</span>}
+				</p>
+			)}
+		</header>
+
+		{photo.story && <p class="photo-story">{photo.story}</p>}
+		{postSlug && <a class="photo-post" href={"/" + postSlug}>Yazıda: {titleBySlug.get(postSlug)} →</a>}
+
+		{(prev || next) && (
+			<nav class="photo-nav" aria-label="Diğer kareler">
+				{prev ? <a rel="prev" href={"/galeri/" + prev.id}><span>← Önceki</span>{prev.title}</a> : <span />}
+				{next ? <a rel="next" href={"/galeri/" + next.id}><span>Sonraki →</span>{next.title}</a> : <span />}
+			</nav>
+		)}
+	</article>
+</Content>
+
+<style>
+	.photo-page { max-width: 1040px; margin: 0 auto; }
+	.photo-back {
+		display: inline-block; margin-bottom: 1.25rem; font-size: 0.85rem;
+		color: var(--color-muted); text-decoration: none;
+	}
+	.photo-back:hover { color: var(--color-text); }
+	.photo-figure { margin: 0 0 1.5rem; }
+	/* Oran korunur: dikey kare 85vh'ye sigar, kenarda renkli bosluk kalmaz. */
+	.photo-figure img {
+		display: block; width: auto; height: auto; max-width: 100%; max-height: 85vh;
+		margin: 0 auto; border-radius: var(--radius-lg);
+	}
+	.photo-header h1 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 500; letter-spacing: -0.03em; margin: 0 0 0.5rem; }
+	.photo-meta { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0; font-size: 0.85rem; color: var(--color-muted); }
+	.photo-story { max-width: 680px; margin: 1.25rem 0 0; font-size: 1.05rem; line-height: 1.8; color: var(--color-text); }
+	.photo-post { display: inline-block; margin-top: 1rem; color: var(--color-text); text-decoration: underline; text-underline-offset: 4px; }
+	.photo-nav {
+		display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+		margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border-subtle);
+	}
+	.photo-nav a { display: grid; align-content: start; gap: 0.2rem; color: var(--color-text); text-decoration: none; }
+	.photo-nav a[rel="next"] { text-align: right; }
+	.photo-nav a span { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-muted); }
+	.photo-nav a:hover { text-decoration: underline; text-underline-offset: 4px; }
+</style>

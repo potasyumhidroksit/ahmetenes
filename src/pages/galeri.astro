@@ -30,7 +30,7 @@ const jsonLd = {
     "@type": "ImageObject",
     contentUrl: origin + p.fullSrc,
     thumbnailUrl: origin + p.src,
-    url: origin + "/galeri#kare-" + p.id,
+    url: origin + "/galeri/" + p.id,
     name: p.title,
     ...(p.story ? { description: p.story } : {}),
     // contentUrl 1600px genislige olceklenmis onizleme; boyutlar ona gore.
@@ -156,8 +156,9 @@ const fullSrcset = (p: (typeof photos)[number]) =>
 
     const fill = (item: HTMLButtonElement) => {
       if (!img || !title || !meta || !story) return;
-      // Paylasilabilir baglanti: /galeri#kare-<id> bu kareyi dogrudan acar.
-      history.replaceState(null, "", "#" + item.id);
+      // Adres cubugu karenin kendi sayfasi (/galeri/<id>): kopyalanan baglanti
+      // o karenin onizlemesiyle paylasilir. Eski #kare-<id> baglantilari da acar.
+      history.replaceState(null, "", "/galeri/" + item.id.replace(/^kare-/, ""));
       img.srcset = item.dataset.fullSrcset || "";
       img.src = item.dataset.full || "";
       img.alt = item.dataset.title || "";
@@ -194,7 +195,7 @@ const fullSrcset = (p: (typeof photos)[number]) =>
     });
 
     dialog.addEventListener("close", () => {
-      history.replaceState(null, "", location.pathname + location.search);
+      history.replaceState(null, "", "/galeri" + location.search);
       if (lastFocus) lastFocus.focus();
     });
 

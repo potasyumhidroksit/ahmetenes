@@ -31,6 +31,8 @@ export const GET: APIRoute = async ({ url }) => {
     const photos = await loadGallery();
     const galeri = entries.find((entry) => entry.loc === origin + "/galeri");
     if (galeri) galeri.images = photos.slice(0, 1000).map((p) => new URL(p.fullSrc, origin + "/").href);
+    // Her karenin kendi sayfasi (/galeri/<id>) ve gorseli.
+    for (const p of photos) entries.push({ loc: origin + "/galeri/" + p.id, images: [new URL(p.fullSrc, origin + "/").href] });
   } catch {
     // galeri alinamazsa gorselsiz devam
   }

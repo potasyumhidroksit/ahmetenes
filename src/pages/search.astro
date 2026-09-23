@@ -18,12 +18,20 @@ const query = Astro.url.searchParams.get("q")?.trim() || "";
 // post bodies in JS quickly become unusable past a few hundred posts.
 type SearchResult = { id: string; slug?: string | null; title?: string | null; snippet?: string | null };
 let results: SearchResult[] = [];
+const exactTerms = query.slice(0, 100).toLocaleLowerCase("tr-TR").split(/\s+/).filter(Boolean);
+/** Sorgu kelimelerinden katlanmadan (Turkce harfleriyle) gecen her biri icin puan. */
+const exactBonus = (text: string, weight: number) => {
+	const lower = text.toLocaleLowerCase("tr-TR");
+	return exactTerms.filter((term) => lower.includes(term)).length * weight;
+};
 if (query && locale === "tr") {
 	// Katlamali (ışık = isik), tum kelimeleri iceren, basligi one alan arama.
 	// Yalnizca okunur metin aranir; eskiden _type/_key/gorsel URL'leri de
 	// aranip "span", "webp" gibi sorgular tum yazilari donduruyordu.
 	const terms = searchTerms(query);
 	const { entries } = await localizedPosts("tr", { limit: 100, orderBy: { published_at: "desc" } });
+	// Katlama "isik"i "ışık"la eslestirir ama "gece"yi "geçen"le de; sorgunun
+	// birebir (katlanmamis) gectigi sonuclar one alinir.
 	results = entries
 		.map((entry) => {
 			const title = entry.data.title ?? "";
@@ -31,7 +39,9 @@ if (query && locale === "tr") {
 			const body = plainText(entry.data.content);
 			const [ft, fe, fb] = [fold(title), fold(excerpt), fold(body)];
 			if (!terms.every((term) => ft.includes(term) || fe.includes(term) || fb.includes(term))) return null;
-			const score = terms.reduce((sum, term) => sum + (ft.includes(term) ? 10 : 0) + (fe.includes(term) ? 3 : 0) + (fb.includes(term) ? 1 : 0), 0);
+			const score =
+				terms.reduce((sum, term) => sum + (ft.includes(term) ? 10 : 0) + (fe.includes(term) ? 3 : 0) + (fb.includes(term) ? 1 : 0), 0) +
+				exactBonus(title, 20) + exactBonus(excerpt, 6) + exactBonus(body, 2);
 			const inExcerpt = terms.some((term) => fe.includes(term));
 			const snippetText = inExcerpt || !excerpt ? excerpt || excerptAround(body, terms) || "" : excerptAround(body, terms) || excerpt;
 			return { score, result: { id: entry.data.id, slug: entry.id, title, snippet: highlight(snippetText, terms) } };
@@ -59,7 +69,7 @@ if (query) {
 						.join(" "),
 				);
 				if (terms.length === 0 || !terms.every((term) => title.includes(term) || rest.includes(term))) return null;
-				return { photo, score: terms.reduce((sum, term) => sum + (title.includes(term) ? 10 : 1), 0) };
+				return { photo, score: terms.reduce((sum, term) => sum + (title.includes(term) ? 10 : 1), 0) + exactBonus(photo.title, 20) + exactBonus(photo.story ?? "", 2) };
 			})
 			.filter((hit): hit is NonNullable<typeof hit> => hit !== null)
 			.sort((a, b) => b.score - a.score)

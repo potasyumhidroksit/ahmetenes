@@ -5,6 +5,7 @@ import { search } from "emdash";
 import Base from "../layouts/Content.astro";
 import { localizedPosts } from "../utils/localized-posts";
 import { excerptAround, fold, highlight, plainText, searchTerms } from "../lib/search-text";
+import { galleryCategories, loadGallery, type GalleryPhoto } from "../lib/gallery";
 
 import { localeFromUrl, localePath, translate } from "../utils/i18n";
 const locale = localeFromUrl(Astro.url);
@@ -42,11 +43,39 @@ if (query && locale === "tr") {
 } else if (query) {
 	results = (await search(query, { collections: ["posts"], limit: 30, locale: "en" })).items;
 }
+
+// Galeri kareleri: baslik, hikaye, konum, etiket, kategori ve ekipman.
+let photoHits: GalleryPhoto[] = [];
+if (query) {
+	const terms = searchTerms(query);
+	const categoryLabel = new Map(galleryCategories.map((cat) => [cat.id, cat.label]));
+	try {
+		photoHits = (await loadGallery())
+			.map((photo) => {
+				const title = fold(photo.title);
+				const rest = fold(
+					[photo.alt, photo.story, photo.location, photo.year, ...(photo.tags ?? []), categoryLabel.get(photo.category), photo.exif?.camera, photo.exif?.lens]
+						.filter(Boolean)
+						.join(" "),
+				);
+				if (terms.length === 0 || !terms.every((term) => title.includes(term) || rest.includes(term))) return null;
+				return { photo, score: terms.reduce((sum, term) => sum + (title.includes(term) ? 10 : 1), 0) };
+			})
+			.filter((hit): hit is NonNullable<typeof hit> => hit !== null)
+			.sort((a, b) => b.score - a.score)
+			.slice(0, 12)
+			.map((hit) => hit.photo);
+	} catch {
+		// galeri alinamazsa yalnizca yazilar
+	}
+}
+const thumb = (photo: GalleryPhoto) => (photo.srcSet.find((s) => s.w === 480) ?? photo.srcSet[0])?.src ?? photo.src;
+const summary = [results.length && `${results.length} yazı`, photoHits.length && `${photoHits.length} kare`].filter(Boolean).join(", ");
 ---
 
 <Base
 	title={query ? `${t("Ara")}: ${query}` : t("Ara")}
-	description={t("Yazılar arasında arayın")}
+	description={t("Yazılarda ve galeride arayın")}
 	robots="noindex, follow"
 >
 	<section class="search-page">
@@ -56,9 +85,9 @@ if (query && locale === "tr") {
 			<input
 				type="search"
 				name="q"
-                aria-label={t("Yazılarda ara")}
+                aria-label={t("Yazılarda ve galeride ara")}
 				value={query}
-				placeholder={t("Yazılarda ara...")}
+				placeholder={t("Yazılarda ve galeride ara...")}
 				class="search-input"
 			/>
 			<button type="submit" class="search-button">{t("Ara")}</button>
@@ -67,11 +96,33 @@ if (query && locale === "tr") {
 		{
 			query && (
 				<p class="search-summary">
-					{results.length === 0
+					{!summary
 						? (locale === "tr" ? `“${query}” için sonuç bulunamadı.` : `No results for “${query}”.`)
-						: (locale === "tr" ? `“${query}” için ${results.length} sonuç` : `${results.length} results for “${query}”`)}
+						: (locale === "tr" ? `“${query}” için ${summary}` : `${results.length} results for “${query}”`)}
 				</p>
 			)
+		}
+
+		{
+			photoHits.length > 0 && (
+				<section class="search-photos" aria-labelledby="search-photos-title">
+					<h2 id="search-photos-title" class="search-section-title">Kareler</h2>
+					<ul>
+						{photoHits.map((photo) => (
+							<li>
+								<a href={"/galeri/" + photo.id}>
+									<img src={thumb(photo)} alt="" width="160" height="160" loading="lazy" decoding="async" style={photo.color ? `background-color:${photo.color}` : undefined} />
+									<span>{photo.title}</span>
+								</a>
+							</li>
+						))}
+					</ul>
+				</section>
+			)
+		}
+
+		{
+			results.length > 0 && photoHits.length > 0 && <h2 class="search-section-title">Yazılar</h2>
 		}
 
 		{
@@ -96,7 +147,7 @@ if (query && locale === "tr") {
 			)
 		}
 
-		{!query && <p class="search-hint">{t("Bir kelime veya konu yazarak notlar arasında gezinin.")}</p>}
+		{!query && <p class="search-hint">{t("Bir kelime, yer ya da konu yazarak yazılar ve kareler arasında gezinin.")}</p>}
 	</section>
 </Base>
 
@@ -106,6 +157,19 @@ if (query && locale === "tr") {
 		margin: 0 auto;
 		padding: var(--spacing-8) var(--spacing-6) var(--spacing-16);
 	}
+
+	.search-section-title {
+		font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase;
+		color: var(--color-muted); font-weight: 500; margin: 0 0 1rem;
+	}
+	.search-photos { margin-bottom: 2.5rem; }
+	.search-photos ul {
+		list-style: none; margin: 0; padding: 0;
+		display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem;
+	}
+	.search-photos a { display: grid; gap: 0.45rem; color: var(--color-text); text-decoration: none; font-size: 0.85rem; }
+	.search-photos img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); display: block; }
+	.search-photos a:hover span { text-decoration: underline; text-underline-offset: 3px; }
 
 	.search-title {
 		font-size: var(--font-size-2xl);
@@ -172,13 +236,8 @@ if (query && locale === "tr") {
 		border-bottom: 1px solid var(--color-border-subtle);
 	}
 
-	.search-result:first-child {
-		padding-top: 0;
-	}
-
-	.search-result:last-child {
-		border-bottom: none;
-	}
+	/* Tema sonuclari kart olarak cizer (theme.css); liste ayraci kurallari
+	   (ilk kartta ust bosluk 0, son kartta alt kenarlik yok) kartlari bozuyordu. */
 
 	.result-link {
 		display: block;

@@ -46,7 +46,8 @@ export function extractText(blocks: PortableTextBlock[] | undefined): string {
 }
 
 /**
- * Display half the standard reading estimate, rounded up to a whole minute.
+ * Standart okuma tahmini (dakikada ~200 kelime), tam dakikaya yuvarlanir.
+ * Tema tahmini ikiye boluyordu: 1.200 kelimelik yaziya "3 dk" diyordu.
  */
 export function getReadingTime(content: PortableTextBlock[] | undefined): number {
 	const text = extractText(content);
@@ -55,7 +56,7 @@ export function getReadingTime(content: PortableTextBlock[] | undefined): number
 	const minutes = Math.ceil(
 		wordCount / WORDS_PER_MINUTE + cjkCharacterCount / CJK_CHARACTERS_PER_MINUTE,
 	);
-	return Math.max(1, Math.ceil(minutes / 2));
+	return Math.max(1, minutes);
 }
 
 /**

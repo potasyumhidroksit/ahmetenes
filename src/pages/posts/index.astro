@@ -235,6 +235,9 @@ const commentCounts = new Map(
 
   :global(.posts-page .post-card--cover .card-placeholder span) { display: none; }
 
+  /* Kapaksiz yazi kartlari: sabit yukseklik yok, metin kadar. */
+  .posts-page :global(.post-card--text .card-link) { min-height: 0 !important; }
+
   :global(html[data-public-theme] .content-panel .posts-page .post-card--cover .card-body) {
     position: relative;
     z-index: 2;

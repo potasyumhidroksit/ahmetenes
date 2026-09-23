@@ -47,16 +47,15 @@ const formattedDate = date
 	: null;
 ---
 
-<article class:list={["post-card", { "post-card--cover": coverBackground }]}>
+<article class:list={["post-card", { "post-card--cover": coverBackground, "post-card--text": !featuredImage }]}>
 	<a href={localePath(href, locale)} class="card-link">
 		{
 			featuredImage ? (
 				<div class="card-image" aria-hidden={coverBackground ? "true" : undefined}>
 					<ResponsiveImage image={featuredImage} sizes={coverBackground ? "(max-width: 736px) calc(100vw - 78px), min(1160px, calc(100vw - 130px))" : "(max-width: 736px) calc(100vw - 100px), 420px"} priority={priority} />
 				</div>
-			) : (
-				<div class="card-placeholder" aria-hidden="true"><span>{t("Notlar & düşünceler")}</span><span>↗</span></div>
-			)
+			) : null
+			/* Kapaksiz yazi: bos gorsel kutusu yerine yalnizca metin (kompakt kart). */
 		}
 		<div class="card-body">
 			{metaAfterTitle && <h2 class="card-title">{title}</h2>}

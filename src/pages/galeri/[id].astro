@@ -2,6 +2,7 @@
 // Tek kare sayfasi: paylasilinca kareye ozel onizleme (og:image), Google
 // Gorseller icin kendi URL'si ve ImageObject verisi. Galerideki lightbox
 // adres cubugunu bu adrese cevirir; eski /galeri#kare-<id> baglantilari da calisir.
+import PostShare from "../../components/PostShare.astro";
 import Content from "../../layouts/Content.astro";
 import { postSlugsByPhoto } from "../../lib/blog-photo";
 import { exifLine, galleryCategories, loadGallery } from "../../lib/gallery";
@@ -114,6 +115,7 @@ const jsonLd = {
 
 		{photo.story && <p class="photo-story">{photo.story}</p>}
 		{postSlug && <a class="photo-post" href={"/" + postSlug}>Yazıda: {titleBySlug.get(postSlug)} →</a>}
+		<PostShare title={photo.title} url={pageUrl} locale="tr" label="Kareyi paylaş" />
 
 		{(prev || next) && (
 			<nav class="photo-nav" aria-label="Diğer kareler">

@@ -1,8 +1,14 @@
 ---
 import LinkIcon from "./personabio/LinkIcon.astro";
 
-interface Props { title: string; url: string; locale: string }
-const { title, url, locale } = Astro.props;
+interface Props {
+  title: string;
+  url: string;
+  locale: string;
+  /** Ekran okuyucu etiketi (varsayilan: "Yazıyı paylaş") */
+  label?: string;
+}
+const { title, url, locale, label } = Astro.props;
 const shareUrl = new URL(url);
 shareUrl.search = "";
 shareUrl.hash = "";
@@ -18,7 +24,7 @@ const platforms = [
 ];
 ---
 
-<nav class="post-share" aria-label={locale === "tr" ? "Yazıyı paylaş" : "Share this post"}>
+<nav class="post-share" aria-label={label ?? (locale === "tr" ? "Yazıyı paylaş" : "Share this post")}>
   <span class="share-label">{locale === "tr" ? "Paylaş:" : "Share:"}</span>
   <div class="share-links">
     {platforms.map(({ name, href }) => (
@@ -26,16 +32,37 @@ const platforms = [
         <LinkIcon url={href} />
       </a>
     ))}
+    <button type="button" class="share-copy" data-share-copy data-url={canonical} data-title={title} aria-label="Bağlantıyı kopyala" title="Bağlantıyı kopyala">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg>
+    </button>
   </div>
+  <span class="share-status" data-share-status role="status" aria-live="polite"></span>
 </nav>
+
+<script>
+  import { flashLabel, shareOrCopy } from "../scripts/share";
+  document.querySelectorAll<HTMLButtonElement>("[data-share-copy]").forEach((button) => {
+    const status = button.closest(".post-share")?.querySelector<HTMLElement>("[data-share-status]");
+    button.addEventListener("click", async () => {
+      const result = await shareOrCopy(button.dataset.url || location.href, button.dataset.title || document.title);
+      if (status && (result === "copied" || result === "failed")) {
+        flashLabel(status, result === "copied" ? "Bağlantı kopyalandı" : "Kopyalanamadı");
+      }
+    });
+  });
+</script>
 
 <style>
   .post-share { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem .75rem; margin-block: 2rem; color: var(--color-text-secondary); }
   .share-label { font-size: .9rem; font-weight: 500; }
   .share-links { display: flex; flex-wrap: wrap; gap: .125rem; }
   .share-links a { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; color: inherit; transition: color .2s, background-color .2s, transform .2s; }
-  .share-links a :global(svg) { width: 20px; height: 20px; }
+  .share-links a :global(svg), .share-copy svg { width: 20px; height: 20px; }
+  .share-copy { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; transition: color .2s, background-color .2s, transform .2s; }
+  .share-copy:hover { color: var(--color-text); background: var(--color-bg-subtle); transform: translateY(-2px); }
+  .share-copy:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2px; }
+  .share-status { font-size: .85rem; color: var(--color-muted); min-height: 1em; }
   .share-links a:hover { color: var(--color-text); background: var(--color-bg-subtle); transform: translateY(-2px); }
   .share-links a:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2px; }
-  @media (prefers-reduced-motion: reduce) { .share-links a { transition: none; } .share-links a:hover { transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .share-links a, .share-copy { transition: none; } .share-links a:hover, .share-copy:hover { transform: none; } }
 </style>

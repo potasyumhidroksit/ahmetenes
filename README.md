@@ -100,7 +100,10 @@ Konteyner açılışta `docker-entrypoint.sh` ile seed'i idempotent uygular, son
 ## Operasyon
 
 - **Sağlık kontrolü** (`ahmetenes-health.timer`, 5 dk; `scripts/healthcheck.sh`): konteyner, ana sayfa,
-  hash'li CSS'ler (stilsiz sayfa), galeride en az bir kare, RSS XML, sitemap, Sinedexter/Immich/Pulse.
+  hash'li CSS'ler (stilsiz sayfa), önbelleğe alınmayan `/search` ile uçtan uca Cloudflare → tünel → origin,
+  galeride en az bir kare, RSS XML, sitemap, Sinedexter/Immich/Pulse.
+  Not: Cloudflare analitiğindeki `requestSource: earlyHintsCache` 504'leri zararsızdır (Early Hints iç
+  sorgusu); gerçek hatalar için `requestSource: eyeball` süzülür.
   ntfy (`ahmetenes-alerts`) yalnızca durum değişince + süren arızada saatte bir; düzelince "düzeldi".
   Sertifika uyarısı günde bir, tek mesaj. Günlük: `/var/log/ahmetenes-health.log` (logrotate 14 gün).
 - **Yedek** (`ahmetenes-backup.timer`, 04:00; `scripts/backup.sh`): SQLite `.backup` (tutarlı anlık

@@ -44,6 +44,11 @@ if [ "$deploying" = 0 ]; then
       [ "$code" = "200" ] || fail "css($code $css)"
     done
   fi
+  # Uçtan uca canlı istek (Cloudflare -> tünel -> origin): ana sayfa ve galeri
+  # edge önbelleğinden (SWR, 1 güne kadar) gelebildiği için cloudflared/origin
+  # çökse de "tamam" denirdi. /search hiç önbelleğe alınmaz (DYNAMIC).
+  live=$(http_code "$SITE/search")
+  [ "$live" = "200" ] || fail "canli-istek/tunel($live)"
   # Galeri: Immich anahtarı/erişimi bozulursa kareler kaybolur.
   galeri=$(curl -s --max-time 20 "$SITE/galeri" 2>/dev/null | grep -c 'data-gallery-item' || true)
   [ "${galeri:-0}" -ge 1 ] || fail "galeri(0 kare)"

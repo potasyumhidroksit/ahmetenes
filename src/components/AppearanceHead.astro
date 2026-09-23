@@ -5,6 +5,8 @@
     const apply = (value) => {
       const preference = valid(value);
       document.documentElement.dataset.appearance = preference;
+      // Mobil tarayici adres cubugu secilen temanin zeminiyle ayni olsun.
+      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", preference === "light" ? "#f4f4f3" : "#11151a");
       document.querySelectorAll("[data-appearance-select]").forEach((select) => {
         select.value = preference;
       });

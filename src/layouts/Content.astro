@@ -137,7 +137,7 @@ const pageCtx = createPublicPageContext({
         <nav id="content-navigation" class="content-nav" aria-label={t("Ana menü")}>
           <button class="content-drawer-close" type="button" aria-label={t("Menüyü kapat")} title={t("Menüyü kapat")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
           <ContentMenu items={menu?.items ?? []} />
-          <a class="content-search-link" href={localePath("/search", locale)} aria-current={Astro.url.pathname === localePath('/search', locale) ? 'page' : undefined} aria-label={t("Yazılarda ara")} title={t("Ara")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="10.75" cy="10.75" r="6.75"/><path d="m16 16 4.25 4.25"/></svg></a>
+          <a class="content-search-link" href={localePath("/search", locale)} aria-current={Astro.url.pathname === localePath('/search', locale) ? 'page' : undefined} aria-label={t("Sitede ara")} title={t("Ara")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="10.75" cy="10.75" r="6.75"/><path d="m16 16 4.25 4.25"/></svg></a>
           {socialLinks.length > 0 && <div class="content-drawer-social" aria-label={t("Profil bağlantıları")}><ul>{socialLinks.map((link) => <li><a href={link.href} aria-label={link.label} title={link.label} target={link.target} rel={link.target === "_blank" ? "noopener noreferrer" : undefined}><LinkIcon url={link.href} /></a></li>)}</ul></div>}
         </nav>
       </header>

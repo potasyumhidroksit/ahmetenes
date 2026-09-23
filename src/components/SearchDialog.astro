@@ -3,11 +3,11 @@ import { localeFromUrl, localePath, translate } from "../utils/i18n";
 const locale = localeFromUrl(Astro.url);
 const t = (text: string) => translate(locale, text);
 ---
-<dialog id="site-search-dialog" class="site-search-dialog" aria-label={t("Yazılarda ara")}>
+<dialog id="site-search-dialog" class="site-search-dialog" aria-label={t("Sitede ara")}>
   <form method="get" action={localePath("/search", locale)} class="search-dialog-form">
     <label class="search-dialog-field">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="10.75" cy="10.75" r="6.75"/><path d="m16 16 4.25 4.25"/></svg>
-      <input type="search" name="q" aria-label={t("Yazılarda ara")} placeholder={t("Yazılarda ara...")} required autofocus />
+      <input type="search" name="q" aria-label={t("Sitede ara")} placeholder={t("Yazılarda ve galeride ara...")} required autofocus />
     </label>
     <button type="submit">{t("Ara")}</button>
   </form>

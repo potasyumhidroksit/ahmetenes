@@ -31,7 +31,10 @@ Panel: `http://localhost:4321/_emdash/admin`
 - `/` profil kartı; `/posts` + `/<slug>` yazılar (karelerin altında EXIF + "Galeride aç");
   `/hakkimda`, `/now` (panelden düzenlenen sayfalar)
 - `/galeri` — Immich "sitede" albümü: filtre çipleri (kare sayılı), sütun ızgara, lightbox
-  (EXIF, hikâye, kaydırma, "Yazıda: …"); `/galeri#kare-<id>` kareyi doğrudan açar
+  (EXIF, hikâye, kaydırma, "Yazıda: …"); açık karede adres `/galeri/<id>` olur, eski
+  `/galeri#kare-<id>` bağlantıları da kareyi açar
+- `/galeri/<id>` — tek kare sayfası: kareye özel paylaşım görseli, EXIF/konum/hikâye, önceki/sonraki,
+  ImageObject + BreadcrumbList; yazılardaki "Galeride aç" ve ekipman küçük resimleri buraya gider
 - `/ekipman` — gövde / objektif / filtre / ses / ışık / aksesuar; gövde ve objektiflerin
   yanında EXIF'e göre onlarla çekilmiş kareler
 - `/medya` — Pulse "şu an çalıyor / son dinlenen" + Sinedexter film/dizi/bölüm istatistikleri

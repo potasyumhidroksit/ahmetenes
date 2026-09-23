@@ -71,6 +71,13 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
   code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "http://127.0.0.1:${HOST_PORT}/" || true)
   if [ "$code" = "200" ]; then
     echo "OK: http://127.0.0.1:${HOST_PORT}/ (HTTP $code)"
+    # Galeri gorsel onbellegini arka planda isit: yeni genislikler ilk
+    # ziyaretcide Immich'ten cekilip yeniden boyutlandiriliyordu (yavas LCP).
+    ( for id in $(curl -s "http://127.0.0.1:${HOST_PORT}/galeri" | grep -oE 'id="kare-[0-9a-f-]{36}"' | sed 's/id="kare-//;s/"//' | sort -u); do
+        for q in w=240 w=480 w=640 w=800 w=1200 w=1600 fmt=og; do
+          curl -s -o /dev/null --max-time 30 "http://127.0.0.1:${HOST_PORT}/api/immich/preview/$id?$q"
+        done
+      done ) >/dev/null 2>&1 &
     # Cloudflare edge onbellegini temizle (yeni surum aninda gorunsun). Zone
     # diger alt alan adlarini da barindirir (cdn., sis., ...); yalnizca bu
     # sitenin hostlarini temizle, olmazsa tum zone'a dus. Yaniti dogrula.

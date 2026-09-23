@@ -37,6 +37,25 @@ const page = await (await fetch(`${SITE}/${slug}`, { signal: AbortSignal.timeout
 const image = page.match(/<meta property="og:image" content="([^"]+)"/)?.[1] ?? "";
 console.log(`Yazı:  ${title}\nÖzet:  ${excerpt}\nURL:   ${SITE}/${slug}\nKapak: ${image || "(yok)"}\n`);
 
+// Yeni yazi hemen gorunsun: /posts ve ana sayfa edge'de 5 dk, yazi URL'si
+// daha once 404 aldiysa 60 sn onbellekte kalabilir. Ilgili URL'leri temizle.
+try {
+  const env = Object.fromEntries(
+    readFileSync("/root/.cloudflare/env", "utf8").split("\n").map((l) => l.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/)).filter(Boolean).map((m) => [m[1], m[2].replace(/^["']|["']$/g, "")]),
+  );
+  const files = ["/", "/posts", `/${slug}`, "/rss.xml", "/sitemap.xml", "/sitemap-posts.xml", "/sitemap-static.xml"].map((p) => SITE + p);
+  const res = await fetch("https://api.cloudflare.com/client/v4/zones/5079525e40cebf813550cbf2bd411b46/purge_cache", {
+    method: "POST",
+    headers: { "X-Auth-Email": env.CF_EMAIL, "X-Auth-Key": env.CF_GLOBAL_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ files }),
+    signal: AbortSignal.timeout(15000),
+  });
+  const data = await res.json();
+  console.log(data.success ? `Önbellek temizlendi (${files.length} URL).` : `UYARI: önbellek temizlenemedi ${JSON.stringify(data.errors)}`);
+} catch (error) {
+  console.log("UYARI: Cloudflare temizliği atlandı (" + error.message + ")");
+}
+
 execFileSync("node", [path.join(DIR, "indexnow.mjs"), `/${slug}`, "/posts"], { stdio: "inherit" });
 
 const file = process.env.NEWSLETTER_FILE || "/var/www/ahmetenes-data/newsletter.json";

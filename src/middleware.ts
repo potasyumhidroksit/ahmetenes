@@ -130,6 +130,13 @@ async function handleRequest(context: APIContext, next: () => Promise<Response>)
   // saklanmamali (edge cerezlere bakmaz: onbellekteki 404 yoneticiye de giderdi).
   if (url.pathname.startsWith("/istatistik") || (contentType.includes("text/html") && !url.pathname.startsWith("/_emdash") && !isAnonymous(context))) {
     response = withNoStore(response);
+  } else if (request.method === "GET" && response.status === 404 && contentType.includes("text/html")) {
+    // 404'ler edge'de en fazla 60 sn: yayindan once paylasilan bir yazi linki
+    // yayindan sonra dakikalarca 404 kalmasin (Cloudflare varsayilani daha uzun).
+    const headers = new Headers(response.headers);
+    headers.set("Cache-Control", "public, max-age=0, s-maxage=60");
+    headers.set("Cloudflare-CDN-Cache-Control", "max-age=60");
+    response = new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   } else if (
     request.method === "GET" &&
     response.status === 200 &&

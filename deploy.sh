@@ -88,12 +88,32 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
             -H "X-Auth-Email: $CF_EMAIL" -H "X-Auth-Key: $CF_GLOBAL_KEY" \
             -H 'Content-Type: application/json' --data "$1" | grep -Eq '"success": *true'
         }
+        # Katmanli onbellekte host purge nesneyi silmiyor, "suresi dolmus"
+        # isaretliyor; stale-while-revalidate yuzunden her sayfanin ilk
+        # ziyaretcisi deploy oncesi HTML'i goruyordu (UPDATING). Sitemap'teki
+        # sayfalar iki tur istenir: ilki arka plan tazelemesini tetikler,
+        # ikincisi taze kopyayi (HIT) dogrular.
+        warm() {
+          urls=$(for sm in sitemap-static.xml sitemap-posts.xml; do curl -s --max-time 10 "https://ahmetenes.com/$sm"; done \
+            | grep -o '<loc>https://ahmetenes.com[^<]*</loc>' | sed -e 's#<loc>##' -e 's#</loc>##' | sort -u)
+          [ -n "$urls" ] || return 0
+          for u in $urls; do curl -s -o /dev/null --max-time 15 "$u"; done
+          sleep 3
+          total=0; fresh=0
+          for u in $urls; do
+            total=$((total + 1))
+            st=$(curl -s -o /dev/null -D - --max-time 15 "$u" | tr -d '\r' | awk -F': ' 'tolower($1)=="cf-cache-status"{print $2}')
+            [ "$st" = "HIT" ] && fresh=$((fresh + 1))
+          done
+          echo "→ Önbellek ısıtıldı: $fresh/$total sayfa taze (HIT)."
+        }
         if purge '{"hosts":["ahmetenes.com","www.ahmetenes.com"]}'; then
           echo "→ Cloudflare edge cache temizlendi (ahmetenes.com)."
           # Cache Reserve / ust katman eski kopyayi kisa sure geri doldurabiliyor
           # (dagitimdan 10-60 sn sonra eski HTML goruldu); ikinci tur.
           sleep 20
           purge '{"hosts":["ahmetenes.com","www.ahmetenes.com"]}' && echo "→ İkinci temizleme turu tamam."
+          warm
         elif purge '{"purge_everything":true}'; then
           echo "→ Cloudflare edge cache temizlendi (tüm zone)."
         else

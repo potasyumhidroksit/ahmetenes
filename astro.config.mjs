@@ -2,6 +2,7 @@ import node from "@astrojs/node";
 import react from "@astrojs/react";
 import { formsPlugin } from "@emdash-cms/plugin-forms";
 import { publishPingPlugin } from "./src/plugins/publish-ping.ts";
+import { cdnPurgePlugin } from "./src/plugins/cdn-purge.ts";
 import { defineConfig, fontProviders } from "astro/config";
 import emdash, { local } from "emdash/astro";
 import { sqlite } from "emdash/db";
@@ -39,7 +40,7 @@ export default defineConfig({
 				directory: process.env.MEDIA_DIR || "./data/uploads",
 				baseUrl: "/_emdash/api/media/file",
 			}),
-			plugins: [formsPlugin(), publishPingPlugin()],
+			plugins: [formsPlugin(), publishPingPlugin(), cdnPurgePlugin()],
 			marketplace: "https://marketplace.emdashcms.com",
 		}),
 	],

@@ -116,6 +116,14 @@ Konteyner açılışta `docker-entrypoint.sh` ile seed'i idempotent uygular, son
   sorgusu); gerçek hatalar için `requestSource: eyeball` süzülür.
   ntfy (`ahmetenes-alerts`) yalnızca durum değişince + süren arızada saatte bir; düzelince "düzeldi".
   Sertifika uyarısı günde bir, tek mesaj. Günlük: `/var/log/ahmetenes-health.log` (logrotate 14 gün).
+- **Panel değişikliğinde önbellek temizliği** (`ahmetenes-cdn-purge.path`; `src/plugins/cdn-purge.ts`,
+  `scripts/cdn-purge-watch.sh`): HTML Cloudflare'de 5 dk (`s-maxage=300`) + stale-while-revalidate ile
+  önbelleklenir; panelde kaydet/yayınla/sil sonrası eklenti `/var/www/ahmetenes-data/cdn-purge-request`
+  dosyasına yazar, sunucudaki path birimi `scripts/cdn-refresh.sh`'i çalıştırır (Cloudflare anahtarı
+  konteynere girmez). Kurulum: `cp scripts/systemd/ahmetenes-cdn-purge.* /etc/systemd/system/ &&
+  systemctl daemon-reload && systemctl enable --now ahmetenes-cdn-purge.path`. Günlük:
+  `journalctl -u ahmetenes-cdn-purge`. Site ayarları ve menüler bu kancalarda yok; onlardan sonra
+  `bash scripts/cdn-refresh.sh`.
 - **Yedek** (`ahmetenes-backup.timer`, 04:00; `scripts/backup.sh`): SQLite `.backup` (tutarlı anlık
   görüntü) + `integrity_check`, medya/bülten/galeri künyesi, env, git bundle. Yerelde 14, şifreli R2'de
   (`ahmetenes-crypt:ahmetenes-backup/ahmetenes-site`) 30 gün. Hata → ntfy + systemd failed.

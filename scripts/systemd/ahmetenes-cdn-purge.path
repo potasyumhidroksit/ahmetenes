@@ -1,0 +1,9 @@
+[Unit]
+Description=Ahmetenes: panel değişikliğinde Cloudflare temizleme isteğini izle
+
+[Path]
+PathChanged=/var/www/ahmetenes-data/cdn-purge-request
+Unit=ahmetenes-cdn-purge.service
+
+[Install]
+WantedBy=paths.target

@@ -1,0 +1,7 @@
+[Unit]
+Description=Ahmetenes: Cloudflare önbelleğini temizle ve ısıt
+
+[Service]
+Type=oneshot
+ExecStart=/var/www/deneme/projeler/ahmetenes/scripts/cdn-purge-watch.sh
+TimeoutStartSec=15min

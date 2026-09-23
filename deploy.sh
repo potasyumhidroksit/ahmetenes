@@ -97,7 +97,12 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
           urls=$(for sm in sitemap-static.xml sitemap-posts.xml; do curl -s --max-time 10 "https://ahmetenes.com/$sm"; done \
             | grep -o '<loc>https://ahmetenes.com[^<]*</loc>' | sed -e 's#<loc>##' -e 's#</loc>##' | sort -u)
           [ -n "$urls" ] || return 0
-          for u in $urls; do curl -s -o /dev/null --max-time 15 "$u"; done
+          # Ilk tur: tazelemeyi tetikle; yazilardaki kategori/etiket arsivlerini
+          # de topla (sitemap'te yoklar ama yazi listesi gosterirler).
+          tax=$(for u in $urls; do curl -s --max-time 15 "$u"; done \
+            | grep -oE 'href="/(category|tag)/[a-z0-9-]+"' | sed -e 's#href="#https://ahmetenes.com#' -e 's#"$##' | sort -u)
+          for u in $tax; do curl -s -o /dev/null --max-time 15 "$u"; done
+          urls=$(printf '%s\n' $urls $tax | sort -u)
           sleep 3
           total=0; fresh=0
           for u in $urls; do

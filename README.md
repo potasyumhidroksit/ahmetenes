@@ -48,7 +48,11 @@ Panel: `http://localhost:4321/_emdash/admin`
 ## İçerik ve servis entegrasyonları
 
 - `seed/seed.json` — koleksiyonlar, menüler, taksonomiler, sayfalar ve yazılar.
-  İçerik, mevcut Next.js blog yazılarından `scripts/migrate-content.mjs` ile üretilir.
+- **Yazılar** `content/yazilar/*.md` (frontmatter: title, slug, excerpt, category, tags). `node scripts/yazilar.mjs seed`
+  seed'i günceller (sıra, byline, eksik kategori/etiket); deploy'da yalnızca eksik yazılar oluşturulur (mevcutlar
+  panelden düzenlenir). Kapaksız yazılar için fotoğrafsız paylaşım görselleri:
+  `PLAYWRIGHT=<playwright-core yolu> node scripts/og-yazilar.mjs` → `public/og/<slug>.jpg`.
+  Panel işlemleri CLI ile: `emdash login --url https://ahmetenes.com` (tarayıcıdan kod onayı), sonra `emdash content …`.
 - Blog görselleri `public/blog/<slug>/` altında. Yeni görsel ekledikten sonra `pnpm optimize-images`
   çalıştır: 640/960/1280px varyantları, kapaklar için 1200×630 JPEG paylaşım görseli (`cover-og.jpg`,
   og:image) ve `src/data/image-manifest.json` üretilir; kartlar, yazı

@@ -25,6 +25,7 @@ const stateMessage = state === "ok" ? "Onay e-postası gönderildi — gelen kut
 		<button type="submit" class="button-primary">Kaydol</button>
 		<p class="newsletter-status" data-newsletter-status role="status" aria-live="polite" data-state={state ? (state === "ok" ? "ok" : "error") : undefined}>{stateMessage}</p>
 	</form>
+	<p class="newsletter-privacy">Adresin yalnızca bülten için kullanılır; her e-postada tek tıkla çıkabilirsin. <a href="/gizlilik#bulten">Gizlilik</a></p>
 </section>
 
 <script>
@@ -79,6 +80,8 @@ const stateMessage = state === "ok" ? "Onay e-postası gönderildi — gelen kut
 		color: var(--color-on-brand); border: 0; border-radius: var(--radius); padding: 0.7rem 1.3rem;
 	}
 	.newsletter-form button:disabled { opacity: 0.6; cursor: progress; }
+	.newsletter-privacy { margin: 0.15rem 0 0; font-size: 0.78rem; color: var(--color-muted); }
+	.newsletter-privacy a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 	.newsletter-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 	.newsletter-status { grid-column: 1 / -1; min-height: 1.2em; font-size: 0.85rem; color: var(--color-muted); margin: 0; }
 	.newsletter-status[data-state="ok"] { color: light-dark(#1a7f37, #6fd08c); }

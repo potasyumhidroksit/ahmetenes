@@ -8,7 +8,7 @@ export const prerender = false;
 // EmDash sitemap index'i yalnızca koleksiyon sitemaplarini listeler ve
 // pages koleksiyonu su an dahil degil. Statik sayfalar + CMS sayfalari icin
 // ayri bir sitemap uretiyoruz; robots.txt ikisini de bildirir.
-const STATIC_PATHS = ["/", "/galeri", "/ekipman", "/medya", "/iletisim", "/posts"];
+const STATIC_PATHS = ["/", "/galeri", "/ekipman", "/medya", "/iletisim", "/posts", "/gizlilik"];
 
 function escapeXml(value: string): string {
   return value

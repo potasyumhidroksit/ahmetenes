@@ -12,6 +12,11 @@ const SECRET =
 let cache: Subscriber[] | null = null;
 let writeChain: Promise<void> = Promise.resolve();
 
+/** Onay baglantisinin gecerlilik suresi. */
+export const CONFIRM_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+// Baglanti suresi dolmus onaysiz kayit tutulmaz (veri minimizasyonu); 1 gun pay.
+const PENDING_KEEP_MS = CONFIRM_TTL_MS + 24 * 60 * 60 * 1000;
+
 async function load(): Promise<Subscriber[]> {
   if (cache) return cache;
   try {
@@ -34,6 +39,22 @@ async function load(): Promise<Subscriber[]> {
   return cache;
 }
 
+function isExpiredPending(s: Subscriber, now: number): boolean {
+  if (s.confirmed) return false;
+  const created = Date.parse(s.createdAt);
+  return Number.isFinite(created) && now - created > PENDING_KEEP_MS;
+}
+
+/** Guncel liste; suresi dolmus onaysiz kayitlar atilir (degistiyse diske yazilir). */
+async function current(): Promise<Subscriber[]> {
+  const list = await load();
+  const now = Date.now();
+  if (!list.some((s) => isExpiredPending(s, now))) return list;
+  const kept = list.filter((s) => !isExpiredPending(s, now));
+  await persist(kept);
+  return kept;
+}
+
 function persist(list: Subscriber[]): Promise<void> {
   cache = list;
   writeChain = writeChain.then(async () => {
@@ -48,17 +69,21 @@ function persist(list: Subscriber[]): Promise<void> {
 }
 
 export async function addSubscriber(email: string): Promise<{ ok: boolean; pending: boolean; message: string }> {
-  const list = await load();
+  const list = await current();
   const normalized = email.toLowerCase();
   const existing = list.find((x) => x.email === normalized);
   if (existing && existing.confirmed) return { ok: false, pending: false, message: "Bu e-posta zaten kayıtlı." };
-  if (existing) return { ok: true, pending: true, message: "Doğrulama e-postası tekrar gönderildi." };
+  if (existing) {
+    // Yeni onay baglantisi gidiyor: kayit da onunla birlikte tazelenir.
+    await persist(list.map((x) => (x.email === normalized ? { ...x, createdAt: new Date().toISOString() } : x)));
+    return { ok: true, pending: true, message: "Doğrulama e-postası tekrar gönderildi." };
+  }
   await persist([...list, { email: normalized, confirmed: false, createdAt: new Date().toISOString() }]);
   return { ok: true, pending: true, message: "Doğrulama e-postası gönderildi — lütfen onaylayın." };
 }
 
 export async function confirmSubscriber(email: string): Promise<boolean> {
-  const list = await load();
+  const list = await current();
   const normalized = email.toLowerCase();
   const sub = list.find((x) => x.email === normalized);
   if (!sub) return false;
@@ -67,7 +92,7 @@ export async function confirmSubscriber(email: string): Promise<boolean> {
 }
 
 export async function removeSubscriber(email: string): Promise<boolean> {
-  const list = await load();
+  const list = await current();
   const normalized = email.toLowerCase();
   if (!list.some((x) => x.email === normalized)) return false;
   await persist(list.filter((x) => x.email !== normalized));
@@ -75,7 +100,7 @@ export async function removeSubscriber(email: string): Promise<boolean> {
 }
 
 export async function getSubscribers(): Promise<Subscriber[]> {
-  return load();
+  return current();
 }
 
 /**

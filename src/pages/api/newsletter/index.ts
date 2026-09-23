@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { readBody, responder, safeReturnPath } from "../../../lib/form-request";
-import { addSubscriber, removeSubscriber, signEmailToken } from "../../../lib/newsletter";
+import { CONFIRM_TTL_MS, addSubscriber, removeSubscriber, signEmailToken } from "../../../lib/newsletter";
 import { clientIp, isBot, rateLimit } from "../../../lib/rate-limit";
 
 export const prerender = false;
@@ -33,7 +33,7 @@ export const POST: APIRoute = async ({ request, url }) => {
   }
 
   if (result.ok && result.pending && RESEND_API_KEY) {
-    const token = signEmailToken(email, 7 * 24 * 60 * 60 * 1000, "confirm");
+    const token = signEmailToken(email, CONFIRM_TTL_MS, "confirm");
     // Link Host basligindan degil, yapilandirilmis site adresinden uretilir.
     const confirmUrl = new URL(
       "/api/newsletter/confirm?token=" + encodeURIComponent(token),

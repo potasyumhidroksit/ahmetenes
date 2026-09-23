@@ -1,0 +1,97 @@
+---
+// Gizlilik / KVKK aydinlatma: sitenin koddaki gercek davranisini anlatir.
+// Veri akisi degisirse (yeni form, yeni ucuncu taraf, saklama suresi) bu
+// sayfa da guncellenmeli; UPDATED tarihi elle ilerletilir.
+import Content from "../layouts/Content.astro";
+
+const UPDATED = new Date("2026-09-23T12:00:00Z");
+const updatedLabel = UPDATED.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+---
+<Content
+	title="Gizlilik"
+	description="ahmetenes.com hangi verileri neden ve ne kadar süre işler: çerezsiz ziyaret sayacı, iletişim formu, bülten, altyapı ve KVKK hakların."
+>
+	<article class="page-article">
+		<header class="page-header">
+			<h1 class="page-title">Gizlilik</h1>
+			<p class="page-updated">Son güncelleme: <time datetime={UPDATED.toISOString().slice(0, 10)}>{updatedLabel}</time></p>
+		</header>
+
+		<div class="page-content privacy">
+			<p class="privacy-lead">
+				Kısaca: reklam ve izleme yok, site kendi çerezini koymaz, sayfalar Cloudflare dışında hiçbir üçüncü
+				taraf sunucuya bağlanmaz. E-posta adresin yalnızca senin istediğin iş için kullanılır.
+			</p>
+
+			<h2 id="sorumlu">Veri sorumlusu</h2>
+			<p>Ahmet Enes · <a href="mailto:info@ahmetenes.com">info@ahmetenes.com</a></p>
+
+			<h2 id="sayac">Ziyaret sayacı</h2>
+			<p>
+				Hangi sayfanın kaç kez açıldığı ve günlük toplam görüntüleme sayılır. IP adresi, çerez, cihaz kimliği ya da
+				tarayıcı parmak izi tutulmaz; ziyaretler birbirine ya da bir kişiye bağlanamaz. Bulunamayan bir sayfa (404)
+				açıldığında, kırık bağlantıları düzeltebilmek için o yol ve geldiğin sitenin yalnızca adı (ör. <code>instagram.com</code>) kaydedilir.
+			</p>
+
+			<h2 id="cerezler">Çerezler ve tarayıcı depolaması</h2>
+			<p>
+				Site ziyaretçilere kendi çerezini koymaz. Cloudflare'in bot koruması, tarayıcının doğrulamayı geçtiğini
+				hatırlamak için <code>cf_clearance</code> adlı teknik bir çerez bırakabilir; reklam ya da izleme amaçlı
+				değildir. Açık/koyu tema ve yazılar sayfasındaki görünüm tercihin yalnızca kendi tarayıcında
+				(<code>localStorage</code>) durur, sunucuya gönderilmez. Oturum çerezi yalnızca yönetim paneline giriş
+				yapan site sahibi için kullanılır.
+			</p>
+
+			<h2 id="iletisim">İletişim formu</h2>
+			<p>
+				Formla gönderdiğin ad, e-posta ve mesaj, sana yanıt verebilmem için e-posta gönderim hizmeti <a href="https://resend.com/legal/privacy-policy" rel="noopener noreferrer">Resend</a> aracılığıyla bana
+				e-posta olarak iletilir; sitenin sunucusunda ayrıca saklanmaz. Formun kötüye kullanılmasını önlemek için
+				IP adresin kısa süreli bir hız sınırında yalnızca bellekte tutulur, diske yazılmaz.
+			</p>
+
+			<h2 id="bulten">Bülten</h2>
+			<p>
+				Bültene yalnızca e-posta adresinle kaydolursun. Kayıt çift onaylıdır: onay bağlantısı 7 gün geçerlidir,
+				onaylanmayan adres en geç 8 gün sonra listeden silinir. Onaylanan adres ve kayıt tarihi, yalnızca bülten
+				göndermek için saklanır; e-postalar Resend ile gönderilir. Her e-postada tek tıkla abonelikten çıkma
+				bağlantısı vardır; çıktığında adresin listeden hemen silinir.
+			</p>
+
+			<h2 id="altyapi">Altyapı ve üçüncü taraflar</h2>
+			<ul>
+				<li>
+					Site <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener noreferrer">Cloudflare</a> üzerinden
+					sunulur (içerik dağıtımı ve saldırı koruması). Cloudflare isteği iletmek için IP adresini işler ve bot
+					korumasının parçası olarak tarayıcında kısa bir doğrulama betiği çalıştırabilir (bkz. çerezler).
+				</li>
+				<li>
+					Yazı tipleri, galeri fotoğrafları ve /medya'daki albüm kapağı bu sitenin kendi sunucusundan gelir;
+					tarayıcın Google, Spotify ya da başka bir üçüncü tarafa bağlanmaz. Instagram, Spotify gibi dış
+					bağlantılara ancak tıklarsan gidersin.
+				</li>
+				<li>Yorumlar kapalıdır.</li>
+			</ul>
+
+			<h2 id="kayitlar">Sunucu kayıtları ve yedekler</h2>
+			<p>
+				Bulunamayan sayfa istekleri (çoğu otomatik tarama) kötüye kullanımı izlemek için yol, yönlendiren adres
+				ve tarayıcı bilgisiyle sınırlı bir kayıtta tutulur; bu kayda IP adresi yazılmaz. Site verileri (bülten
+				listesi dahil) her gün yedeklenir; yedekler 30 gün sonra silinir ve sunucu dışındaki kopyalar şifrelidir.
+			</p>
+
+			<h2 id="haklar">Hakların</h2>
+			<p>
+				Hakkında hangi verinin tutulduğunu öğrenmek, düzeltilmesini ya da silinmesini istemek ve 6698 sayılı
+				Kişisel Verilerin Korunması Kanunu'nun 11. maddesindeki diğer haklarını kullanmak için <a href="mailto:info@ahmetenes.com">info@ahmetenes.com</a> adresine yazabilirsin.
+			</p>
+		</div>
+	</article>
+</Content>
+
+<style>
+	.privacy-lead { font-size: 1.1em; color: var(--color-text); }
+	.privacy h2 { font-size: 1.15rem; font-weight: 600; margin: 2.2em 0 0.4em; scroll-margin-top: 1.5rem; }
+	.privacy ul { padding-left: 1.2em; }
+	.privacy li + li { margin-top: 0.5em; }
+	.privacy code { font-size: 0.88em; }
+</style>

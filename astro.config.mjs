@@ -42,13 +42,16 @@ export default defineConfig({
 			marketplace: "https://marketplace.emdashcms.com",
 		}),
 	],
+	// Turkce ğ/Ğ/ş/Ş/İ "latin-ext" alt kumesinde: yalnizca "latin" yuklenince bu
+	// harfler Arial/Liberation ile ciziliyordu. 600: tema basliklari/dugmeleri
+	// (yoksa tarayici sahte kalin uretir). Inter hicbir sayfada kullanilmiyordu.
 	fonts: [
-		{ provider: fontProviders.google(), name: "DM Sans", cssVariable: "--font-personabio", weights: [400, 500], fallbacks: ["sans-serif"] },
 		{
 			provider: fontProviders.google(),
-			name: "Inter",
-			cssVariable: "--font-body",
-			weights: [400, 500, 600, 700],
+			name: "DM Sans",
+			cssVariable: "--font-personabio",
+			weights: [400, 500, 600],
+			subsets: ["latin", "latin-ext"],
 			fallbacks: ["sans-serif"],
 		},
 		{
@@ -56,6 +59,7 @@ export default defineConfig({
 			name: "JetBrains Mono",
 			cssVariable: "--font-mono",
 			weights: [400, 500],
+			subsets: ["latin", "latin-ext"],
 			fallbacks: ["monospace"],
 		},
 	],

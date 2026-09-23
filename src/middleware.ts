@@ -126,7 +126,9 @@ async function handleRequest(context: APIContext, next: () => Promise<Response>)
   // Herkese acik HTML sayfalar icin edge/tarayici onbellegi. Edge'de en fazla
   // s-maxage kadar bayat kalir; deploy'da Cloudflare purge edilir.
   const contentType = response.headers.get("content-type") || "";
-  if (contentType.includes("text/html") && !url.pathname.startsWith("/_emdash") && !isAnonymous(context)) {
+  // /istatistik: anonime 404, yoneticiye sayfa; ikisi de hicbir katmanda
+  // saklanmamali (edge cerezlere bakmaz: onbellekteki 404 yoneticiye de giderdi).
+  if (url.pathname.startsWith("/istatistik") || (contentType.includes("text/html") && !url.pathname.startsWith("/_emdash") && !isAnonymous(context))) {
     response = withNoStore(response);
   } else if (
     request.method === "GET" &&

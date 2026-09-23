@@ -1,12 +1,15 @@
 ---
 import Content from "../layouts/Content.astro";
+import PageHero from "../components/PageHero.astro";
+import { PAGE_HEROES, pageHeroOg } from "../lib/page-hero";
 import NewsletterForm from "../components/NewsletterForm.astro";
 // JS'siz gonderimden donus: /api/contact 303 ile ?iletisim=ok|<hata> getirir.
 const contactState = Astro.url.searchParams.get("iletisim");
 const contactMessage = contactState === "ok" ? "Teşekkürler! Mesajın iletildi." : contactState;
 ---
-<Content title="İletişim" description="Ahmet Enes'e ulaşın: iş birliği, fotoğraf çekimi ya da sorular için mesaj gönderin; yeni yazılardan haberdar olmak için bültene kaydolun.">
+<Content title="İletişim" image={pageHeroOg("iletisim", Astro.url.origin)} imageAlt={PAGE_HEROES.iletisim.alt} description="Ahmet Enes'e ulaşın: iş birliği, fotoğraf çekimi ya da sorular için mesaj gönderin; yeni yazılardan haberdar olmak için bültene kaydolun.">
   <section class="archive-section contact-page">
+    <PageHero {...PAGE_HEROES.iletisim} />
     <header class="archive-header">
       <h1>İletişim</h1>
       <p>Bir iş, bir soru ya da sadece merhaba.</p>

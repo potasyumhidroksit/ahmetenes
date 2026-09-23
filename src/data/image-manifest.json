@@ -172,6 +172,50 @@
     "color": "#181828",
     "og": "/blog/renk-teorisi-ve-doygunluk/cover-og.jpg"
   },
+  "/blog/sayfa-ekipman/cover.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#b87868",
+    "og": "/blog/sayfa-ekipman/cover-og.jpg"
+  },
+  "/blog/sayfa-hakkimda/cover.webp": {
+    "width": 1600,
+    "height": 1043,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#181818",
+    "og": "/blog/sayfa-hakkimda/cover-og.jpg"
+  },
+  "/blog/sayfa-iletisim/cover.webp": {
+    "width": 1600,
+    "height": 1065,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#c80808",
+    "og": "/blog/sayfa-iletisim/cover-og.jpg"
+  },
+  "/blog/sayfa-now/cover.webp": {
+    "width": 1600,
+    "height": 1048,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#987848",
+    "og": "/blog/sayfa-now/cover-og.jpg"
+  },
   "/blog/sikici-fotograftan-derinlikli-kareye/cover.webp": {
     "width": 1600,
     "height": 1067,

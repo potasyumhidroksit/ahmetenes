@@ -6,6 +6,8 @@ import { PortableText } from "emdash/ui";
 import { getEditMeta, type PortableTextBlock } from "emdash";
 import Base from "../../layouts/Content.astro";
 import { firstParagraphPreview } from "../../utils/first-paragraph";
+import PageHero from "../../components/PageHero.astro";
+import { PAGE_HEROES, pageHeroOg } from "../../lib/page-hero";
 
 import { localeFromUrl, localePath } from "../../utils/i18n";
 const locale = localeFromUrl(Astro.url);
@@ -77,10 +79,13 @@ const updated = slug === "now" && page.data.updatedAt
 <Base
 	title={page.data.title}
 	description={description}
+	image={slug === "hakkimda" ? undefined : pageHeroOg(slug, origin)}
+	imageAlt={slug === "hakkimda" ? undefined : PAGE_HEROES[slug]?.alt}
 	jsonLd={profileJsonLd}
 	content={{ collection: "pages", id: page.data.id, slug }}
 >
 	<article class="page-article">
+		{PAGE_HEROES[slug] && <PageHero {...PAGE_HEROES[slug]} />}
 		<header class="page-header">
 			<h1 class="page-title" {...page.edit.title}>{page.data.title}</h1>
 			{updated && <p class="page-updated">Son güncelleme: <time datetime={page.data.updatedAt.toISOString()}>{updated}</time></p>}

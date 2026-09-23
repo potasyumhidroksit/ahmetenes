@@ -1,5 +1,7 @@
 ---
 import Content from "../layouts/Content.astro";
+import PageHero from "../components/PageHero.astro";
+import { PAGE_HEROES, pageHeroOg } from "../lib/page-hero";
 import { equipment, gearCategories, type GearItem } from "../lib/equipment";
 import { loadGallery } from "../lib/gallery";
 import { metaDescription } from "../utils/meta-description";
@@ -27,8 +29,9 @@ const groups = gearCategories
   }))
   .filter((g) => g.items.length > 0);
 ---
-<Content title="Ekipman" description={description}>
+<Content title="Ekipman" image={pageHeroOg("ekipman", Astro.url.origin)} imageAlt={PAGE_HEROES.ekipman.alt} description={description}>
   <section class="archive-section gear-page">
+    <PageHero {...PAGE_HEROES.ekipman} />
     <header class="archive-header">
       <h1>Ekipman</h1>
       <p>Kullandığım gövdeler, objektifler ve aksesuarlar.</p>

@@ -6,6 +6,7 @@ import Base from "../layouts/Content.astro";
 import { localizedPosts } from "../utils/localized-posts";
 import { excerptAround, fold, highlight, plainText, searchTerms } from "../lib/search-text";
 import { galleryCategories, loadGallery, type GalleryPhoto } from "../lib/gallery";
+import { imageSrc, localImage } from "../lib/responsive-image";
 
 import { localeFromUrl, localePath, translate } from "../utils/i18n";
 const locale = localeFromUrl(Astro.url);
@@ -16,8 +17,15 @@ const query = Astro.url.searchParams.get("q")?.trim() || "";
 // filtering in JS. FTS scales as the post count grows, returns ranked
 // results, and handles tokenization/stemming. Templates that grep all
 // post bodies in JS quickly become unusable past a few hundred posts.
-type SearchResult = { id: string; slug?: string | null; title?: string | null; snippet?: string | null };
+type SearchResult = { id: string; slug?: string | null; title?: string | null; snippet?: string | null; image?: string };
 let results: SearchResult[] = [];
+/** Sonuc kucuk resmi: kapagin 640px varyanti (manifestte varsa). */
+const thumbOf = (src?: string) => {
+	const local = localImage(src);
+	if (!local) return undefined;
+	const w = local.width > 640 ? 640 : local.width;
+	return { src: w === 640 ? local.src.replace(/\.[^.]+$/, "-640w.webp") : local.src, width: w, height: Math.round((local.height / local.width) * w), color: local.color };
+};
 const exactTerms = query.slice(0, 100).toLocaleLowerCase("tr-TR").split(/\s+/).filter(Boolean);
 /** Sorgu kelimelerinden katlanmadan (Turkce harfleriyle) gecen her biri icin puan. */
 const exactBonus = (text: string, weight: number) => {
@@ -44,7 +52,7 @@ if (query && locale === "tr") {
 				exactBonus(title, 20) + exactBonus(excerpt, 6) + exactBonus(body, 2);
 			const inExcerpt = terms.some((term) => fe.includes(term));
 			const snippetText = inExcerpt || !excerpt ? excerpt || excerptAround(body, terms) || "" : excerptAround(body, terms) || excerpt;
-			return { score, result: { id: entry.data.id, slug: entry.id, title, snippet: highlight(snippetText, terms) } };
+			return { score, result: { id: entry.data.id, slug: entry.id, title, snippet: highlight(snippetText, terms), image: imageSrc(entry.data.featured_image) } };
 		})
 		.filter((hit): hit is NonNullable<typeof hit> => hit !== null)
 		.sort((a, b) => b.score - a.score)
@@ -138,21 +146,20 @@ const summary = [results.length && `${results.length} yazı`, photoHits.length &
 		{
 			results.length > 0 && (
 				<ol class="search-results">
-					{results.map((result) => (
-						<li class="search-result">
-							<a
-								href={localePath(`/${result.slug ?? result.id}`, locale)}
-								class="result-link"
-							>
-								<h2 class="result-title">
-									{result.title ?? t("Başlıksız")}
-								</h2>
-								{result.snippet && (
-									<p class="result-snippet" set:html={result.snippet} />
-								)}
-							</a>
-						</li>
-					))}
+					{results.map((result) => {
+						const thumb = thumbOf(result.image);
+						return (
+							<li class="search-result">
+								<a href={localePath(`/${result.slug ?? result.id}`, locale)} class:list={["result-link", { "has-thumb": thumb }]}>
+									{thumb && <img class="result-thumb" src={thumb.src} width={thumb.width} height={thumb.height} alt="" loading="lazy" decoding="async" style={thumb.color ? `background-color:${thumb.color}` : undefined} />}
+									<div class="result-body">
+										<h2 class="result-title">{result.title ?? t("Başlıksız")}</h2>
+										{result.snippet && <p class="result-snippet" set:html={result.snippet} />}
+									</div>
+								</a>
+							</li>
+						);
+					})}
 				</ol>
 			)
 		}
@@ -253,6 +260,25 @@ const summary = [results.length && `${results.length} yazı`, photoHits.length &
 		display: block;
 		text-decoration: none;
 		color: inherit;
+	}
+
+	.result-link.has-thumb {
+		display: grid;
+		grid-template-columns: 176px minmax(0, 1fr);
+		gap: 20px;
+		align-items: start;
+	}
+
+	.result-thumb {
+		width: 100%;
+		height: auto;
+		aspect-ratio: 4 / 3;
+		object-fit: cover;
+		border-radius: 10px;
+	}
+
+	@media (max-width: 600px) {
+		.result-link.has-thumb { grid-template-columns: 96px minmax(0, 1fr); gap: 14px; }
 	}
 
 	.result-title {

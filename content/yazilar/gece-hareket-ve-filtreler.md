@@ -24,6 +24,8 @@ Tek bir kareyle hem gökyüzünü hem ön planı yakalamaya çalıştığınızd
 
 Enstantaneyi bilinçli olarak yavaşlatmak, donmuş bir anın veremeyeceği bir hareket ve zaman duygusu verir.
 
+![Kayalar arasından akan dağ deresi, uzun pozlamayla yumuşamış su](/blog/gece-hareket-ve-filtreler/uzun-pozlama.webp "Uzun pozlama: hareketsiz kayalar net, akan su yumuşak bir iz.")
+
 - **Su.** Birkaç saniyelik pozlama suyu tamamen süt gibi yapar ve dokusunu siler. Hem hareket hem doku istiyorsanız 1/10 ile 1/2 saniye arası çoğu zaman en güzel sonucu verir: su akar ama dalgacıklar ve köpük okunur kalır.
 - **Şehir ve araçlar.** Geçen bir bisikletli, tramvay ya da araba için 1/10 ile 1/50 saniye arasında bir enstantane ve konuyu takip eden bir kamera hareketi (pan), konuyu görece net tutarken arka planı çizgilere dönüştürür. Birkaç deneme gerekir; isabet oranı düşük ama isabet eden kareler çok güçlüdür.
 - **Gündüz sorunu.** Güneşli bir günde enstantaneyi yavaşlattığınızda kareye fazla ışık girer. ISO'yu en düşüğe alıp diyaframı f/16 – f/22'ye kısmak ilk akla gelen çözümdür, ama kırınım yüzünden tüm kare yumuşar. Doğru araç bir ND filtredir.

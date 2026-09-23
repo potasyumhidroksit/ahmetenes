@@ -1,1 +1,219 @@
-{}
+{
+  "/blog/fotografciliga-baslangic-yol-haritasi/cover.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#182828",
+    "og": "/blog/fotografciliga-baslangic-yol-haritasi/cover-og.jpg"
+  },
+  "/blog/fotografciligin-dort-evresi/cover.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#d8e8e8",
+    "og": "/blog/fotografciligin-dort-evresi/cover-og.jpg"
+  },
+  "/blog/gece-hareket-ve-filtreler/cover.webp": {
+    "width": 1600,
+    "height": 1087,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#080808",
+    "og": "/blog/gece-hareket-ve-filtreler/cover-og.jpg"
+  },
+  "/blog/gece-hareket-ve-filtreler/uzun-pozlama.webp": {
+    "width": 1600,
+    "height": 900,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#080808"
+  },
+  "/blog/ilk-kamera-ve-objektif-secimi/cover.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#f8f8f8",
+    "og": "/blog/ilk-kamera-ve-objektif-secimi/cover-og.jpg"
+  },
+  "/blog/isigi-okumak-yon-kalite-saat/cover.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#181808",
+    "og": "/blog/isigi-okumak-yon-kalite-saat/cover-og.jpg"
+  },
+  "/blog/isigi-okumak-yon-kalite-saat/sert-golge.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#484848"
+  },
+  "/blog/iso-gurultu-isik-ve-sinyal/cover.webp": {
+    "width": 1600,
+    "height": 1071,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#886858",
+    "og": "/blog/iso-gurultu-isik-ve-sinyal/cover-og.jpg"
+  },
+  "/blog/keskin-fotograf-enstantane-odak-titresim/cover.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#588848",
+    "og": "/blog/keskin-fotograf-enstantane-odak-titresim/cover-og.jpg"
+  },
+  "/blog/odak-uzakligi-ve-perspektif/cover.webp": {
+    "width": 1600,
+    "height": 824,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#f8f8f8",
+    "og": "/blog/odak-uzakligi-ve-perspektif/cover-og.jpg"
+  },
+  "/blog/olcum-histogram-ve-manuel-mod-efsanesi/cover.webp": {
+    "width": 1600,
+    "height": 1071,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#080808",
+    "og": "/blog/olcum-histogram-ve-manuel-mod-efsanesi/cover-og.jpg"
+  },
+  "/blog/pozlama-ucgeni-diyafram-enstantane-iso/cover.webp": {
+    "width": 1600,
+    "height": 1066,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#080808",
+    "og": "/blog/pozlama-ucgeni-diyafram-enstantane-iso/cover-og.jpg"
+  },
+  "/blog/pozlama-ucgeni-diyafram-enstantane-iso/mod-tekerlegi.webp": {
+    "width": 1600,
+    "height": 1063,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#a87838"
+  },
+  "/blog/raw-duzenleme-is-akisi/cover.webp": {
+    "width": 1600,
+    "height": 1200,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#a8a898",
+    "og": "/blog/raw-duzenleme-is-akisi/cover-og.jpg"
+  },
+  "/blog/raw-jpeg-ve-lightroom/cover.webp": {
+    "width": 1600,
+    "height": 1199,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#98b8e8",
+    "og": "/blog/raw-jpeg-ve-lightroom/cover-og.jpg"
+  },
+  "/blog/renk-teorisi-ve-doygunluk/cover.webp": {
+    "width": 1600,
+    "height": 1000,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#181828",
+    "og": "/blog/renk-teorisi-ve-doygunluk/cover-og.jpg"
+  },
+  "/blog/sikici-fotograftan-derinlikli-kareye/cover.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#4878b8",
+    "og": "/blog/sikici-fotograftan-derinlikli-kareye/cover-og.jpg"
+  },
+  "/blog/sokakta-35mm-yaklasmak-beklemek/cover.webp": {
+    "width": 1600,
+    "height": 1065,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#080808",
+    "og": "/blog/sokakta-35mm-yaklasmak-beklemek/cover-og.jpg"
+  },
+  "/blog/turist-gibi-cekmeyi-birakmak/cover.webp": {
+    "width": 1600,
+    "height": 1065,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#585858",
+    "og": "/blog/turist-gibi-cekmeyi-birakmak/cover-og.jpg"
+  },
+  "/blog/yeni-baslayanlarin-sik-yaptigi-hatalar/cover.webp": {
+    "width": 1600,
+    "height": 1067,
+    "variants": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#d8d8d8",
+    "og": "/blog/yeni-baslayanlarin-sik-yaptigi-hatalar/cover-og.jpg"
+  }
+}

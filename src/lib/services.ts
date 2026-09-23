@@ -56,6 +56,21 @@ type RawPulse = {
   } | null;
 };
 
+/** Spotify kapak kimligi (i.scdn.co/image/<hex>). */
+export const SPOTIFY_ART_ID = /^[a-f0-9]{16,64}$/;
+
+/** Kapak site ustunden sunulur (/api/pulse/art); baska kaynaklar gosterilmez. */
+function localArt(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    const id = u.pathname.replace(/^\/image\//, "");
+    return u.protocol === "https:" && u.hostname === "i.scdn.co" && SPOTIFY_ART_ID.test(id) ? "/api/pulse/art/" + id : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function getPulseStatus(): Promise<PulseStatus> {
   if (pulseCache && Date.now() - pulseCache.at < 4000) return pulseCache.data;
   try {
@@ -73,7 +88,7 @@ export async function getPulseStatus(): Promise<PulseStatus> {
             name: t.name ?? "",
             artist: t.artist ?? "",
             album: t.album ?? "",
-            art: t.art ?? null,
+            art: localArt(t.art),
             link: t.link ?? null,
             progressMs: t.progressMs ?? null,
             durationMs: t.durationMs ?? null,

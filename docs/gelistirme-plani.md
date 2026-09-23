@@ -152,3 +152,9 @@ Kod değişiklikleri git geçmişinde; aşağıdakiler repoda görünmez:
 - Cloudflare Bot Fight Mode / JS detections: mobilde ana iş parçacığını 0.5-3 sn meşgul
   ediyor ve Lighthouse "en iyi uygulamalar"ı 81'de tutuyor; zone genelinde bir güvenlik ayarı.
 - *.ahmetenes.tr kaynak sertifikaları 22 Eylül'de doldu (Cloudflare "Full" modunda maskeleniyor).
+- Editör deneyimi: oturum açıkken, kenarda zaten önbellekte olan bir sayfa anonim kopyadan
+  gelir (görsel düzenleme araç çubuğu görünmez). Kimlikli yanıtlar artık hiç önbelleğe
+  alınmıyor (sızıntı yok); araç çubuğunun her sayfada görünmesi için Cloudflare Cache
+  Rule'a `http.cookie contains "astro-session"` → bypass istisnası eklenebilir.
+- E-posta altyapısı (web sitesi dışı, 92.5.98.67): MTA-STS yarım (`_mta-sts` TXT yok,
+  politika dosyası boş); MX sertifikası `imap.ahmetenes.com` adına (mx. için değil).

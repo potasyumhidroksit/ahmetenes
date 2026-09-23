@@ -45,7 +45,8 @@ Panel: `http://localhost:4321/_emdash/admin`
 - **Medya:** Pulse (`/api/pulse` same-origin proxy) + Sinedexter `/api/stats`.
 - **İletişim/Bülten:** Resend; aboneler `data/newsletter.json` (double opt-in, HMAC imzalı token).
 - Bülten: `pnpm newsletter list` (aboneler), `pnpm newsletter export [dosya.csv]` (CSV), `pnpm send-newsletter "Başlık" "slug" ["özet"]` (gönderim, `List-Unsubscribe` başlıklı).
-- Analitik (gizlilik dostu; IP/çerez saklanmaz): `pnpm analytics [gün]`
+- Analitik (gizlilik dostu; IP/çerez saklanmaz): panelde oturum açıkken https://ahmetenes.com/istatistik
+  (yalnızca yönetici; diğerlerine 404) ya da sunucuda `pnpm analytics [gün]`
 - Yeni yazı yayınladıktan sonra: `pnpm announce <slug>` (RSS'ten başlık/özet, IndexNow, bülten önizlemesi);
   bülteni de göndermek için `pnpm announce <slug> --send`. Göndermeden e-postayı görmek için:
   `NEWSLETTER_PREVIEW=/tmp/bulten.html pnpm send-newsletter "Başlık" "slug" "özet" "kapak.jpg"`.

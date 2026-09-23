@@ -22,6 +22,7 @@ async function fixAdminColorScheme(response: Response) {
 function isCacheable(pathname: string): boolean {
   if (pathname.startsWith("/_emdash") || pathname.startsWith("/api/")) return false;
   if (pathname.startsWith("/search")) return false;
+  if (pathname.startsWith("/istatistik")) return false;
   if (/\/(?:sitemap|rss)[^/]*\.(?:xml)$/.test(pathname) || pathname === "/robots.txt") return false;
   return true;
 }

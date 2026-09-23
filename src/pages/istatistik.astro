@@ -1,0 +1,90 @@
+---
+// Yalnizca yoneticiye (EmDash oturumu, rol >= 50) acik ziyaret ozeti. Digerleri
+// 404 alir; kimlikli yanitlar middleware'de no-store (edge'de saklanmaz).
+import Content from "../layouts/Content.astro";
+import { getAnalytics } from "../lib/analytics";
+import { getSubscribers } from "../lib/newsletter";
+import { notFound } from "../utils/http";
+
+export const prerender = false;
+
+const ROLE_ADMIN = 50;
+const user = Astro.locals.user as { role?: number } | undefined;
+if (!user || (user.role ?? 0) < ROLE_ADMIN) return notFound(Astro);
+Astro.response.headers.set("Cache-Control", "private, no-store");
+
+const { days, paths } = await getAnalytics();
+const subscribers = await getSubscribers();
+const confirmed = subscribers.filter((s) => s.confirmed).length;
+
+// Son 30 gun (Istanbul takvimi), ziyaretsiz gunler 0.
+const fmt = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul" });
+const series = Array.from({ length: 30 }, (_, i) => {
+  const key = fmt.format(new Date(Date.now() - (29 - i) * 86_400_000));
+  return { key, count: days[key] ?? 0 };
+});
+const max = Math.max(1, ...series.map((d) => d.count));
+const sum = (n: number) => series.slice(-n).reduce((a, d) => a + d.count, 0);
+const total = Object.values(days).reduce((a, b) => a + b, 0);
+const topPaths = Object.entries(paths).sort((a, b) => b[1] - a[1]).slice(0, 15);
+const label = (key: string) =>
+  new Date(key + "T12:00:00Z").toLocaleDateString("tr-TR", { day: "numeric", month: "short" });
+---
+<Content title="İstatistik" description="Ziyaret özeti" robots="noindex, nofollow">
+  <section class="archive-section stats-page">
+    <header class="archive-header">
+      <h1>İstatistik</h1>
+      <p>Gizlilik dostu sayaç: IP, çerez ve kimlik saklanmaz; otomasyon (headless) sayılmaz.</p>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat"><strong>{sum(1).toLocaleString("tr-TR")}</strong><span>Bugün</span></div>
+      <div class="stat"><strong>{sum(7).toLocaleString("tr-TR")}</strong><span>Son 7 gün</span></div>
+      <div class="stat"><strong>{sum(30).toLocaleString("tr-TR")}</strong><span>Son 30 gün</span></div>
+      <div class="stat"><strong>{total.toLocaleString("tr-TR")}</strong><span>Toplam</span></div>
+      <div class="stat"><strong>{confirmed}</strong><span>Bülten abonesi</span></div>
+      <div class="stat"><strong>{subscribers.length - confirmed}</strong><span>Onay bekleyen</span></div>
+    </div>
+
+    <h2>Son 30 gün</h2>
+    <ol class="stats-bars" aria-label="Son 30 günün günlük görüntülemeleri">
+      {series.map((d) => (
+        <li title={`${label(d.key)}: ${d.count}`}>
+          <span class="bar" style={`--h:${Math.round((d.count / max) * 100)}%`}></span>
+          <span class="sr">{label(d.key)}: {d.count}</span>
+        </li>
+      ))}
+    </ol>
+    <p class="stats-axis"><span>{label(series[0].key)}</span><span>{label(series[series.length - 1].key)}</span></p>
+
+    <h2>En çok görüntülenen</h2>
+    <table class="stats-table">
+      <thead><tr><th scope="col">Sayfa</th><th scope="col">Görüntüleme</th></tr></thead>
+      <tbody>
+        {topPaths.map(([path, count]) => (
+          <tr><td>{path.startsWith("/") ? <a href={path}>{path}</a> : path}</td><td>{count.toLocaleString("tr-TR")}</td></tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</Content>
+
+<style>
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+  .stat { padding: 1rem 1.1rem; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--color-surface); }
+  .stat strong { display: block; font-size: 1.6rem; font-weight: 600; color: var(--color-text); font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-muted); }
+  .stats-page h2 { font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-muted); margin: 0 0 1rem; }
+  .stats-bars { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(30, 1fr); gap: 3px; align-items: end; height: 140px; }
+  .stats-bars li { height: 100%; display: flex; align-items: flex-end; }
+  .stats-bars .bar { display: block; width: 100%; height: max(2px, var(--h)); border-radius: 3px 3px 0 0; background: var(--color-text-secondary); }
+  .stats-bars li:hover .bar { background: var(--color-text); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .stats-axis { display: flex; justify-content: space-between; margin: 0.5rem 0 2.5rem; font-size: 0.75rem; color: var(--color-muted); }
+  .stats-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .stats-table th, .stats-table td { text-align: left; padding: 0.55rem 0; border-bottom: 1px solid var(--color-border-subtle); }
+  .stats-table th:last-child, .stats-table td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  .stats-table th { font-weight: 500; color: var(--color-muted); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .stats-table a { color: var(--color-text); text-decoration: none; }
+  .stats-table a:hover { text-decoration: underline; text-underline-offset: 3px; }
+</style>

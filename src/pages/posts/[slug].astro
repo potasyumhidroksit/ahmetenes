@@ -81,6 +81,8 @@ const localizedSiteTitle = locale === "tr" ? localizeTurkish(siteTitle) : t(site
 // Generate SEO meta from content
 const seo = getSeoMeta(post, {
 	siteTitle: localizedSiteTitle,
+	// Diger sayfalarla ayni ayirici ("X — Ahmet Enes"; varsayilan " | ").
+	titleSeparator: " — ",
 	siteUrl: Astro.url.origin,
 	path: Astro.url.pathname.replace(/\/$/, ""),
 	defaultOgImage: featuredImageUrl,

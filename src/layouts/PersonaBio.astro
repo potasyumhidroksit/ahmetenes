@@ -7,12 +7,12 @@ import "../styles/appearance.css";
 import AppearanceHead from "../components/AppearanceHead.astro";
 import SiteFavicon from "../components/SiteFavicon.astro";
 import { localeFromUrl } from "../utils/i18n";
-interface Props { title: string; description?: string; demo?: boolean; content?: {collection:string; id:string; slug?:string} }
-const {title, description, content, demo = false} = Astro.props;
+interface Props { title: string; siteName?: string; description?: string; demo?: boolean; content?: {collection:string; id:string; slug?:string} }
+const {title, siteName = title, description, content, demo = false} = Astro.props;
 // Kanonik URL ve varsayılan paylaşım görseli.
 const canonical = new URL(Astro.url.pathname, Astro.url.origin).href;
 const ogImage = Astro.url.origin + "/og-default.jpg";
-const page = createPublicPageContext({Astro, kind: content ? "content" : "custom", pageType:"website", siteName: title, title, description, canonical, image: ogImage, content, seo: demo ? {robots:"noindex, nofollow"} : { ogImage }});
+const page = createPublicPageContext({Astro, kind: content ? "content" : "custom", pageType:"website", siteName, title, description, canonical, image: ogImage, content, seo: demo ? {robots:"noindex, nofollow"} : { ogImage }});
 ---
 <!doctype html>
 <html lang={localeFromUrl(Astro.url)} data-public-theme="personabio-bio" data-appearance="dark">

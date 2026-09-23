@@ -3,6 +3,7 @@ import { getSiteSettings } from "emdash";
 
 import { localeFromUrl, localePath, translate } from "../utils/i18n";
 import { localizedPosts } from "../utils/localized-posts";
+import { portableTextToHtml } from "../lib/portable-text-html";
 import { imageSrc, localImage } from "../lib/responsive-image";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
 
@@ -40,6 +41,11 @@ export const GET: APIRoute = async ({ site, url }) => {
 			const terms = [...new Set(labels)]
 				.map((label) => `\n      <category>${escapeXml(label)}</category>`)
 				.join("");
+			// Tam metin (okuyucuda siteye gitmeden okunur); kapak govdede tekrarlanmaz.
+			const body = portableTextToHtml(post.data.content, siteUrl, cover ?? undefined);
+			const content = body
+				? `\n      <content:encoded>${cdata(`${body}\n<p><a href="${postUrl}">Yazıyı ahmetenes.com'da oku →</a></p>`)}</content:encoded>`
+				: "";
 
 			return `    <item>
       <title>${title}</title>
@@ -47,14 +53,14 @@ export const GET: APIRoute = async ({ site, url }) => {
       <guid isPermaLink="true">${postUrl}</guid>
       <pubDate>${pubDate}</pubDate>
       <dc:creator>Ahmet Enes</dc:creator>
-      <description>${description}</description>${media}${terms}
+      <description>${description}</description>${content}${media}${terms}
     </item>`;
 		})
 		.filter(Boolean)
 		.join("\n");
 
 	const rss = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>${escapeXml(translate(locale, siteTitle))}</title>
     <description>${escapeXml(translate(locale, siteTagline))}</description>
@@ -87,6 +93,11 @@ const XML_ESCAPE_PATTERNS = [
 	[/"/g, "&quot;"],
 	[/'/g, "&apos;"],
 ] as const;
+
+/** CDATA icinde "]]>" gecerse bolunur (aksi halde XML bozulur). */
+function cdata(str: string): string {
+	return "<![CDATA[" + str.replace(/]]>/g, "]]]]><![CDATA[>") + "]]>";
+}
 
 function escapeXml(str: string): string {
 	let result = str;

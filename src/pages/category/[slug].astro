@@ -42,7 +42,7 @@ const filteredPosts = posts.map((post) => ({
 }));
 ---
 
-<Base title={locale === "tr" ? `${term.label} yazıları` : `${term.label} posts`} description={locale === "tr" ? `${term.label} kategorisindeki yazılar` : `Posts in ${term.label}`}>
+<Base title={locale === "tr" ? `${term.label} yazıları` : `${term.label} posts`} description={locale === "tr" ? `${term.label} kategorisindeki yazılar` : `Posts in ${term.label}`} robots={filteredPosts.length < 2 ? "noindex, follow" : undefined}>
 	<section class="archive-section">
 		<header class="archive-header">
 			<span class="archive-label">{t("Kategori")}</span>

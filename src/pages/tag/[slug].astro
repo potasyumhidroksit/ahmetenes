@@ -44,6 +44,7 @@ const filteredPosts = posts.map((post) => ({
 <Base
 	title={locale === "tr" ? `${term.label} etiketli yazılar` : `Posts tagged "${term.label}"`}
 	description={locale === "tr" ? `${term.label} etiketindeki tüm yazılar` : `All posts tagged with ${term.label}`}
+	robots={filteredPosts.length < 2 ? "noindex, follow" : undefined}
 >
 	<section class="archive-section">
 		<header class="archive-header">

@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { readBody, responder } from "../../lib/form-request";
 import { clientIp, isBot, rateLimit } from "../../lib/rate-limit";
 
 export const prerender = false;
@@ -17,18 +18,15 @@ function escapeHtml(s: string): string {
 }
 
 export const POST: APIRoute = async ({ request }) => {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json({ ok: false, error: "Geçersiz istek." }, { status: 400 });
-  }
-  const b = (body ?? {}) as Record<string, unknown>;
+  const { body, isForm } = await readBody(request);
+  const b = body ?? {};
+  const respond = responder(isForm, "/iletisim", "iletisim", "iletisim-form");
+  if (!body) return respond({ ok: false, error: "Geçersiz istek." }, 400);
 
   // Bot korumasi: honeypot dolduysa sessizce yut; IP hiz sinirini uygula.
-  if (isBot(b)) return Response.json({ ok: true });
+  if (isBot(b)) return respond({ ok: true });
   if (!rateLimit("contact:" + clientIp(request), 5, 60_000)) {
-    return Response.json({ ok: false, error: "Çok fazla istek, lütfen biraz bekleyin." }, { status: 429 });
+    return respond({ ok: false, error: "Çok fazla istek, lütfen biraz bekleyin." }, 429);
   }
 
   // Kontrol karakterleri (satir sonu vb.) konu satirina tasinmasin.
@@ -43,10 +41,10 @@ export const POST: APIRoute = async ({ request }) => {
     message.length < 5 ||
     message.length > 5000
   ) {
-    return Response.json({ ok: false, error: "Lütfen tüm alanları doğru doldurun." }, { status: 400 });
+    return respond({ ok: false, error: "Lütfen tüm alanları doğru doldurun." }, 400);
   }
   if (!RESEND_API_KEY) {
-    return Response.json({ ok: false, error: "E-posta servisi yapılandırılmadı." }, { status: 500 });
+    return respond({ ok: false, error: "E-posta servisi yapılandırılmadı." }, 500);
   }
 
   const html =
@@ -75,16 +73,10 @@ export const POST: APIRoute = async ({ request }) => {
       signal: AbortSignal.timeout(20000),
     });
     if (!res.ok) {
-      return Response.json(
-        { ok: false, error: "Mesaj gönderilemedi, lütfen sonra tekrar deneyin." },
-        { status: 502 }
-      );
+      return respond({ ok: false, error: "Mesaj gönderilemedi, lütfen sonra tekrar deneyin." }, 502);
     }
-    return Response.json({ ok: true });
+    return respond({ ok: true });
   } catch {
-    return Response.json(
-      { ok: false, error: "Mesaj gönderilemedi, lütfen sonra tekrar deneyin." },
-      { status: 500 }
-    );
+    return respond({ ok: false, error: "Mesaj gönderilemedi, lütfen sonra tekrar deneyin." }, 500);
   }
 };

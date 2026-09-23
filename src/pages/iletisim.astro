@@ -1,6 +1,9 @@
 ---
 import Content from "../layouts/Content.astro";
 import NewsletterForm from "../components/NewsletterForm.astro";
+// JS'siz gonderimden donus: /api/contact 303 ile ?iletisim=ok|<hata> getirir.
+const contactState = Astro.url.searchParams.get("iletisim");
+const contactMessage = contactState === "ok" ? "Teşekkürler! Mesajın iletildi." : contactState;
 ---
 <Content title="İletişim" description="Mesaj gönder veya bültene katıl.">
   <section class="archive-section contact-page">
@@ -9,7 +12,7 @@ import NewsletterForm from "../components/NewsletterForm.astro";
       <p>Bir iş, bir soru ya da sadece merhaba.</p>
     </header>
     <div class="contact-grid">
-      <form class="contact-form" data-contact novalidate>
+      <form class="contact-form" id="iletisim-form" data-contact method="post" action="/api/contact">
         <label>Ad
           <input type="text" name="name" required minlength="2" maxlength="120" autocomplete="name" />
         </label>
@@ -23,7 +26,7 @@ import NewsletterForm from "../components/NewsletterForm.astro";
           <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
         </div>
         <button type="submit" class="button-primary">Gönder</button>
-        <p class="form-status" data-contact-status role="status" aria-live="polite"></p>
+        <p class="form-status" data-contact-status role="status" aria-live="polite" data-state={contactState ? (contactState === "ok" ? "ok" : "error") : undefined}>{contactMessage}</p>
       </form>
       <aside class="contact-side">
         <a href="mailto:info@ahmetenes.com">info@ahmetenes.com</a>

@@ -9,17 +9,21 @@ interface Props {
 }
 
 const { heading, text, variant = "plain" } = Astro.props;
+// JS'siz gonderimden donus: /api/newsletter 303 ile ?bulten=ok|<hata> getirir.
+const state = Astro.url.searchParams.get("bulten");
+const stateMessage = state === "ok" ? "Onay e-postası gönderildi — gelen kutunu (ve spam klasörünü) kontrol et." : state;
 ---
-<section class:list={["newsletter", `newsletter--${variant}`]} aria-label={heading}>
+<section class:list={["newsletter", `newsletter--${variant}`]} id="bulten" aria-label={heading}>
 	<h2 class="newsletter-title">{heading}</h2>
 	<p class="newsletter-text">{text}</p>
-	<form class="newsletter-form" data-newsletter novalidate>
+	<form class="newsletter-form" data-newsletter method="post" action="/api/newsletter">
+		<input type="hidden" name="donus" value={Astro.url.pathname} />
 		<input type="email" name="email" required placeholder="eposta@ornek.com" autocomplete="email" aria-label="E-posta adresin" />
 		<div class="newsletter-hp" aria-hidden="true">
 			<label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
 		</div>
 		<button type="submit" class="button-primary">Kaydol</button>
-		<p class="newsletter-status" data-newsletter-status role="status" aria-live="polite"></p>
+		<p class="newsletter-status" data-newsletter-status role="status" aria-live="polite" data-state={state ? (state === "ok" ? "ok" : "error") : undefined}>{stateMessage}</p>
 	</form>
 </section>
 

@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { readBody, responder, safeReturnPath } from "../../../lib/form-request";
 import { addSubscriber, removeSubscriber, signEmailToken } from "../../../lib/newsletter";
 import { clientIp, isBot, rateLimit } from "../../../lib/rate-limit";
 
@@ -9,21 +10,18 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
 const FROM = process.env.RESEND_FROM || "mail@ahmetenes.com";
 
 export const POST: APIRoute = async ({ request, url }) => {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json({ ok: false, error: "Geçersiz istek." }, { status: 400 });
-  }
-  const b = (body ?? {}) as Record<string, unknown>;
-  if (isBot(b)) return Response.json({ ok: true, message: "Teşekkürler!" });
+  const { body, isForm } = await readBody(request);
+  const b = body ?? {};
+  const respond = responder(isForm, safeReturnPath(body?.donus, "/iletisim"), "bulten", "bulten");
+  if (!body) return respond({ ok: false, error: "Geçersiz istek." }, 400);
+  if (isBot(b)) return respond({ ok: true, message: "Teşekkürler!" });
   if (!rateLimit("newsletter:" + clientIp(request), 5, 60_000)) {
-    return Response.json({ ok: false, error: "Çok fazla istek, lütfen biraz bekleyin." }, { status: 429 });
+    return respond({ ok: false, error: "Çok fazla istek, lütfen biraz bekleyin." }, 429);
   }
   const raw = typeof b.email === "string" ? b.email : "";
   const email = raw.trim().toLowerCase();
   if (!EMAIL_RE.test(email)) {
-    return Response.json({ ok: false, error: "Geçerli bir e-posta girin." }, { status: 400 });
+    return respond({ ok: false, error: "Geçerli bir e-posta girin." }, 400);
   }
 
   const result = await addSubscriber(email);
@@ -31,7 +29,7 @@ export const POST: APIRoute = async ({ request, url }) => {
   // Ayni adrese en fazla 10 dakikada bir onay e-postasi: farkli IP'lerle
   // birinin gelen kutusunu onay mailiyle doldurmak mumkun olmasin.
   if (result.ok && result.pending && !rateLimit("newsletter-mail:" + email, 1, 10 * 60_000)) {
-    return Response.json({ ok: true, pending: true, message: "Onay e-postası az önce gönderildi — gelen kutunu (ve spam klasörünü) kontrol et." });
+    return respond({ ok: true, pending: true, message: "Onay e-postası az önce gönderildi — gelen kutunu (ve spam klasörünü) kontrol et." });
   }
 
   if (result.ok && result.pending && RESEND_API_KEY) {
@@ -63,12 +61,9 @@ export const POST: APIRoute = async ({ request, url }) => {
       if (!res.ok) throw new Error("resend " + res.status);
     } catch {
       await removeSubscriber(email);
-      return Response.json(
-        { ok: false, error: "Doğrulama e-postası gönderilemedi, tekrar dene." },
-        { status: 500 }
-      );
+      return respond({ ok: false, error: "Doğrulama e-postası gönderilemedi, tekrar dene." }, 500);
     }
   }
 
-  return Response.json(result);
+  return respond(result);
 };

@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { getEmDashCollection } from "emdash";
+import { loadGallery } from "../lib/gallery";
 import { localizedPosts } from "../utils/localized-posts";
 
 export const prerender = false;
@@ -20,9 +21,19 @@ function escapeXml(value: string): string {
 
 export const GET: APIRoute = async ({ url }) => {
   const origin = url.origin.replace(/\/$/, "");
-  const entries: { loc: string; lastmod?: string }[] = STATIC_PATHS.map((path) => ({
+  const entries: { loc: string; lastmod?: string; images?: string[] }[] = STATIC_PATHS.map((path) => ({
     loc: origin + path,
   }));
+
+  // Galeri kareleri (Google Gorseller): buyuk onizleme adresi. Kareler sayfada
+  // da var; image sitemap kesfi hizlandirir. Immich yoksa bos gecer.
+  try {
+    const photos = await loadGallery();
+    const galeri = entries.find((entry) => entry.loc === origin + "/galeri");
+    if (galeri) galeri.images = photos.slice(0, 1000).map((p) => new URL(p.fullSrc, origin + "/").href);
+  } catch {
+    // galeri alinamazsa gorselsiz devam
+  }
 
   // /posts ve ana sayfa: en son yazi degisikligi (tarayicilar arsivi ne zaman
   // yeniden taramasi gerektigini bilsin).
@@ -53,7 +64,7 @@ export const GET: APIRoute = async ({ url }) => {
 
   const body =
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n' +
     entries
       .map(
         (entry) =>
@@ -61,6 +72,8 @@ export const GET: APIRoute = async ({ url }) => {
           escapeXml(entry.loc) +
           "</loc>" +
           (entry.lastmod ? "<lastmod>" + escapeXml(entry.lastmod) + "</lastmod>" : "") +
+          (entry.images ?? []).map((src) => "\n    <image:image><image:loc>" + escapeXml(src) + "</image:loc></image:image>").join("") +
+          (entry.images?.length ? "\n  " : "") +
           "</url>"
       )
       .join("\n") +

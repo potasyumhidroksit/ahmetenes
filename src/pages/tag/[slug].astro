@@ -10,7 +10,7 @@ import { getReadingTime } from "../../utils/reading-time";
 
 import { localizedTerm as getTerm } from "../../utils/localized-content";
 import { localizedPosts } from "../../utils/localized-posts";
-import { localeFromUrl, localePath, translate } from "../../utils/i18n";
+import { localeFromUrl, translate } from "../../utils/i18n";
 import { localizeTurkish } from "../../utils/turkish-content";
 const locale = localeFromUrl(Astro.url);
 const t = (text: string) => translate(locale, text);

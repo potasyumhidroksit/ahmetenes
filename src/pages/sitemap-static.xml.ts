@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { getEmDashCollection } from "emdash";
+import { localizedPosts } from "../utils/localized-posts";
 
 export const prerender = false;
 
@@ -22,6 +23,19 @@ export const GET: APIRoute = async ({ url }) => {
   const entries: { loc: string; lastmod?: string }[] = STATIC_PATHS.map((path) => ({
     loc: origin + path,
   }));
+
+  // /posts ve ana sayfa: en son yazi degisikligi (tarayicilar arsivi ne zaman
+  // yeniden taramasi gerektigini bilsin).
+  try {
+    const { entries: posts } = await localizedPosts("tr", { orderBy: { published_at: "desc" } });
+    const latest = Math.max(0, ...posts.map((post) => (post.data.updatedAt ?? post.data.publishedAt ?? new Date(0)).getTime()));
+    if (latest > 0) {
+      const lastmod = new Date(latest).toISOString();
+      for (const entry of entries) if (entry.loc === origin + "/posts" || entry.loc === origin + "/") entry.lastmod = lastmod;
+    }
+  } catch {
+    // yazilar alinamazsa lastmod'suz devam
+  }
 
   try {
     const { entries: pages } = await getEmDashCollection("pages");

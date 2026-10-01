@@ -9,7 +9,7 @@ if [ -f /root/.cloudflare/env ]; then
   ( set -a; . /root/.cloudflare/env; set +a
     purge() {
       curl -s -X POST "https://api.cloudflare.com/client/v4/zones/5079525e40cebf813550cbf2bd411b46/purge_cache" \
-        -H "X-Auth-Email: $CF_EMAIL" -H "X-Auth-Key: $CF_GLOBAL_KEY" \
+        -H "Authorization: Bearer $CF_TOKEN_PURGE" \
         -H 'Content-Type: application/json' --data "$1" | grep -Eq '"success": *true'
     }
     # Katmanli onbellekte host purge nesneyi silmiyor, "suresi dolmus"

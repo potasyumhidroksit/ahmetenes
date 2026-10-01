@@ -14,3 +14,6 @@ for _ in 1 2 3 4 5; do
   echo "istek: $(tail -n1 "$REQ" 2>/dev/null)"
   bash scripts/cdn-refresh.sh
 done
+# İstek dosyası konteynerin (uid 1001) olmalı: root bir kez dokunup sahipliği aldığında panel EACCES alıyordu
+# (2026-09-23 → 10-01 arası panel temizliği hiç çalışmadı).
+chown 1001:1001 "$REQ" 2>/dev/null || true

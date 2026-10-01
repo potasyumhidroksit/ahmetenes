@@ -132,5 +132,5 @@ Konteyner açılışta `docker-entrypoint.sh` ile seed'i idempotent uygular, son
 
 ## Eski site
 
-Önceki Next.js sürümü `/var/www/deneme/projeler/ahmetenes-nextjs-archive` altında rollback için korunur.
+Önceki Next.js sürümü `/var/www/deneme/projeler/ahmetenes-nextjs-archive` altında yalnız **kaynak arşivi** olarak durur; geri dönüş yolu DEĞİLDİR (aynı imaj/konteyner/port — `deploy.sh`'si kilitli). Geri dönüş: `bash deploy.sh --rollback` (önceki yayının `ahmetenes:rollback` imajı).
 `/blog/*`, `/now` ve `/admin` yolları yeni rotalara 301 ile yönlendirilir.

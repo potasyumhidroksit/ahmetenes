@@ -33,6 +33,8 @@ const description = metaDescription(
 );
 const srcset = photo.srcSet.filter((s) => s.w >= 480).map((s) => s.src + " " + s.w + "w").join(", ");
 // contentUrl 1600px genislige olceklenmis onizleme; boyutlar ona gore.
+// Görsel inmeden yer ayrılsın (CLS): `width/height:auto` öznitelik boyutlarını geçersiz kılıyordu; oran CSS'e gider.
+const aspect = photo.width && photo.height ? Number((photo.width / photo.height).toFixed(4)) : undefined;
 const shown = photo.width && photo.height
 	? { width: Math.min(1600, photo.width), height: Math.round((Math.min(1600, photo.width) * photo.height) / photo.width) }
 	: null;
@@ -97,7 +99,8 @@ const jsonLd = {
 				alt={photo.alt ?? photo.title}
 				fetchpriority="high"
 				decoding="async"
-				style={photo.color ? `background-color:${photo.color}` : undefined}
+				class:list={[{ "photo-sized": aspect }]}
+				style={[photo.color ? `background-color:${photo.color}` : "", aspect ? `--ar:${aspect}` : ""].filter(Boolean).join(";") || undefined}
 				{...(photo.width && photo.height ? { width: photo.width, height: photo.height } : {})}
 			/>
 		</figure>
@@ -139,6 +142,8 @@ const jsonLd = {
 		display: block; width: auto; height: auto; max-width: 100%; max-height: 85vh;
 		margin: 0 auto; border-radius: var(--radius-lg);
 	}
+	/* Boyutu bilinen kare: genişlik = min(kap, 85vh × oran), yükseklik orandan — yükleme öncesi yer ayrılır. */
+	.photo-figure img.photo-sized { width: min(100%, calc(85vh * var(--ar))); aspect-ratio: var(--ar); }
 	.photo-header h1 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 500; letter-spacing: -0.03em; margin: 0 0 0.5rem; }
 	.photo-meta { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0; font-size: 0.85rem; color: var(--color-muted); }
 	.photo-story { max-width: 680px; margin: 1.25rem 0 0; font-size: 1.05rem; line-height: 1.8; color: var(--color-text); }

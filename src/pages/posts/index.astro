@@ -48,7 +48,7 @@ const commentCounts = new Map(
       </div>
     </div>
     {posts.length === 0 ? <div class="content-empty"><h2>{t("Biraz düşünce, biraz zaman.")}</h2><p>{t("Yeni yazılar burada yerini alacak.")}</p><a href={localePath("/", locale)}>{t("Ana sayfaya dön")} →</a></div> : <>
-      <ul class="post-titles">{posts.map((post) => <li><a href={localePath(`/${post.id}`, locale)}>{post.data.title}</a></li>)}</ul>
+      <ol class="post-titles">{posts.map((post) => <li><a href={localePath(`/${post.id}`, locale)}>{post.data.title}</a></li>)}</ol>
       <div class="posts-grid">{posts.map((post, index) => <PostCard priority={index === 0} title={post.data.title} excerpt={post.data.excerpt} featuredImage={post.data.featured_image} href={`/${post.id}`} date={post.data.publishedAt ?? undefined} readingTime={getReadingTime(post.data.content)} commentCount={commentCounts.get(post.data.id) ?? 0} metaAfterTitle coverBackground showReadMore={false} />)}</div>
     </>}
   </section>
@@ -147,7 +147,7 @@ const commentCounts = new Map(
     stroke-linecap: round;
   }
 
-  .post-titles { display: none; margin: 0; padding: 0; list-style: none; }
+  .post-titles { display: none; margin: 0; padding: 0; list-style: none; counter-reset: okuma; }
 
   .posts-page[data-view="list"] .post-titles {
     display: flex;
@@ -155,7 +155,23 @@ const commentCounts = new Map(
     gap: 31.2px;
   }
 
-  .post-titles li { min-width: 0; }
+  /* Okuma sırası görünür (2026-10-06): liste zaten "yukarıdan aşağı" dizili; soluk sıra numarası. */
+  .post-titles li {
+    display: grid;
+    grid-template-columns: 2.6rem minmax(0, 1fr);
+    align-items: baseline;
+    min-width: 0;
+    counter-increment: okuma;
+  }
+  /* display:grid li artık list-item değil: list-item sayacı artmaz, kendi sayacımız. */
+  .post-titles li::before {
+    content: counter(okuma, decimal-leading-zero);
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+  }
 
   .post-titles a {
     display: inline-block;
@@ -302,6 +318,8 @@ const commentCounts = new Map(
     :global(html[data-public-theme] .content-panel .posts-page[data-view="grid"] .post-card :is(.card-excerpt, .card-read, .card-meta .meta-dot, .card-meta time ~ span)) { display: none; }
     .posts-page[data-view="list"] .post-titles { gap: 24px; }
     .post-titles a { max-width: 96%; font-size: clamp(21px, 6vw, 26px); }
+    .post-titles li { grid-template-columns: 2.1rem minmax(0, 1fr); }
+    .post-titles li::before { font-size: 0.75rem; }
     .post-titles a:hover,
     .post-titles a:focus-visible { transform: translateX(4px) scale(1.035); }
     .posts-page[data-view="single"] :global(.card-link) { min-height: 400px; }

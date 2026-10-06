@@ -317,7 +317,7 @@ const publishDate =
 		otherPostsWithTags.length > 0 && (
 			<section class="more-posts">
 				<div class="more-inner">
-					<h2 class="more-title">{t("İlgini Çekebilir")}</h2>
+					<h2 class="more-title">{t("İlgini çekebilir")}</h2>
 					<div class="more-grid">
 						{otherPostsWithTags.map(
 							({ post: p, tags: postTags, bylines: postBylines }) => (
@@ -346,14 +346,14 @@ const publishDate =
   const comments = document.querySelector<HTMLElement>(".article-comments");
   const isTurkish = comments?.dataset.commentLocale === "tr";
   const commentText: Record<string, string> = {
-    Name: "Adınız",
-    Email: "E-posta adresiniz",
-    Comment: "Yorumunuz",
-    "Post Comment": "Yorumu Gönder",
+    Name: "Adın",
+    Email: "E-posta adresin",
+    Comment: "Yorumun",
+    "Post Comment": "Yorumu gönder",
     "Submitting...": "Gönderiliyor...",
-    "Comment submitted!": "Yorumunuz gönderildi!",
+    "Comment submitted!": "Yorumun gönderildi!",
     "Failed to submit comment.": "Yorum gönderilemedi.",
-    "Network error. Please try again.": "Ağ hatası. Lütfen tekrar deneyin.",
+    "Network error. Please try again.": "Bağlantı hatası, lütfen tekrar dene.",
   };
   const tr = (value: string) => isTurkish ? commentText[value] ?? value : value;
   document.querySelectorAll<HTMLLabelElement>(".article-comments .ec-comment-form-field").forEach((label) => {

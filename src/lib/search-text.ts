@@ -60,6 +60,24 @@ export function plainText(value: unknown): string {
     .join(" ");
 }
 
+const WORD_CHAR = /[\p{L}\p{N}]/u;
+
+/**
+ * Terimin kelime basinda gectigi ilk konum (yoksa -1). Turkce ekler kelime
+ * sonuna geldigi icin onek eslesmesi yeter ("gece" -> "geceleri"); kelime
+ * icinde eslesme "isik"i "b-isik-letliler"de buluyordu.
+ */
+export function wordIndex(folded: string, term: string, from = 0): number {
+  let at = folded.indexOf(term, from);
+  while (at > 0 && WORD_CHAR.test(folded[at - 1])) at = folded.indexOf(term, at + 1);
+  return at;
+}
+
+/** Katlanmis metinde terim bir kelimenin basinda geciyor mu? */
+export function hasWord(folded: string, term: string): boolean {
+  return wordIndex(folded, term) !== -1;
+}
+
 export function searchTerms(query: string): string[] {
   return [...new Set(fold(query.slice(0, 100)).split(/\s+/).filter(Boolean))].slice(0, 8);
 }
@@ -73,10 +91,10 @@ export function highlight(text: string, terms: string[]): string {
   const { folded, map } = foldWithMap(text);
   const ranges: Array<[number, number]> = [];
   for (const term of terms) {
-    let at = folded.indexOf(term);
+    let at = wordIndex(folded, term);
     while (at !== -1) {
       ranges.push([map[at], map[at + term.length]]);
-      at = folded.indexOf(term, at + term.length);
+      at = wordIndex(folded, term, at + term.length);
     }
   }
   ranges.sort((a, b) => a[0] - b[0]);
@@ -95,7 +113,7 @@ export function excerptAround(text: string, terms: string[], before = 70, after 
   const { folded, map } = foldWithMap(text);
   let first = -1;
   for (const term of terms) {
-    const at = folded.indexOf(term);
+    const at = wordIndex(folded, term);
     if (at !== -1 && (first === -1 || at < first)) first = at;
   }
   if (first === -1) return null;

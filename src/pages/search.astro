@@ -4,7 +4,7 @@ export const prerender = false;
 import { search } from "emdash";
 import Base from "../layouts/Content.astro";
 import { localizedPosts } from "../utils/localized-posts";
-import { excerptAround, fold, highlight, plainText, searchTerms } from "../lib/search-text";
+import { excerptAround, fold, hasWord, highlight, plainText, searchTerms } from "../lib/search-text";
 import { galleryCategories, loadGallery, type GalleryPhoto } from "../lib/gallery";
 import { imageSrc, localImage } from "../lib/responsive-image";
 
@@ -27,10 +27,10 @@ const thumbOf = (src?: string) => {
 	return { src: w === 640 ? local.src.replace(/\.[^.]+$/, "-640w.webp") : local.src, width: w, height: Math.round((local.height / local.width) * w), color: local.color };
 };
 const exactTerms = query.slice(0, 100).toLocaleLowerCase("tr-TR").split(/\s+/).filter(Boolean);
-/** Sorgu kelimelerinden katlanmadan (Turkce harfleriyle) gecen her biri icin puan. */
+/** Sorgu kelimelerinden katlanmadan (Turkce harfleriyle) kelime basinda gecen her biri icin puan. */
 const exactBonus = (text: string, weight: number) => {
 	const lower = text.toLocaleLowerCase("tr-TR");
-	return exactTerms.filter((term) => lower.includes(term)).length * weight;
+	return exactTerms.filter((term) => hasWord(lower, term)).length * weight;
 };
 if (query && locale === "tr") {
 	// Katlamali (ışık = isik), tum kelimeleri iceren, basligi one alan arama.
@@ -46,12 +46,14 @@ if (query && locale === "tr") {
 			const excerpt = entry.data.excerpt ?? "";
 			const body = plainText(entry.data.content);
 			const [ft, fe, fb] = [fold(title), fold(excerpt), fold(body)];
-			if (!terms.every((term) => ft.includes(term) || fe.includes(term) || fb.includes(term))) return null;
+			if (!terms.every((term) => hasWord(ft, term) || hasWord(fe, term) || hasWord(fb, term))) return null;
 			const score =
-				terms.reduce((sum, term) => sum + (ft.includes(term) ? 10 : 0) + (fe.includes(term) ? 3 : 0) + (fb.includes(term) ? 1 : 0), 0) +
+				terms.reduce((sum, term) => sum + (hasWord(ft, term) ? 10 : 0) + (hasWord(fe, term) ? 3 : 0) + (hasWord(fb, term) ? 1 : 0), 0) +
 				exactBonus(title, 20) + exactBonus(excerpt, 6) + exactBonus(body, 2);
-			const inExcerpt = terms.some((term) => fe.includes(term));
-			const snippetText = inExcerpt || !excerpt ? excerpt || excerptAround(body, terms) || "" : excerptAround(body, terms) || excerpt;
+			// Ozet her zaman eslesmenin cevresinden: uzun bir yazi ozetinde
+			// eslesme sonda kalinca telefonda (4 satir) gorunmuyordu.
+			const inExcerpt = terms.some((term) => hasWord(fe, term));
+			const snippetText = (inExcerpt ? excerptAround(excerpt, terms) : excerptAround(body, terms)) || excerpt;
 			return { score, result: { id: entry.data.id, slug: entry.id, title, snippet: highlight(snippetText, terms), image: imageSrc(entry.data.featured_image) } };
 		})
 		.filter((hit): hit is NonNullable<typeof hit> => hit !== null)
@@ -76,8 +78,8 @@ if (query) {
 						.filter(Boolean)
 						.join(" "),
 				);
-				if (terms.length === 0 || !terms.every((term) => title.includes(term) || rest.includes(term))) return null;
-				return { photo, score: terms.reduce((sum, term) => sum + (title.includes(term) ? 10 : 1), 0) + exactBonus(photo.title, 20) + exactBonus(photo.story ?? "", 2) };
+				if (terms.length === 0 || !terms.every((term) => hasWord(title, term) || hasWord(rest, term))) return null;
+				return { photo, score: terms.reduce((sum, term) => sum + (hasWord(title, term) ? 10 : 1), 0) + exactBonus(photo.title, 20) + exactBonus(photo.story ?? "", 2) };
 			})
 			.filter((hit): hit is NonNullable<typeof hit> => hit !== null)
 			.sort((a, b) => b.score - a.score)
@@ -93,7 +95,7 @@ const summary = [results.length && `${results.length} yazı`, photoHits.length &
 
 <Base
 	title={query ? `${t("Ara")}: ${query}` : t("Ara")}
-	description={t("Yazılarda ve galeride arayın")}
+	description={t("Yazılarda ve galeride ara")}
 	robots="noindex, follow"
 >
 	<section class="search-page">
@@ -164,7 +166,7 @@ const summary = [results.length && `${results.length} yazı`, photoHits.length &
 			)
 		}
 
-		{!query && <p class="search-hint">{t("Bir kelime, yer ya da konu yazarak yazılar ve kareler arasında gezinin.")}</p>}
+		{!query && <p class="search-hint">{t("Bir kelime, yer ya da konu yazarak yazılar ve kareler arasında gezin.")}</p>}
 	</section>
 </Base>
 
@@ -277,8 +279,22 @@ const summary = [results.length && `${results.length} yazı`, photoHits.length &
 		border-radius: 10px;
 	}
 
+	/* Telefonda dar metin sutunu basligi 5, ozeti 13 satira boluyordu (kart
+	   ~540px). Baslik + kucuk kare yan yana, ozet tam genislikte 4 satir. */
 	@media (max-width: 600px) {
-		.result-link.has-thumb { grid-template-columns: 96px minmax(0, 1fr); gap: 14px; }
+		.result-link.has-thumb {
+			grid-template-columns: minmax(0, 1fr) 72px;
+			grid-template-areas: "title thumb" "snippet snippet";
+			gap: 12px 14px;
+		}
+		.result-link.has-thumb .result-body { display: contents; }
+		.result-link.has-thumb .result-thumb { grid-area: thumb; aspect-ratio: 1; border-radius: 8px; }
+		.result-link.has-thumb .result-title { grid-area: title; align-self: center; margin: 0; }
+		.result-link.has-thumb .result-snippet { grid-area: snippet; }
+		.result-title { font-size: 1.15rem; }
+		.result-snippet {
+			display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden;
+		}
 	}
 
 	.result-title {

@@ -16,7 +16,7 @@ export const POST: APIRoute = async ({ request, url }) => {
   if (!body) return respond({ ok: false, error: "Geçersiz istek." }, 400);
   if (isBot(b)) return respond({ ok: true, message: "Teşekkürler!" });
   if (!rateLimit("newsletter:" + clientIp(request), 5, 60_000)) {
-    return respond({ ok: false, error: "Çok fazla istek, lütfen biraz bekleyin." }, 429);
+    return respond({ ok: false, error: "Çok fazla istek; biraz bekleyip tekrar dene." }, 429);
   }
   const raw = typeof b.email === "string" ? b.email : "";
   const email = raw.trim().toLowerCase();

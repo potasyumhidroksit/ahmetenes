@@ -306,3 +306,10 @@ html[data-public-theme] body .site-search-dialog .search-dialog-close:hover { ba
 
 /* Fotoğraf sayfasındaki "← Galeri" bağlantısı 54×23px'ti: dokunma alanı 44px. */
 [data-public-theme="personabio-content"] .content-panel .photo-back { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* ───── Tasarım turu 2026-10 · katman 3 ───── */
+
+/* Telefonda arama sonucu kartı: iç boşluk 24→18px (özet satırı ~12px daha geniş). */
+@media (max-width: 600px) {
+  [data-public-theme="personabio-content"] .content-panel .search-result { padding: 18px; }
+}

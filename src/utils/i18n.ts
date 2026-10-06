@@ -39,10 +39,10 @@ const interfaceTr: Record<string, string> = {
   "Kategori": "Kategori", "Etiket": "Etiket", "yazı": "yazı",
   "Bu kategoride henüz yazı yok.": "Bu kategoride henüz yazı yok.", "Bu etikette henüz yazı yok.": "Bu etikette henüz yazı yok.",
   "Yayın tarihi": "Yayın tarihi", "Okuma süresi": "Okuma süresi", "İçindekiler": "İçindekiler", "Bu yazıda": "Bu yazıda",
-  "Yazar": "Yazar", "Yazarlar": "Yazarlar", "Etiketler": "Etiketler", "İlgini Çekebilir": "İlgini Çekebilir",
-  "Yazılar arasında arayın": "Yazılar arasında arayın", "Yazılarda ara...": "Yazılarda ara...", "Başlıksız": "Başlıksız",
-  "Bir kelime veya konu yazarak notlar arasında gezinin.": "Bir kelime veya konu yazarak notlar arasında gezinin.",
-  "Sayfa bulunamadı": "Sayfa bulunamadı", "Aradığınız sayfa bulunamadı.": "Aradığınız sayfa bulunamadı.",
+  "Yazar": "Yazar", "Yazarlar": "Yazarlar", "Etiketler": "Etiketler", "İlgini çekebilir": "İlgini çekebilir",
+  "Yazılar arasında ara": "Yazılar arasında ara", "Yazılarda ara...": "Yazılarda ara...", "Başlıksız": "Başlıksız",
+  "Bir kelime veya konu yazarak notlar arasında gezin.": "Bir kelime veya konu yazarak notlar arasında gezin.",
+  "Sayfa bulunamadı": "Sayfa bulunamadı", "Aradığın sayfa bulunamadı.": "Aradığın sayfa bulunamadı.",
 };
 
 const englishToTurkish: Record<string, string> = {
@@ -50,7 +50,7 @@ const englishToTurkish: Record<string, string> = {
   Navigate: "Gezin", Connect: "Bağlan", Search: "Ara", "Search...": "Yazılarda ara...",
   Admin: "Yönetim", RSS: "RSS", "All posts": "Tüm yazılar", "Read more": "Devamını oku",
   Categories: "Kategoriler", Tags: "Etiketler", "Recent posts": "Son yazılar",
-  "Keep reading": "İlgini Çekebilir", Published: "Yayın tarihi", "Reading time": "Okuma süresi",
+  "Keep reading": "İlgini çekebilir", Published: "Yayın tarihi", "Reading time": "Okuma süresi",
   "Table of contents": "İçindekiler", "On this page": "Bu yazıda", Author: "Yazar", Authors: "Yazarlar",
   "Page not found": "Sayfa bulunamadı", "Back to home": "Ana sayfaya dön",
 };

@@ -26,7 +26,7 @@ export const POST: APIRoute = async ({ request }) => {
   // Bot korumasi: honeypot dolduysa sessizce yut; IP hiz sinirini uygula.
   if (isBot(b)) return respond({ ok: true });
   if (!rateLimit("contact:" + clientIp(request), 5, 60_000)) {
-    return respond({ ok: false, error: "Çok fazla istek, lütfen biraz bekleyin." }, 429);
+    return respond({ ok: false, error: "Çok fazla istek; biraz bekleyip tekrar dene." }, 429);
   }
 
   // Kontrol karakterleri (satir sonu vb.) konu satirina tasinmasin.
@@ -73,10 +73,10 @@ export const POST: APIRoute = async ({ request }) => {
       signal: AbortSignal.timeout(20000),
     });
     if (!res.ok) {
-      return respond({ ok: false, error: "Mesaj gönderilemedi, lütfen sonra tekrar deneyin." }, 502);
+      return respond({ ok: false, error: "Mesaj gönderilemedi, biraz sonra tekrar dene." }, 502);
     }
     return respond({ ok: true });
   } catch {
-    return respond({ ok: false, error: "Mesaj gönderilemedi, lütfen sonra tekrar deneyin." }, 500);
+    return respond({ ok: false, error: "Mesaj gönderilemedi, biraz sonra tekrar dene." }, 500);
   }
 };

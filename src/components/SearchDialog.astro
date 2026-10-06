@@ -37,8 +37,10 @@ const t = (text: string) => translate(locale, text);
     });
     dialog.addEventListener("close", () => {
       document.documentElement.classList.remove("search-dialog-open");
-      if (trigger.getClientRects().length) trigger.focus();
-      else document.querySelector<HTMLButtonElement>(".content-menu-toggle")?.focus();
+      // Mobil cekmeceden acildiysa tetikleyici artik inert/gizli (getClientRects
+      // yine dolu): odak body'ye dusmesin, menu dugmesine donsun.
+      trigger.focus();
+      if (document.activeElement !== trigger) document.querySelector<HTMLButtonElement>(".content-menu-toggle")?.focus();
     });
   }
 </script>

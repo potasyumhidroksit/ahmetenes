@@ -90,5 +90,23 @@ const groups = gearCategories
     background: var(--color-bg-subtle); transition: transform 0.25s ease, opacity 0.25s ease;
   }
   .gear-shots a:hover img { transform: scale(1.06); }
+  /* Masaüstünde iki sütun (gruplar bölünmeden): tek sütunlu liste sağ yarıyı boş
+     bırakıp sayfayı ~2200px'e uzatıyordu (→ ~1700px). */
+  @media (min-width: 1000px) {
+    .gear-list { display: block; columns: 2; column-gap: 4rem; }
+    .gear-group { break-inside: avoid; margin-bottom: 2.5rem; }
+  }
+  /* Telefonda her satır aynı düzende: ad, altında açıklama, "Galeride N kare",
+     kareler tek sırada (6. kare tek başına alt satıra düşüyordu; etiket kimi
+     satırda yanda kimi satırda üstteydi). */
+  @media (max-width: 600px) {
+    .gear-group > ul > li > span { flex-basis: 100%; }
+    .gear-shots { flex-direction: column; align-items: flex-start; }
+    .gear-shots ul {
+      display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
+      width: 100%; max-width: calc(6 * 56px + 5 * 0.4rem);
+    }
+    .gear-shots img { width: 100%; height: auto; aspect-ratio: 1; }
+  }
   @media (prefers-reduced-motion: reduce) { .gear-shots img { transition: none; } }
 </style>

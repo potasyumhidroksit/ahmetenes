@@ -13,20 +13,21 @@ const number = (value: number) => (stats.ok ? value.toLocaleString("tr-TR") : "�
   <section class="archive-section media-page">
     <header class="archive-header">
       <h1>Medya</h1>
-      <p>Pulse ve Sinedexter'dan canlı sinyaller.</p>
+      <p>Şu an dinlediğim müzik ve Sinedexter'daki film/dizi arşivim — canlı.</p>
     </header>
     <div class="media-grid">
       <article class="media-card" data-pulse-card data-playing={pulse.playing ? "true" : "false"}>
-        <p class="media-label" data-pulse-label>{pulse.playing ? "Şu an çalıyor" : track ? "Son dinlenen" : "Şu an çalıyor"}</p>
+        <p class="media-label" data-pulse-label>{pulse.playing ? "Şu an çalıyor" : track ? "Son dinlenen" : "Müzik"}</p>
         <div class="pulse-row">
-          <img data-pulse-art src={track?.art || "/favicon.svg"} alt="" width="64" height="64" />
+          <img data-pulse-art src={track?.art || "/favicon.svg"} alt="" width="88" height="88" />
           <div class="pulse-meta">
-            <a class="pulse-name" data-pulse-name href={track?.link || undefined} target="_blank" rel="noopener noreferrer">{track?.name || "Şu an sessizlik"}</a>
-            <span data-pulse-artist>{track ? track.artist : "Pulse bekleniyor"}</span>
+            <a class="pulse-name" data-pulse-name href={track?.link || undefined} target="_blank" rel="noopener noreferrer">{track?.name || "Şu an bir şey çalmıyor"}</a>
+            <span data-pulse-artist>{track ? track.artist : ""}</span>
             <span class="pulse-progress" data-pulse-progress></span>
           </div>
         </div>
         <div class="pulse-bar" aria-hidden="true"><span data-pulse-bar></span></div>
+        <a class="media-more" data-pulse-open href={track?.link || undefined} target="_blank" rel="noopener noreferrer" hidden={!track?.link}>Şarkıyı aç →</a>
       </article>
       <article class="media-card">
         <p class="media-label">Sinedexter</p>
@@ -68,6 +69,7 @@ const number = (value: number) => (stats.ok ? value.toLocaleString("tr-TR") : "�
   const artEl = document.querySelector<HTMLImageElement>("[data-pulse-art]");
   const progEl = document.querySelector<HTMLElement>("[data-pulse-progress]");
   const barEl = document.querySelector<HTMLElement>("[data-pulse-bar]");
+  const openEl = document.querySelector<HTMLAnchorElement>("[data-pulse-open]");
 
   // Son yanit + alindigi an: ilerleme yoklamalar arasinda saniye saniye akar.
   let last: { data: Pulse; at: number } | null = null;
@@ -78,13 +80,17 @@ const number = (value: number) => (stats.ok ? value.toLocaleString("tr-TR") : "�
     const t = data.track;
     const playing = Boolean(data.playing && t);
     if (card) card.dataset.playing = String(playing);
-    if (labelEl) labelEl.textContent = playing ? "Şu an çalıyor" : t ? "Son dinlenen" : "Şu an çalıyor";
+    if (labelEl) labelEl.textContent = playing ? "Şu an çalıyor" : t ? "Son dinlenen" : "Müzik";
+    if (openEl) {
+      openEl.hidden = !t?.link;
+      if (t?.link) openEl.href = t.link;
+    }
     if (nameEl) {
-      nameEl.textContent = t?.name || "Şu an sessizlik";
+      nameEl.textContent = t?.name || "Şu an bir şey çalmıyor";
       if (t?.link) nameEl.href = t.link;
       else nameEl.removeAttribute("href");
     }
-    if (artistEl) artistEl.textContent = t ? t.artist || "" : "Pulse bekleniyor";
+    if (artistEl) artistEl.textContent = t ? t.artist || "" : "";
     const art = t?.art || "/favicon.svg";
     if (artEl && artEl.getAttribute("src") !== art) artEl.src = art;
     let pct = 0;
@@ -147,8 +153,8 @@ const number = (value: number) => (stats.ok ? value.toLocaleString("tr-TR") : "�
   }
   .pulse-row { display: flex; align-items: center; gap: 1rem; }
   .pulse-row img {
-    width: 64px; height: 64px; border-radius: var(--radius); object-fit: cover;
-    background: var(--color-bg-subtle);
+    width: 88px; height: 88px; flex: none; border-radius: var(--radius); object-fit: cover;
+    background: var(--color-bg-subtle); box-shadow: 0 10px 28px rgb(0 0 0 / 22%);
   }
   .pulse-meta { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
   .pulse-name { font-weight: 500; color: var(--color-text); text-decoration: none; overflow-wrap: anywhere; }
@@ -163,12 +169,20 @@ const number = (value: number) => (stats.ok ? value.toLocaleString("tr-TR") : "�
     display: block; height: 100%; background: var(--color-text-secondary);
     transform: scaleX(0); transform-origin: left; transition: transform 1s linear;
   }
-  [data-playing="false"] .pulse-bar { visibility: hidden; }
+  /* Çalmıyorken çubuk yer kaplamasın (görünmez ama 60px boşluk bırakıyordu). */
+  [data-playing="false"] .pulse-bar { display: none; }
+  /* Çalarken etiketin önünde canlı noktası. */
+  [data-playing="true"] .media-label::before {
+    content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 0.55rem; vertical-align: 1px;
+    border-radius: 50%; background: #34c759; box-shadow: 0 0 0 0 rgb(52 199 89 / 55%); animation: canli 2s ease-out infinite;
+  }
+  @keyframes canli { 70% { box-shadow: 0 0 0 7px rgb(52 199 89 / 0%); } 100% { box-shadow: 0 0 0 0 rgb(52 199 89 / 0%); } }
+  .media-more[hidden] { display: none; }
   .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
   .stat { display: flex; flex-direction: column; gap: 0.25rem; }
   .stat strong { font-size: 1.6rem; font-weight: 600; color: var(--color-text); font-variant-numeric: tabular-nums; }
   .stat span { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--color-muted); }
   .media-more { margin-top: auto; padding-top: 1.25rem; font-size: 0.875rem; color: var(--color-text-secondary); text-decoration: none; }
   .media-more:hover { color: var(--color-text); }
-  @media (prefers-reduced-motion: reduce) { .pulse-bar span { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .pulse-bar span { transition: none; } [data-playing="true"] .media-label::before { animation: none; } }
 </style>

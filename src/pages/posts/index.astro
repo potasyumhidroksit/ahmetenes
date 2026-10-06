@@ -292,11 +292,11 @@ const commentCounts = new Map(
     /* "Kare" telefonda da ızgara: 2 sütun, başlık + tarih (önceden "Tekli" ile
        aynı tek sütundu, seçeneğin farkı kalmıyordu). */
     .posts-page[data-view="grid"] .posts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    :global(html[data-public-theme] .content-panel .posts-page[data-view="grid"] .post-card--cover .card-link) { min-height: 0; aspect-ratio: 4 / 5; }
+    :global(html[data-public-theme] .content-panel .posts-page[data-view="grid"] .post-card--cover .card-link) { min-height: 0; aspect-ratio: 3 / 4; }
     :global(html[data-public-theme] .content-panel .posts-page[data-view="grid"] .post-card--cover .card-body) { padding: 14px; }
     :global(html[data-public-theme] .content-panel .posts-page[data-view="grid"] .post-card .card-title) {
-      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; line-clamp: 5; overflow: hidden;
-      margin: 0 0 6px; font-size: 16px; line-height: 1.25; letter-spacing: -.01em;
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; line-clamp: 6; overflow: hidden;
+      margin: 0 0 6px; font-size: 15px; line-height: 1.25; letter-spacing: -.01em;
     }
     :global(html[data-public-theme] .content-panel .posts-page[data-view="grid"] .post-card .card-meta) { font-size: 11px; }
     :global(html[data-public-theme] .content-panel .posts-page[data-view="grid"] .post-card :is(.card-excerpt, .card-read, .card-meta .meta-dot, .card-meta time ~ span)) { display: none; }

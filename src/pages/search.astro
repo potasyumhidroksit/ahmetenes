@@ -283,15 +283,15 @@ const summary = [results.length && `${results.length} yazı`, photoHits.length &
 	   ~540px). Baslik + kucuk kare yan yana, ozet tam genislikte 4 satir. */
 	@media (max-width: 600px) {
 		.result-link.has-thumb {
-			grid-template-columns: minmax(0, 1fr) 72px;
+			grid-template-columns: minmax(0, 1fr) 60px;
 			grid-template-areas: "title thumb" "snippet snippet";
-			gap: 12px 14px;
+			gap: 12px;
 		}
 		.result-link.has-thumb .result-body { display: contents; }
 		.result-link.has-thumb .result-thumb { grid-area: thumb; aspect-ratio: 1; border-radius: 8px; }
 		.result-link.has-thumb .result-title { grid-area: title; align-self: center; margin: 0; }
 		.result-link.has-thumb .result-snippet { grid-area: snippet; }
-		.result-title { font-size: 1.15rem; }
+		.result-title { font-size: 1.0625rem; }
 		.result-snippet {
 			display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden;
 		}

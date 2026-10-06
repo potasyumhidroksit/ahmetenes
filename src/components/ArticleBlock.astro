@@ -1,0 +1,12 @@
+---
+// Yazi govdesi blok bileseni: h2'lere "Bu yazida" listesi icin kimlik verir;
+// her sey EmDash'in Block'u ile ayni cizilir (hizalama sinifi dahil).
+import { Block } from "emdash/ui";
+import { headingId } from "../lib/heading-id";
+
+const props = Astro.props;
+const node = props.node as { style?: string; children?: unknown };
+const id = node?.style === "h2" ? headingId(node.children) : undefined;
+---
+
+<Block {...props} id={id}><slot /></Block>

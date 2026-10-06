@@ -20,6 +20,8 @@ import { galleryHref, galleryPhotoFor } from "../../lib/blog-photo";
 import { exifLine } from "../../lib/gallery";
 import ResponsiveImage from "../../components/ResponsiveImage.astro";
 import BlogImage from "../../components/BlogImage.astro";
+import ArticleBlock from "../../components/ArticleBlock.astro";
+import { blockText, headingId } from "../../lib/heading-id";
 import ImageCredit from "../../components/ImageCredit.astro";
 import { imageCredit } from "../../lib/image-credit";
 import { imageSrc, ogImage } from "../../lib/responsive-image";
@@ -121,6 +123,15 @@ const bodyContent = heroSrc && Array.isArray(post.data.content) && !getEditMeta(
 const { body: articleBody, notes: footnotes } = getEditMeta(post.data.content)
 	? { body: bodyContent, notes: [] }
 	: extractFootnotes(bodyContent);
+
+// "Bu yazida": 4+ ara baslikli yazida acilir icindekiler (kimlikler
+// ArticleBlock'ta ayni fonksiyonla verilir). Tekrarlanan baslik varsa gosterme.
+const toc = getEditMeta(post.data.content) || !Array.isArray(articleBody)
+	? []
+	: (articleBody as Array<{ _type?: string; style?: string; children?: unknown }>)
+		.filter((block) => block?._type === "block" && block.style === "h2" && blockText(block.children).trim())
+		.map((block) => ({ id: headingId(block.children), text: blockText(block.children).trim() }));
+const showToc = toc.length >= 4 && new Set(toc.map((item) => item.id)).size === toc.length;
 
 // This post's tags are already hydrated onto the entry by getEmDashEntry —
 // no extra query needed.
@@ -246,8 +257,22 @@ const publishDate =
 					}
 				</header>
 
+				{showToc && (
+					<details class="article-toc">
+						<summary>
+							<span>{t("Bu yazıda")}</span>
+							<span class="article-toc-count">{toc.length} bölüm</span>
+						</summary>
+						<ol>
+							{toc.map((item) => (
+								<li><a href={"#" + item.id}>{item.text}</a></li>
+							))}
+						</ol>
+					</details>
+				)}
+
 				<div class="article-content">
-					<PortableText value={articleBody} components={{ type: { image: BlogImage } }} />
+					<PortableText value={articleBody} components={{ block: ArticleBlock, type: { image: BlogImage } }} />
 					{footnotes.length > 0 && (
 						<section class="footnotes" aria-labelledby="dipnotlar">
 							<h2 id="dipnotlar">Dipnotlar</h2>
@@ -261,6 +286,8 @@ const publishDate =
 						</section>
 					)}
 				</div>
+
+				{showToc && <p class="article-top"><a href="#top"><span aria-hidden="true">↑</span>&nbsp;{t("Başa dön")}</a></p>}
 
 				{reading && (reading.prev || reading.next) && (
 					<nav class="reading-nav" aria-label="Okuma sırası">
@@ -417,6 +444,38 @@ const publishDate =
     .taxonomy-comments { margin-left: 0; }
   }
   #comments { scroll-margin-top: 24px; }
+  /* "Bu yazida": kapali gelir, okuma sutunu genisliginde; okuma sirasi kutulariyla ayni dil. */
+  .article-toc {
+    max-width: 680px; margin: 0 0 40px;
+    border: 1px solid var(--glass-border-active); border-radius: var(--radius-lg, 12px);
+  }
+  .article-toc summary {
+    display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 10px 18px;
+    cursor: pointer; list-style: none; font-weight: 500; color: var(--color-text);
+  }
+  .article-toc summary::-webkit-details-marker { display: none; }
+  .article-toc summary::after {
+    content: ""; width: 8px; height: 8px; margin-left: auto; margin-right: 4px;
+    border: solid var(--color-text-secondary); border-width: 0 1.5px 1.5px 0;
+    transform: translateY(-2px) rotate(45deg); transition: transform 0.2s ease;
+  }
+  .article-toc[open] summary::after { transform: translateY(2px) rotate(-135deg); }
+  .article-toc summary:focus-visible { outline: 2px solid light-dark(#536163, #ccd7df); outline-offset: 3px; border-radius: var(--radius-lg, 12px); }
+  .article-toc-count { font-size: 0.8125rem; font-weight: 400; color: var(--color-muted); font-variant-numeric: tabular-nums; }
+  .article-toc ol { display: grid; gap: 4px; margin: 0; padding: 0 18px 16px 44px; font-variant-numeric: tabular-nums; }
+  .article-toc li { padding-left: 4px; color: var(--color-muted); }
+  .article-toc a { display: inline-block; padding: 3px 0; color: var(--color-text-secondary); text-decoration: none; line-height: 1.45; }
+  .article-toc a:hover { color: var(--color-text); text-decoration: underline; text-underline-offset: 3px; }
+  .article-content :global(h2[id]) { scroll-margin-top: 24px; }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html:has(.article-toc)) { scroll-behavior: smooth; }
+  }
+  @media (prefers-reduced-motion: reduce) { .article-toc summary::after { transition: none; } }
+  .article-top { margin: 32px 0 0; font-size: 0.875rem; }
+  .article-top a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-text-secondary); text-decoration: none; }
+  .article-top a:hover { color: var(--color-text); }
+  @media print { .article-toc, .article-top { display: none; } }
+
   .reading-nav { margin-top: 40px; }
   .reading-nav-label { margin: 0 0 10px; font-size: 0.8125rem; color: var(--color-muted); font-variant-numeric: tabular-nums; }
   .reading-nav-links { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

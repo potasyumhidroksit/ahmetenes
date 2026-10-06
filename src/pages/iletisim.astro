@@ -33,10 +33,12 @@ const contactMessage = contactState === "ok" ? "Teşekkürler! Mesajın iletildi
         <p class="form-status" data-contact-status role="status" aria-live="polite" data-state={contactState ? (contactState === "ok" ? "ok" : "error") : undefined}>{contactMessage}</p>
       </form>
       <aside class="contact-side">
-        <a href="mailto:info@ahmetenes.com">info@ahmetenes.com</a>
-        <a href="https://instagram.com/eneswideshut" target="_blank" rel="noopener noreferrer">@eneswideshut</a>
+        <dl class="contact-links">
+          <div><dt>E-posta</dt><dd><a href="mailto:info@ahmetenes.com">info@ahmetenes.com</a></dd></div>
+          <div><dt>Instagram</dt><dd><a href="https://instagram.com/eneswideshut" target="_blank" rel="noopener noreferrer">@eneswideshut</a></dd></div>
+        </dl>
         <div class="newsletter-box">
-          <NewsletterForm heading="Bülten" text="Yeni yazılar için e-posta ile haber ver." />
+          <NewsletterForm heading="Bülten" text="Yeni yazılar e-postana gelsin." />
         </div>
       </aside>
     </div>
@@ -113,6 +115,14 @@ const contactMessage = contactState === "ok" ? "Teşekkürler! Mesajın iletildi
   .form-privacy a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
   .contact-side { display: grid; gap: 1rem; align-content: start; font-size: 0.95rem; }
   .contact-side a { color: var(--color-brand); text-decoration: none; }
+  /* Bağlantılar etiketli (form etiketleriyle aynı dil): "@eneswideshut" tek başına
+     hangi platform olduğunu söylemiyordu. */
+  .contact-links { display: grid; gap: 1.1rem; margin: 0; }
+  .contact-links div { display: grid; gap: 0.4rem; }
+  .contact-links dt { font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-muted); }
+  .contact-links dd { margin: 0; }
+  .contact-links a { display: inline-flex; align-items: center; min-height: 32px; overflow-wrap: anywhere; }
+  .contact-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
   .newsletter-box { margin-top: 1rem; padding-top: 1.25rem; border-top: 1px solid var(--color-border-subtle); }
   .form-status { min-height: 1.2em; font-size: 0.85rem; color: var(--color-muted); margin: 0; }
   .form-status[data-state="ok"] { color: light-dark(#1a7f37, #6fd08c); }

@@ -83,3 +83,12 @@ html[data-public-theme="personabio-bio"] { font-size:24px; color-scheme:dark; }
 @media(prefers-reduced-motion:reduce) { .personabio-card::before, .personabio-links a, .personabio-menu-items a { transition:none; } .personabio-links a:hover, .personabio-menu-items a:hover { transform:none; } }
 @media(prefers-reduced-motion:reduce) { .personabio-links a:active { transform:none; } }
 @media(prefers-reduced-transparency:reduce) { .personabio-links a { -webkit-backdrop-filter:none; backdrop-filter:none; } }
+
+/* Tasarım turu 2026-10: tablet genişliğinde (737-980px) ad tek satırda kalsın, tanıtım satırı dengeli kırılsın.
+   Metin sütunu iç boşluk yüzünden ~222px'e iniyordu: "Ahmet Enes" iki satıra bölünüyor, "üçlüsü" yalnız kalıyordu. */
+.personabio-profile h1, .personabio-profile p { text-wrap: balance; }
+@media (min-width: 737px) and (max-width: 980px) {
+  .personabio-profile { padding: 3rem 2.25rem; }
+  .personabio-secondary { padding: 3rem 2.25rem; }
+  .personabio-profile h1 { font-size: 40px; }
+}

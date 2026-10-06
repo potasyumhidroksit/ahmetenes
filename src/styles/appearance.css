@@ -267,7 +267,7 @@ html[data-public-theme] .personabio-footer .appearance-icons svg { width: 18px; 
   html[data-public-theme] { color-scheme: light; }
   .content-header, .content-menu-backdrop, .content-skip, .post-share, .newsletter, .more-posts,
   .content-preferences-footer, .reading-progress, .article-comments, #site-search-dialog,
-  #emdash-toolbar, .photo-nav, .photo-back { display: none !important; }
+  #emdash-toolbar, .photo-nav, .photo-back, .reading-nav, .article-taxonomy { display: none !important; }
   body, .content-shell, .content-panel { background: #fff !important; color: #111 !important; box-shadow: none !important; border: 0 !important; }
   .content-panel { padding: 0 !important; margin: 0 !important; }
   a { color: inherit !important; }

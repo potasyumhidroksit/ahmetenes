@@ -85,7 +85,8 @@ const fullSrcset = (p: (typeof photos)[number]) =>
           data-story={p.story}
           data-post-href={postFor(p.id)?.href}
           data-post-title={postFor(p.id)?.title}
-          style={[p.width && p.height ? "aspect-ratio: " + p.width + " / " + p.height : "", p.color ? "background-color: " + p.color : ""].filter(Boolean).join("; ") || undefined}
+          data-ar={p.width && p.height ? (p.width / p.height).toFixed(4) : undefined}
+          style={[p.width && p.height ? "aspect-ratio: " + p.width + " / " + p.height + "; --ar: " + (p.width / p.height).toFixed(4) : "", p.color ? "background-color: " + p.color : ""].filter(Boolean).join("; ") || undefined}
         >
           <img
             src={p.src}
@@ -104,18 +105,22 @@ const fullSrcset = (p: (typeof photos)[number]) =>
   </section>
 
   <dialog class="lightbox" data-lightbox aria-label="Galeri önizleme">
-    <button type="button" class="lightbox-nav lightbox-prev button-scrim" data-lightbox-prev aria-label="Önceki kare">‹</button>
-    <button type="button" class="lightbox-nav lightbox-next button-scrim" data-lightbox-next aria-label="Sonraki kare">›</button>
     <button type="button" class="lightbox-close button-scrim" data-lightbox-close aria-label="Kapat">×</button>
     <figure>
-      <img data-lightbox-img src="" alt="" sizes="(max-width: 1100px) 94vw, 1100px" />
+      <div class="lightbox-stage">
+        <img data-lightbox-img src="" alt="" sizes="(max-width: 1100px) 94vw, 1100px" />
+        <button type="button" class="lightbox-nav lightbox-prev button-scrim" data-lightbox-prev aria-label="Önceki kare">‹</button>
+        <button type="button" class="lightbox-nav lightbox-next button-scrim" data-lightbox-next aria-label="Sonraki kare">›</button>
+      </div>
       <figcaption>
         <span class="lightbox-count" data-lightbox-count></span>
         <strong data-lightbox-title></strong>
         <span data-lightbox-meta></span>
         <p data-lightbox-story></p>
-        <a class="lightbox-post" data-lightbox-post hidden></a>
-        <button type="button" class="lightbox-share" data-lightbox-share aria-live="polite">Paylaş</button>
+        <div class="lightbox-actions">
+          <a class="lightbox-post" data-lightbox-post hidden></a>
+          <button type="button" class="lightbox-share" data-lightbox-share aria-live="polite">Paylaş</button>
+        </div>
       </figcaption>
     </figure>
   </dialog>
@@ -164,6 +169,10 @@ const fullSrcset = (p: (typeof photos)[number]) =>
       // Adres cubugu karenin kendi sayfasi (/galeri/<id>): kopyalanan baglanti
       // o karenin onizlemesiyle paylasilir. Eski #kare-<id> baglantilari da acar.
       history.replaceState(null, "", "/galeri/" + item.id.replace(/^kare-/, ""));
+      // Oran CSS'e: görsel ekrana kendi oranıyla sığar, dikey kare geniş ekranda bilgiyi yanına alır.
+      const ar = Number(item.dataset.ar);
+      if (ar > 0) { dialog.style.setProperty("--ar", String(ar)); dialog.dataset.orient = ar < 1 ? "portrait" : "landscape"; }
+      else { dialog.style.removeProperty("--ar"); delete dialog.dataset.orient; }
       img.srcset = item.dataset.fullSrcset || "";
       img.src = item.dataset.full || "";
       img.alt = item.dataset.title || "";
@@ -252,13 +261,15 @@ const fullSrcset = (p: (typeof photos)[number]) =>
   }
   .gallery-filter-count { margin-left: 0.2rem; opacity: 0.6; font-variant-numeric: tabular-nums; }
   .gallery-filters button[aria-pressed="true"] { color: light-dark(#1d2128, #fff); border-color: var(--glass-border-active); font-weight: 600; }
-  /* Sutun (masonry) duzeni: dikey kareler satirda bosluk birakmaz. */
-  .gallery-grid { columns: 3 260px; column-gap: 1rem; }
+  /* Yaslanmış satırlar: her kare bilinen oranıyla büyür, satırlar kenardan kenara dolar, soldan sağa sıra korunur
+     (sütun düzeni sağ altta ~380px boşluk bırakıyordu). Telefonda tek sütun. */
+  .gallery-grid { --row: 250px; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 1rem; }
   .gallery-item {
-    position: relative; display: block; width: 100%; margin: 0 0 1rem; padding: 0; border: 0;
-    cursor: zoom-in; overflow: hidden; break-inside: avoid;
-    border-radius: var(--radius-lg); background: var(--color-bg-subtle);
+    position: relative; display: block; flex: var(--ar, 1.5) 1 calc(var(--ar, 1.5) * var(--row)); max-width: calc(var(--ar, 1.5) * 460px);
+    margin: 0; padding: 0; border: 0; cursor: zoom-in; overflow: hidden; border-radius: var(--radius-lg); background: var(--color-bg-subtle);
   }
+  @media (max-width: 1000px) { .gallery-grid { --row: 190px; } }
+  @media (max-width: 640px) { .gallery-grid { display: grid; grid-template-columns: minmax(0, 1fr); } .gallery-item { max-width: none; } }
   .gallery-item[hidden] { display: none; }
   .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
   .gallery-item:hover img { transform: scale(1.03); }
@@ -271,36 +282,59 @@ const fullSrcset = (p: (typeof photos)[number]) =>
   .gallery-item:hover .gallery-item-caption, .gallery-item:focus-visible .gallery-item-caption { opacity: 1; }
   @media (prefers-reduced-motion: reduce) { .gallery-item img { transition: none; } }
 
+  /* Işık kutusu: tam ekran sahne. Görsel kendi oranıyla ekrana sığar (siyah bant yok); oklar fotoğrafın ortasında;
+     arka plan neredeyse opak. Yatay karede bilgi altta (fotoğraf genişliğinde), geniş ekranda dikey karede sağ yanda;
+     dikey karede "Paylaş" eskiden ekranın altına taşıyordu. */
   .lightbox {
-    border: 0; padding: 0; background: transparent; max-width: min(1100px, 94vw);
+    --lb-chrome: 19rem; box-sizing: border-box; width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0;
+    padding: 3.5rem 1.25rem 1.25rem; border: 0; background: transparent; overflow: auto; overscroll-behavior: contain;
   }
-  .lightbox::backdrop { background: rgba(10,12,15,0.82); }
-  .lightbox figure { margin: 0; display: grid; gap: 0.75rem; }
-  .lightbox img { width: 100%; max-height: 78vh; object-fit: contain; border-radius: var(--radius); background: #000; }
-  .lightbox figcaption { color: #e6e9ec; display: grid; gap: 0.25rem; }
-  .lightbox figcaption span { font-size: 0.8rem; color: #a3afb9; }
-  .lightbox .lightbox-count { font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
-  .lightbox-post { justify-self: start; margin-top: 0.4rem; font-size: 0.9rem; color: #e6e9ec; text-underline-offset: 3px; }
+  .lightbox[open] { display: grid; place-items: center; }
+  .lightbox::backdrop { background: rgb(8 10 13 / 94%); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  .lightbox figure { margin: 0; width: fit-content; display: grid; gap: 1rem; }
+  .lightbox-stage { position: relative; }
+  .lightbox img {
+    display: block; box-sizing: border-box; width: min(100vw - 2.5rem, 1200px, calc((100dvh - var(--lb-chrome)) * var(--ar)));
+    height: auto; aspect-ratio: var(--ar); object-fit: cover; border-radius: 12px; background: rgb(255 255 255 / 4%);
+  }
+  /* Oranı bilinmeyen kare: kırpılmadan sığar. */
+  .lightbox:not([data-orient]) img { width: auto; max-width: min(100vw - 2.5rem, 1200px); max-height: calc(100dvh - var(--lb-chrome)); aspect-ratio: auto; object-fit: contain; }
+  .lightbox figcaption { width: 0; min-width: 100%; display: grid; align-content: start; gap: 0.3rem; color: #e6e9ec; }
+  .lightbox figcaption strong { font-size: 1.2rem; font-weight: 500; letter-spacing: -0.01em; line-height: 1.3; text-wrap: balance; }
+  .lightbox figcaption span { font-size: 0.82rem; color: #a3afb9; }
+  .lightbox figcaption p { margin: 0.4rem 0 0; font-size: 0.95rem; line-height: 1.65; color: #cfd6dc; max-width: 68ch; text-wrap: pretty; }
+  .lightbox .lightbox-count { position: fixed; top: 1.15rem; left: 1.25rem; font-size: 0.8rem; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; }
+  .lightbox .lightbox-count:empty { display: none; }
+  .lightbox-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; margin-top: 0.6rem; }
+  .lightbox-post { font-size: 0.9rem; color: #e6e9ec; text-underline-offset: 3px; }
   .lightbox-post:hover { color: #fff; }
   .lightbox-post[hidden] { display: none; }
   .lightbox-share {
-    justify-self: start; margin-top: 0.5rem; padding: 0.45rem 0.95rem; font-size: 0.85rem; cursor: pointer;
-    color: #e6e9ec; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.22); border-radius: 999px;
+    padding: 0.45rem 0.95rem; font-size: 0.85rem; cursor: pointer; color: #e6e9ec;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.22); border-radius: 999px;
   }
   .lightbox-share:hover { background: rgba(255,255,255,0.16); color: #fff; }
   .lightbox-share:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-  .lightbox .lightbox-count:empty { display: none; }
-  .lightbox figcaption p { margin: 0.4rem 0 0; font-size: 0.9rem; color: #cfd6dc; max-width: 70ch; }
   .lightbox-close {
-    position: absolute; top: 0.5rem; right: 0.75rem; z-index: 2;
-    width: 2.5rem; height: 2.5rem; font-size: 1.6rem; line-height: 1; color: #fff; border: 0; cursor: pointer;
+    position: fixed; top: 0.6rem; right: 0.6rem; z-index: 2; display: grid; place-items: center; width: 44px; height: 44px; padding: 0;
+    font-size: 1.6rem; line-height: 1; color: #fff; border: 0; border-radius: 50%; cursor: pointer;
   }
   .lightbox-nav {
-    position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
-    font-size: 2.2rem; line-height: 1; padding: 0.3rem 0.8rem; color: #fff;
-    border: 0; border-radius: 999px; cursor: pointer;
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; display: grid; place-items: center; width: 44px; height: 44px;
+    padding: 0; font-size: 1.9rem; line-height: 1; color: #fff; border: 0; border-radius: 50%; cursor: pointer;
+    background: rgb(10 12 15 / 46%); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
   }
-  .lightbox-prev { left: 0.5rem; }
-  .lightbox-next { right: 0.5rem; }
+  .lightbox-prev { left: 0.6rem; }
+  .lightbox-next { right: 0.6rem; }
   .lightbox-nav:focus-visible, .lightbox-close:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  @media (min-width: 900px) {
+    .lightbox[data-orient="portrait"] { --lb-chrome: 5.5rem; }
+    .lightbox[data-orient="portrait"] figure { grid-template-columns: auto minmax(240px, 320px); align-items: end; column-gap: 2rem; }
+    .lightbox[data-orient="portrait"] figcaption { width: auto; min-width: 0; padding-bottom: 0.25rem; }
+  }
+  @media (max-width: 600px) {
+    .lightbox { --lb-chrome: 21rem; padding: 3.5rem 0.9rem 0.9rem; }
+    .lightbox img { width: min(100vw - 1.8rem, calc((100dvh - var(--lb-chrome)) * var(--ar))); }
+  }
+  @media (prefers-reduced-transparency: reduce) { .lightbox::backdrop, .lightbox-nav { -webkit-backdrop-filter: none; backdrop-filter: none; } }
 </style>

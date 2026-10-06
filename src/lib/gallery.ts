@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { getAlbumAssetIds, getAssetBatch, SITEDE_ALBUM_ID, thumbhashAverageColor, type ImmichAsset } from "./immich";
+import { equipment } from "./equipment";
 
 export type GalleryCategory = { id: string; label: string };
 
@@ -175,10 +176,22 @@ export async function loadGallery(): Promise<GalleryPhoto[]> {
   }
 }
 
-/** "X-T5 · 17-40mm F1.8 DC | Art 025 · 40mm · f/4.5 · 1/600 · ISO 125" */
+/** EXIF'teki ham gövde/objektif adını Ekipman sayfasındaki ada çevirir ("X-T5" → "Fujifilm X-T5",
+ *  "17-40mm F1.8 DC | Art 025" → "Sigma Art 17-40mm F1.8"); eşleşme yoksa "| Art 025" gibi üretici kodları atılır. */
+export function gearName(field: "camera" | "lens", raw?: string | null): string | undefined {
+  if (!raw) return undefined;
+  const hit = equipment.find((g) => g.exif?.field === field && g.exif.match.test(raw));
+  return hit ? hit.name : raw.replace(/\s*\|\s*[A-Za-z]+\s+\d{3}$/, "").replace(/\s*\|\s*/g, " ").trim();
+}
+
+/** "Fujifilm X-T5 · Sigma Art 17-40mm F1.8 · 40mm · f/4.5 · 1/600 · ISO 125". Sabit odaklı objektifte odak uzaklığı
+ *  adda zaten yazılı ("Sigma 56mm F1.4") — tekrarlanmaz; zoom aralığı ("17-40mm") tekrar sayılmaz. */
 export function exifLine(p: GalleryPhoto): string {
   const e = p.exif;
-  return [e?.camera, e?.lens, e?.focal, e?.aperture ? "f/" + e.aperture : null, e?.shutter, e?.iso ? "ISO " + e.iso : null]
+  const lens = gearName("lens", e?.lens);
+  const focalMm = e?.focal ? parseFloat(String(e.focal)) : NaN;
+  const primeHasFocal = lens && Number.isFinite(focalMm) && new RegExp(`(^|[^\\d.-])${focalMm}mm`).test(lens);
+  return [gearName("camera", e?.camera), lens, primeHasFocal ? null : e?.focal, e?.aperture ? "f/" + e.aperture : null, e?.shutter, e?.iso ? "ISO " + e.iso : null]
     .filter(Boolean)
     .join(" · ");
 }

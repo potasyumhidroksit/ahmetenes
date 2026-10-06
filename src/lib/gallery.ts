@@ -186,12 +186,27 @@ export function gearName(field: "camera" | "lens", raw?: string | null): string 
 
 /** "Fujifilm X-T5 · Sigma Art 17-40mm F1.8 · 40mm · f/4.5 · 1/600 · ISO 125". Sabit odaklı objektifte odak uzaklığı
  *  adda zaten yazılı ("Sigma 56mm F1.4") — tekrarlanmaz; zoom aralığı ("17-40mm") tekrar sayılmaz. */
+/** Yazılardaki gibi Türkçe birim: "23.9mm" → "23,9 mm" (sayı ile birim bölünmez). */
+function focalTr(raw: string | undefined, mm: number): string | null {
+  if (!raw) return null;
+  return Number.isFinite(mm) ? `${String(Math.round(mm * 10) / 10).replace(".", ",")}\u00a0mm` : raw;
+}
+
+/** "1/950" → "1/950 sn", "2" → "2 sn", "0.5" → "0,5 sn". */
+function shutterTr(raw?: string): string | null {
+  const s = raw ? String(raw).trim() : "";
+  if (!s) return null;
+  if (/^\d+\/\d+$/.test(s)) return `${s}\u00a0sn`;
+  const n = parseFloat(s);
+  return Number.isFinite(n) && /^[\d.]+$/.test(s) ? `${String(n).replace(".", ",")}\u00a0sn` : s;
+}
+
 export function exifLine(p: GalleryPhoto): string {
   const e = p.exif;
   const lens = gearName("lens", e?.lens);
   const focalMm = e?.focal ? parseFloat(String(e.focal)) : NaN;
   const primeHasFocal = lens && Number.isFinite(focalMm) && new RegExp(`(^|[^\\d.-])${focalMm}mm`).test(lens);
-  return [gearName("camera", e?.camera), lens, primeHasFocal ? null : e?.focal, e?.aperture ? "f/" + e.aperture : null, e?.shutter, e?.iso ? "ISO " + e.iso : null]
+  return [gearName("camera", e?.camera), lens, primeHasFocal ? null : focalTr(e?.focal, focalMm), e?.aperture ? "f/" + e.aperture : null, shutterTr(e?.shutter), e?.iso ? "ISO " + e.iso : null]
     .filter(Boolean)
     .join(" · ");
 }

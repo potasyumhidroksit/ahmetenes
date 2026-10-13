@@ -1,12 +1,18 @@
 ---
 // Yazi govdesi blok bileseni: h2'lere "Bu yazida" listesi icin kimlik verir;
 // her sey EmDash'in Block'u ile ayni cizilir (hizalama sinifi dahil).
-import { Block } from "emdash/ui";
+// `Block` emdash/ui'da hem tur hem bilesen adi; astro check turu gorup
+// "cannot be used as a value" veriyordu. Ayni bilesen emdashComponents.block.
+import { emdashComponents } from "emdash/ui";
 import { headingId } from "../lib/heading-id";
 
+const Block = emdashComponents.block;
+type Props = Parameters<typeof Block>[0];
 const props = Astro.props;
 const node = props.node as { style?: string; children?: unknown };
 const id = node?.style === "h2" ? headingId(node.children) : undefined;
+// Block'un Props tipinde `id` yok; bilesen kalan ozellikleri (...attrs) yine de ogeye yazar.
+const blockProps = { ...props, id };
 ---
 
-<Block {...props} id={id}><slot /></Block>
+<Block {...blockProps}><slot /></Block>

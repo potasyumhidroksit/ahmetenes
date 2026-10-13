@@ -58,11 +58,15 @@ if [ "$deploying" = 0 ]; then
     || fail "rss(xml)"
 fi
 
+# Bagimli servisler hafif saglik uclarindan (yalniz 200 aranir): Pulse /api/status her
+# cagrida Spotify API'ye gidiyordu (5 dk'da bir = gunde ~290 istek), sinedexter
+# /api/stats her cagrida DB sorgusu (edge'de onbelleklenmiyor); /api/health ikisinde de
+# no-store ve yalniz servisin ayakta oldugunu soyler.
 for entry in \
   "$SITE/sitemap-static.xml|sitemap" \
-  "https://sinedexter.ahmetenes.com/api/stats|sinedexter" \
+  "https://sinedexter.ahmetenes.com/api/health|sinedexter" \
   "https://foto.ahmetenes.tr/api/server/ping|immich" \
-  "https://s.ahmetenes.com/api/status|pulse"; do
+  "https://s.ahmetenes.com/api/health|pulse"; do
   url=${entry%|*}
   name=${entry#*|}
   code=$(http_code "$url")

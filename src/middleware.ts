@@ -77,6 +77,16 @@ function withCache(response: Response): Response {
 const PROBE_SEGMENT = /(?:^|\/)\.(?!well-known(?:\/|$))[^/]/;
 const PROBE_PATH = /^\/(?:wp-|wordpress|cgi-bin|proc\/|@fs\/|var\/run\/|vendor\/|actuator|telescope|server-status)|\.(?:php\d?|aspx?|jsp|cgi|env|ini|sql|bak|old|swp|ya?ml|log|git)(?:$|\/)/i;
 
+/**
+ * EmDash'in /sitemap-[collection].xml rotasi her /sitemap-*.xml'i yakalar ama EmDash
+ * ara katmani calisma ortamini yalniz /^\/sitemap-[a-z][a-z0-9_]*\.xml$/ icin kurar;
+ * digerleri ("sitemap-0.xml": eski Next.js next-sitemap adi, "sitemap-1a.xml", buyuk
+ * harf, tire) 404 yerine 500 "EmDash not configured" donuyordu. Onlar dogrudan 404.
+ */
+const SITEMAP_ANY = /^\/sitemap-[^/]+\.xml$/;
+const SITEMAP_COLLECTION = /^\/sitemap-[a-z][a-z0-9_]*\.xml$/;
+const isBrokenSitemapPath = (pathname: string) => SITEMAP_ANY.test(pathname) && !SITEMAP_COLLECTION.test(pathname);
+
 function isProbe(pathname: string): boolean {
   let path = pathname;
   try {
@@ -93,7 +103,7 @@ function isProbe(pathname: string): boolean {
  */
 async function handleRequest(context: APIContext, next: () => Promise<Response>): Promise<Response> {
   const {url, request} = context;
-  if (isProbe(url.pathname)) {
+  if (isProbe(url.pathname) || isBrokenSitemapPath(url.pathname)) {
     return new Response("Not found", {
       status: 404,
       headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=3600" },

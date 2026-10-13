@@ -2,12 +2,26 @@
 // alanlari (span metni, gorsel alt/caption), vurgulu ve guvenli (escape) ozet.
 
 /** "Işık" -> "isik", "ÇİĞDEM" -> "cigdem": tr kucuk harf + aksanlari sil. */
-function foldChar(ch: string): string {
+function foldCharUncached(ch: string): string {
   return ch
     .toLocaleLowerCase("tr-TR")
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/ı/g, "i");
+}
+
+// Karakter basina toLocaleLowerCase+normalize pahali: /search her istekte tum
+// yazi govdelerini katliyordu (~1 sn, tek is parcacigini bloke ediyordu).
+// Ayni karakter hep ayni sonucu verir; sinir, sorgudan gelen rastgele
+// karakterlerle haritanin buyumesini keser.
+const foldCache = new Map<string, string>();
+function foldChar(ch: string): string {
+  let folded = foldCache.get(ch);
+  if (folded === undefined) {
+    folded = foldCharUncached(ch);
+    if (foldCache.size < 4096) foldCache.set(ch, folded);
+  }
+  return folded;
 }
 
 export function fold(text: string): string {

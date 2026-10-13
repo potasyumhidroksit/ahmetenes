@@ -7,6 +7,7 @@ import {
 import Base from "../../layouts/Content.astro";
 import PostCard from "../../components/PostCard.astro";
 import { getReadingTime } from "../../utils/reading-time";
+import { byReadingOrder } from "../../utils/reading-order";
 
 import { localizedTerm as getTerm } from "../../utils/localized-content";
 import { localizedPosts } from "../../utils/localized-posts";
@@ -22,10 +23,13 @@ if (!term) {
 	return notFound(Astro);
 }
 
-const { entries: posts, cacheHint } = await localizedPosts(locale, {
+const { entries: datedPosts, cacheHint } = await localizedPosts(locale, {
 	where: { category: term.slug },
 	orderBy: { published_at: "desc" },
 });
+// /posts ile ayni okuma sirasi: yayin tarihleri tohumlamadan milisaniye
+// farkli oldugu icin tarih sirasi rastgeleydi.
+const posts = byReadingOrder(datedPosts);
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
 

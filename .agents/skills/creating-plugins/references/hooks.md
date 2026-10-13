@@ -231,6 +231,21 @@ Runs after scheduled content is unscheduled. Side effects only.
 Event: `{ content: Record<string, unknown>, collection: string }`
 Returns: `void`
 
+## Comment Hooks
+
+`comment:beforeCreate`, `comment:moderate`, `comment:afterCreate`, and `comment:afterModerate` require the `users:read` capability. Without it the hook is skipped at registration with a log line (`declares comment:afterModerate hook without users:read capability — skipping`); nothing fails at build time.
+
+```typescript
+capabilities: ["users:read"],
+hooks: {
+	"comment:afterModerate": async (event, ctx) => {
+		ctx.log.info(`Comment ${event.comment.id}: ${event.previousStatus} -> ${event.newStatus}`);
+	},
+},
+```
+
+`comment:afterModerate` event: `{ comment, previousStatus: string, newStatus: string, moderator: { id: string, name: string | null } }`
+
 ## Media Hooks
 
 ### `media:beforeUpload`

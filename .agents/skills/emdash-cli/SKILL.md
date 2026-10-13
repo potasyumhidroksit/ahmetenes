@@ -21,6 +21,8 @@ Remote commands resolve auth automatically:
 
 For local dev servers, just run the command — auth is handled automatically. For remote instances, run `emdash login --url https://my-site.pages.dev` first.
 
+The target instance is resolved separately from auth, per command: `--url`/`-u`, then the `EMDASH_URL` env var, else `http://localhost:4321` (`emdash.url` in `package.json` is read only by `emdash dev --types`). Stored credentials are keyed by URL, so a remote command without one of these still talks to localhost (and fails with `fetch failed` when no dev server runs) even after a successful `emdash login`.
+
 ## Custom Headers & Reverse Proxies
 
 Sites behind Cloudflare Access or other reverse proxies need auth headers on every request. The CLI supports this via `--header` flags and environment variables.

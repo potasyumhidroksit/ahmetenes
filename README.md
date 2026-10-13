@@ -29,7 +29,7 @@ Panel: `http://localhost:4321/_emdash/admin`
 ## Sayfalar
 
 - `/` profil kartı; `/posts` + `/<slug>` yazılar (karelerin altında EXIF + "Galeride aç");
-  `/hakkimda`, `/now` (panelden düzenlenen sayfalar)
+  `/hakkimda` (panelden düzenlenen sayfa; silinen `/now` buraya 301)
 - `/galeri` — Immich "sitede" albümü: filtre çipleri (kare sayılı), sütun ızgara, lightbox
   (EXIF, hikâye, kaydırma, "Yazıda: …"); açık karede adres `/galeri/<id>` olur, eski
   `/galeri#kare-<id>` bağlantıları da kareyi açar

@@ -33,49 +33,51 @@ Agent skills are in `.agents/skills/`. Load them when working on specific tasks:
 
 The EmDash docs are available as an MCP server at `https://docs.emdashcms.com/mcp`. When you need to verify an API, hook, config option, field type, or pattern, call `search_docs` against the live documentation rather than relying on training-data recall. The docs reflect current behaviour; assumptions may not.
 
-This template ships with `.mcp.json`, `.cursor/mcp.json`, and `.vscode/mcp.json` so Claude Code, Cursor, and VS Code auto-discover the docs server. Other tools (OpenCode, Windsurf, etc.) need a manual one-time setup -- see [docs.emdashcms.com/docs-mcp](https://docs.emdashcms.com/docs-mcp).
+This repository does not ship an MCP config for it; to use the docs server, add it to your tool once -- see [docs.emdashcms.com/docs-mcp](https://docs.emdashcms.com/docs-mcp).
 
 ## Rules
 
 - All content pages must be server-rendered (`output: "server"`). No `getStaticPaths()` for CMS content.
-- Image fields are objects (`{ src, alt }`), not strings. Use `<Image image={...} />` from `"emdash/ui"`.
+- Image fields can arrive as a string path (seeded, e.g. `/blog/<slug>/cover.webp`) or an object (`{ src, alt, ... }`, after an admin/API save). Read them with `imageSrc()` and render with `ResponsiveImage` (`src/components/ResponsiveImage.astro`, helpers in `src/lib/responsive-image.ts`), which adds srcset for local `/blog/` images and falls back to `<Image>` from `"emdash/ui"`.
 - `entry.id` is the slug (for URLs). `entry.data.id` is the database ULID (for API calls like `getEntryTerms`).
 - Always call `Astro.cache.set(cacheHint)` on pages that query content.
 - Taxonomy names in queries must match the seed's `"name"` field exactly (e.g., `"category"` not `"categories"`).
 
-## This Template
+## This Site
 
-A blog with posts, pages, categories, tags, full-text search, and RSS. Designed for personal writing, technical writing, indie newsletters, and anything where the writing is the product. Editorial-tech aesthetic: confident sans-serif, restrained accent, real article structure with bylines and reading time.
+ahmetenes.com: a Turkish photography portfolio and blog (Persona Bio theme on EmDash). Operations -- deploy, Cloudflare cache, content workflow, backups -- are documented in `README.md`; read it before deploying or editing content.
 
 ## Pages
 
-| Page        | Path               | What it shows                                                                                          |
-| ----------- | ------------------ | ------------------------------------------------------------------------------------------------------ |
-| Home        | `/`                | Featured post hero (large image + excerpt), latest posts grid                                          |
-| All posts   | `/posts`           | Article count, full post list with excerpts and tag chips                                              |
-| Post detail | `/posts/[slug]`    | Featured image, title, body, left meta column (authors + date), right TOC + search + categories gutter |
-| Search      | `/search`          | Full-text search UI                                                                                    |
-| Page        | `/pages/[slug]`    | Static page content (Portable Text)                                                                    |
-| Category    | `/category/[slug]` | Posts filtered by category                                                                             |
-| Tag         | `/tag/[slug]`      | Posts filtered by tag                                                                                  |
-| RSS         | `/rss.xml`         | Generated feed                                                                                         |
+| Page        | Path               | What it shows                                                                  |
+| ----------- | ------------------ | ------------------------------------------------------------------------------ |
+| Home        | `/`                | Profile card (`bio_profiles/personabio`) with the primary menu                 |
+| All posts   | `/posts`           | Posts in reading order (`sira`), list / grid / single views                    |
+| Post / page | `/[slug]`          | Pages win over posts on a shared slug; `/posts/*` and `/pages/*` redirect here |
+| Gallery     | `/galeri`, `/galeri/[id]` | Photos from Immich                                                      |
+| Other       | `/ekipman`, `/medya`, `/iletisim`, `/gizlilik`, `/istatistik` | Static Astro pages                      |
+| Search      | `/search`          | Posts and gallery photos                                                       |
+| Category    | `/category/[slug]` | Posts filtered by category, in reading order                                   |
+| Tag         | `/tag/[slug]`      | Posts filtered by tag, in reading order                                        |
+| RSS         | `/rss.xml`         | Full-text feed                                                                 |
 
 ## Schema
 
-- `posts` collection: `title`, `featured_image`, `content` (Portable Text), `excerpt` (text).
-- `pages` collection: `title`, `content` (Portable Text). Used for `/about` etc.
+- `posts` collection: `title`, `featured_image`, `content` (Portable Text), `excerpt` (text), `sira` (integer reading order).
+- `pages` collection: `title`, `content` (Portable Text). Used for `/hakkimda`; the deleted `/now` page redirects there (seed redirect).
+- `bio_profiles` collection: `title`, `description`, `avatar` -- the home-page profile card.
 - Taxonomies: `category`, `tag`.
-- Single `primary` menu (Home, About, Posts by default).
+- Menus: `primary` (site navigation) and `social`; `seed/seed.json` is the source of truth.
 
 Site settings have `title` and `tagline` -- both render in the header / footer.
 
 ## Visual character
 
-Single typeface: **Inter** on `--font-body`, used for everything including headings (`--font-heading` defaults to the body face; tighter letter-spacing on h1/h2). **JetBrains Mono** on `--font-mono` for inline code and code blocks. Body and headings share the same family; weight and size carry the hierarchy (`--font-weight-heading` 600, `--font-weight-display` 700 for h1/page titles).
+Single typeface: **DM Sans** (`--font-personabio`, mapped to `--font-body` and headings in `src/styles/theme.css`); **JetBrains Mono** on `--font-mono` for code. Weight and size carry the hierarchy.
 
-The brand colour is `#0066cc` (`--color-brand`) -- used for links, the post-card title hover, and the search input focus ring. There's also a secondary text colour (`--color-text-secondary`) and a `--color-muted` for meta info. Don't add a second accent.
+Colours come from the Persona Bio overrides in `src/styles/theme.css`: neutral light/dark surfaces with a near-monochrome brand colour (`--color-brand`). Posts render in a single centred column (max 800px) under a full-width hero image.
 
-The article layout is the standout feature: a three-column reading view with a left meta column (author bylines, date), centred 680px body column, and a right gutter for search, table of contents, and categories. Don't flatten that into one column on desktop -- the layout signals "this is something to read".
+The site owner reviews visual changes and has reverted a redesign before: prefer fixes over restyling unless asked.
 
 ## Customisation
 
@@ -83,7 +85,7 @@ Design tokens live in `src/styles/tokens.css` with their default values. To rest
 
 Colours are defined with `light-dark(<light>, <dark>)`, so each token carries both modes. Overriding with a plain colour changes light and dark at once; use `light-dark()` in the override to keep them distinct. There is no separate dark palette to maintain.
 
-Webfonts are configured in `astro.config.mjs` under `fonts:`. To swap the body face, change the `name:` for the entry bound to `cssVariable: "--font-body"`. Good alternatives: Geist, IBM Plex Sans, Söhne (if you have a licence), Public Sans. If you want a serif-bodied blog, swap to a humanist serif like Source Serif, Crimson Pro, or Lora -- but then also raise `--font-size-base` to `1.0625rem` for readability. To give headings their own face (or use a system font) without touching the font pipeline, override `--font-heading` or `--font-body` in `theme.css`.
+Webfonts are configured in `astro.config.mjs` under `fonts:`. The body face is the entry bound to `cssVariable: "--font-personabio"`; `theme.css` maps it onto `--font-body`. Keep its `latin-ext` subset: Turkish ğ/ş/İ fall back to a system font without it. To give headings their own face without touching the font pipeline, override `--font-heading` in `theme.css`.
 
 CSS variables worth knowing (see `tokens.css` for the full list):
 
@@ -100,13 +102,9 @@ CSS variables worth knowing (see `tokens.css` for the full list):
 
 ## What not to do
 
-- Don't add a second accent colour or coloured section backgrounds. The page should be black, white, and one blue.
-- Don't replace Inter with a display sans (Bebas, Anton, etc.). Headings rely on weight contrast, not novelty faces.
-- Don't collapse the article gutter on desktop -- it's part of the reading experience.
-- Don't use stock blog copy ("Welcome to my blog", "Stay tuned for more"). Write a real tagline that says what this blog is about.
-- Don't seed the home page with three identical placeholder posts. If you only have one real post, show one real post.
-- Don't enable comments without a plan to moderate them. The template doesn't ship a comments system by default for a reason.
+- Don't use stock blog copy ("Welcome to my blog", "Stay tuned for more"); site copy is real and in Turkish.
+- Post comments are enabled and moderated in the admin; keep moderation in place when touching comment code.
 
 ## Documentation language
 
-Write all theme documentation, code comments, catalog descriptions, demo descriptions, and repository-facing copy in English. Public interface translations and editorial content may use their configured languages.
+Match the repository: code comments are Turkish written without diacritics (`Okuma sirasi`), `README.md` and commit messages are Turkish, and this file stays in English. Public interface text and editorial content are Turkish.

@@ -18,9 +18,14 @@ blockExoticSubdeps: true
 # @modelcontextprotocol/sdk (emdash); orta: smol-toml. Hepsi üst paketlerin bildirdiği aralık içinde.
 overrides:
   'devalue@<5.9.3': '^5.9.3'
-  'dompurify@<3.4.16': '^3.4.16'
+  'dompurify@<3.4.17': '^3.4.17'
   'sharp@<0.35.5': '^0.35.5'
   'http-cache-semantics@<4.2.1': '^4.2.1'
   'source-map-js@<1.2.2': '^1.2.2'
   '@modelcontextprotocol/sdk@<1.31.0': '^1.31.0'
   'smol-toml@<1.8.1': '^1.8.1'
+  # 2026-10-22 (ship audit: dompurify kritik, vite yüksek; hono, ip-address, sanitize-html orta) — aynı ana sürüm yamaları.
+  'vite@>=8.3.0 <8.3.3': '^8.3.3'
+  'hono@<4.13.11': '^4.13.11'
+  'ip-address@<10.7.4': '^10.7.4'
+  'sanitize-html@<2.18.0': '^2.18.0'

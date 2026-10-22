@@ -1,5 +1,6 @@
-FROM node:22-alpine AS base
-RUN corepack enable
+FROM node:26-alpine AS base
+# Node 25+ corepack'i taşımıyor (23 Eki 2026, Node 26) → npm'den sabit sürümle kurulur
+RUN npm install -g corepack@0.36.0 && corepack enable
 WORKDIR /app
 
 FROM base AS deps
@@ -11,9 +12,9 @@ COPY . .
 ENV NODE_ENV=production
 RUN pnpm build
 
-FROM node:22-alpine AS runner
-# libc6-compat keeps sharp/astro image tooling happy on musl.
-RUN apk add --no-cache libc6-compat && corepack enable
+FROM node:26-alpine AS runner
+# libc6-compat keeps sharp/astro image tooling happy on musl. (pnpm çalışma anında gerekmez → corepack yok)
+RUN apk add --no-cache libc6-compat
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 astro
 WORKDIR /app
 ENV NODE_ENV=production

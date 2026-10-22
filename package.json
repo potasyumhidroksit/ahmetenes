@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "@types/node": "^22",
+    "@types/node": "^26",
     "typescript": "^5"
   },
   "packageManager": "pnpm@11.28.6"

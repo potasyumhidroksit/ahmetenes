@@ -134,3 +134,7 @@ Konteyner açılışta `docker-entrypoint.sh` ile seed'i idempotent uygular, son
 
 Önceki Next.js sürümü `/var/www/deneme/projeler/ahmetenes-nextjs-archive` altında yalnız **kaynak arşivi** olarak durur; geri dönüş yolu DEĞİLDİR (aynı imaj/konteyner/port — `deploy.sh`'si kilitli). Geri dönüş: `bash deploy.sh --rollback` (önceki yayının `ahmetenes:rollback` imajı).
 `/blog/*`, `/now` ve `/admin` yolları yeni rotalara 301 ile yönlendirilir.
+
+## Yayın
+
+ship (tur=betik, ad `ahmetenes`): `git push github main` = yayın — ship `bash deploy.sh`'i çalıştırır (temiz kopyadan imaj, sağlık + otomatik dönüş) ve sağlığı doğrular. `deploy.sh`'yi elle çalıştırma. Durum: `ship status ahmetenes`.

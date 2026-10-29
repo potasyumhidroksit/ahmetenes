@@ -313,3 +313,20 @@ html[data-public-theme] body .site-search-dialog .search-dialog-close:hover { ba
 @media (max-width: 600px) {
   [data-public-theme="personabio-content"] .content-panel .search-result { padding: 18px; }
 }
+
+/* Kaydırınca beliriş (ObsidianUI "scroll reveal" fikri, JS'siz): yazı içi fotoğraflar ve "İlgini çekebilir" kartları
+   görünüme girerken hafifçe yükselip belirir. Yalnız CSS kaydırma zaman çizelgesi; desteklemeyen tarayıcı ve
+   azaltılmış hareket tercihinde ve baskıda içerik olduğu gibi görünür. Kapak (LCP) etkilenmez; ilk ekrandaki öğe zaten tam görünür. */
+@supports (animation-timeline: view()) {
+  @media screen and (prefers-reduced-motion: no-preference) {
+    [data-public-theme="personabio-content"] .content-panel :is(.article-content figure, .more-grid .post-card) {
+      animation: icerik-belir linear both;
+    }
+    /* Zaman çizelgesi ayrı kuralda: derleyici tek kuralda bunu "animation" kısaltmasına katıyor, Chrome o kısaltmayı reddediyor. */
+    html[data-public-theme="personabio-content"] .content-panel :is(.article-content figure, .more-grid .post-card) {
+      animation-timeline: view();
+      animation-range: entry 0% entry 50%;
+    }
+  }
+}
+@keyframes icerik-belir { from { opacity: 0; translate: 0 24px; } }

@@ -1,0 +1,48 @@
+---
+import { commentCountLabel, localeFromUrl, localePath, translate } from "../utils/i18n";
+
+// Yazi sonu: kategori, etiketler ve (varsa) yorum sayisi.
+type Term = { slug: string; label: string };
+interface Props {
+	categories: Term[];
+	tags: Term[];
+	commentCount: number;
+}
+
+const { categories, tags, commentCount } = Astro.props;
+const locale = localeFromUrl(Astro.url);
+const t = (text: string) => translate(locale, text);
+---
+
+<footer class="article-taxonomy" aria-label={locale === "tr" ? "Yazı bilgileri" : "Post information"}>
+	{categories.length > 0 && <div class="taxonomy-item">
+		<span class="taxonomy-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 6.5h6l2 2h9v10h-17z"/><path d="M3.5 8.5v-3h6l2 3"/></svg></span>
+		<div class="taxonomy-values">{categories.map((term) => <a href={localePath(`/category/${term.slug}`, locale)} aria-label={`${t("Kategori")}: ${term.label}`}>{term.label}</a>)}</div>
+	</div>}
+	{tags.length > 0 && <div class="taxonomy-item">
+		<span class="taxonomy-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 13 13 20l-9-9V4h7z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg></span>
+		<div class="taxonomy-values">{tags.map((term) => <a href={localePath(`/tag/${term.slug}`, locale)} aria-label={`${t("Etiket")}: ${term.label}`}>{term.label}</a>)}</div>
+	</div>}
+	{commentCount > 0 && <a href="#comments" class="taxonomy-item taxonomy-comments">
+		<span class="taxonomy-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5h14v11H9l-4 3z"/></svg></span>
+		<span class="taxonomy-value">{commentCountLabel(locale, commentCount)}</span>
+	</a>}
+</footer>
+
+<style>
+  .article-taxonomy { margin-top: 32px; padding-block: 20px; border-block: 1px solid var(--glass-border-active); display: flex; flex-wrap: wrap; align-items: center; gap: 20px 36px; }
+  .taxonomy-item { min-width: 0; max-width: 100%; min-height: 44px; display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
+  .taxonomy-icon { display: grid; place-items: center; flex: 0 0 20px; width: 20px; height: 24px; color: light-dark(#536163, #cbd5dc); }
+  .taxonomy-icon svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .taxonomy-values { display: flex; flex-wrap: wrap; gap: 3px 8px; }
+  .taxonomy-values a, .taxonomy-value { color: var(--color-text); font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+  .taxonomy-values a { display: inline-flex; align-items: center; min-height: 28px; text-underline-offset: 3px; }
+  .taxonomy-values a:hover { text-decoration: underline; }
+  .taxonomy-comments { margin-left: auto; }
+  .taxonomy-comments:hover .taxonomy-value { text-decoration: underline; text-underline-offset: 3px; }
+  .taxonomy-comments:focus-visible { outline: 2px solid light-dark(#536163, #ccd7df); outline-offset: 3px; }
+  @media (max-width: 600px) {
+    .article-taxonomy { gap: 16px 24px; }
+    .taxonomy-comments { margin-left: 0; }
+  }
+</style>

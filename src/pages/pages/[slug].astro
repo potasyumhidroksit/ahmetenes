@@ -8,8 +8,9 @@ import Base from "../../layouts/Content.astro";
 import { firstParagraphPreview } from "../../utils/first-paragraph";
 import PageHero from "../../components/PageHero.astro";
 import { PAGE_HEROES, pageHeroOg } from "../../lib/page-hero";
+import { blockText as spanText } from "../../lib/heading-id";
 
-import { localeFromUrl, localePath } from "../../utils/i18n";
+import { formatDate, localeFromUrl, localePath } from "../../utils/i18n";
 const locale = localeFromUrl(Astro.url);
 const slug = decodeSlug(Astro.params.slug);
 
@@ -32,8 +33,7 @@ if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
 // Sayfa basligi zaten <h1>; icerikteki h1 bloklari h2'ye indirilir, basligi
 // tekrar eden ilk h1 atlanir (tek h1, tekrar eden baslik yok).
 // Duzenleme modunda (gorsel editor) icerige dokunma.
-const blockText = (block: PortableTextBlock) =>
-	((block as { children?: Array<{ text?: string }> }).children ?? []).map((child) => child.text ?? "").join("").trim();
+const blockText = (block: PortableTextBlock) => spanText((block as { children?: unknown }).children).trim();
 const rawContent = page.data.content as PortableTextBlock[] | undefined;
 const content = Array.isArray(rawContent) && !getEditMeta(rawContent)
 	? rawContent
@@ -72,7 +72,7 @@ const profileJsonLd = slug === "hakkimda"
 		}
 	: undefined;
 const updated = slug === "now" && page.data.updatedAt
-	? page.data.updatedAt.toLocaleDateString("tr-TR", { year: "numeric", month: "long", day: "numeric" })
+	? formatDate(page.data.updatedAt, locale)
 	: null;
 ---
 

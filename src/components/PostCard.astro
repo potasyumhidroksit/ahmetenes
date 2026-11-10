@@ -1,7 +1,7 @@
 ---
 import type { MediaValue, ContentBylineCredit } from "emdash";
 import ResponsiveImage from "./ResponsiveImage.astro";
-import { commentCountLabel, localeFromUrl, localePath, readingTimeLabel, translate } from "../utils/i18n";
+import { commentCountLabel, formatDate, localeFromUrl, localePath, readingTimeLabel, translate } from "../utils/i18n";
 const locale = localeFromUrl(Astro.url);
 const t = (text: string) => translate(locale, text);
 
@@ -38,13 +38,7 @@ const {
 	priority = false,
 } = Astro.props;
 
-const formattedDate = date
-	? date.toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		})
-	: null;
+const formattedDate = date ? formatDate(date, locale) : null;
 ---
 
 <article class:list={["post-card", { "post-card--cover": coverBackground, "post-card--text": !featuredImage }]}>

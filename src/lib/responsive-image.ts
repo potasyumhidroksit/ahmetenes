@@ -43,3 +43,29 @@ export function ogImage(image: unknown): string | undefined {
   const src = imageSrc(image);
   return src ? entries[src]?.og : undefined;
 }
+
+/** Gorsel alanindan mutlak URL (og:image yedegi): src (dis ya da goreli) ya da
+ * yerel medyanin storageKey'i; bulunamazsa undefined. */
+export function absoluteImageUrl(img: unknown, origin: string): string | undefined {
+  if (!img || (typeof img !== "object" && typeof img !== "string")) return undefined;
+  if (typeof img === "string") {
+    if (!img) return undefined;
+    return img.startsWith("http") ? img : `${origin}${img}`;
+  }
+  const image = img as Record<string, unknown>;
+  // Check for direct src
+  if (typeof image.src === "string" && image.src) {
+    return image.src.startsWith("http")
+      ? image.src
+      : `${origin}${image.src}`;
+  }
+  // Build from storageKey for local images
+  const meta = image.meta as Record<string, unknown> | undefined;
+  const storageKey =
+    (typeof meta?.storageKey === "string" ? meta.storageKey : undefined) ||
+    (typeof image.id === "string" ? image.id : undefined);
+  if (storageKey) {
+    return `${origin}/_emdash/api/media/file/${storageKey}`;
+  }
+  return undefined;
+}

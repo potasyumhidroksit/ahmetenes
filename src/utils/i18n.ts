@@ -35,6 +35,11 @@ const englishToTurkish: Record<string, string> = {
 export const translate = (_locale: Locale, text: string) =>
   englishToTurkish[text] ?? text;
 
+/** "23 Eylül 2026" */
+export function formatDate(date: Date, locale: Locale): string {
+  return date.toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", { year: "numeric", month: "long", day: "numeric" });
+}
+
 export function readingTimeLabel(_locale: Locale, minutes: number): string {
   return minutes + " dk okuma";
 }

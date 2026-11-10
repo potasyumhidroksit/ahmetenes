@@ -1,0 +1,47 @@
+---
+import { localeFromUrl, localePath } from "../utils/i18n";
+
+// Okuma sirasinda onceki/sonraki yazi (yeni baslayan icin rehberli ilerleyis).
+type Neighbor = { id: string; data: { title: string } };
+interface Props {
+	reading: { prev?: Neighbor; next?: Neighbor; position: number; total: number };
+}
+
+const { reading } = Astro.props;
+const locale = localeFromUrl(Astro.url);
+---
+
+<nav class="reading-nav" aria-label="Okuma sırası">
+	<p class="reading-nav-label">Okuma sırası · {reading.position}/{reading.total}</p>
+	<div class="reading-nav-links">
+		{reading.prev ? (
+			<a class="reading-nav-link reading-nav-prev" href={localePath(`/${reading.prev.id}`, locale)} rel="prev">
+				<span class="reading-nav-dir">← Önceki</span>
+				<span class="reading-nav-title">{reading.prev.data.title}</span>
+			</a>
+		) : <span />}
+		{reading.next && (
+			<a class="reading-nav-link reading-nav-next" href={localePath(`/${reading.next.id}`, locale)} rel="next">
+				<span class="reading-nav-dir">Sonraki →</span>
+				<span class="reading-nav-title">{reading.next.data.title}</span>
+			</a>
+		)}
+	</div>
+</nav>
+
+<style>
+  .reading-nav { margin-top: 40px; }
+  .reading-nav-label { margin: 0 0 10px; font-size: 0.8125rem; color: var(--color-muted); font-variant-numeric: tabular-nums; }
+  .reading-nav-links { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .reading-nav-link { display: grid; gap: 4px; padding: 14px 16px; border: 1px solid var(--glass-border-active); border-radius: var(--radius-lg, 12px); color: var(--color-text); text-decoration: none; transition: border-color 0.15s ease, background-color 0.15s ease; }
+  .reading-nav-link:hover { border-color: var(--color-text-secondary); background: var(--color-surface); }
+  .reading-nav-link:focus-visible { outline: 2px solid light-dark(#536163, #ccd7df); outline-offset: 3px; }
+  .reading-nav-next { text-align: right; grid-column: 2; }
+  .reading-nav-dir { font-size: 0.8125rem; color: var(--color-text-secondary); }
+  .reading-nav-title { font-size: 0.9375rem; line-height: 1.35; font-weight: 500; }
+  @media (max-width: 600px) {
+    .reading-nav-links { grid-template-columns: 1fr; }
+    .reading-nav-next { grid-column: auto; text-align: left; }
+    .reading-nav-links > span:empty { display: none; }
+  }
+</style>

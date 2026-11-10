@@ -4,10 +4,9 @@
 // adres cubugunu bu adrese cevirir; eski /galeri#kare-<id> baglantilari da calisir.
 import PostShare from "../../components/PostShare.astro";
 import Content from "../../layouts/Content.astro";
-import { postSlugsByPhoto } from "../../lib/blog-photo";
-import { exifLine, galleryCategories, loadGallery } from "../../lib/gallery";
+import { photoPostFinder } from "../../lib/blog-photo";
+import { exifLine, galleryCategories, loadGallery, photoCreator, photoSrcset, previewSize } from "../../lib/gallery";
 import { notFound } from "../../utils/http";
-import { localizedPosts } from "../../utils/localized-posts";
 import { metaDescription } from "../../utils/meta-description";
 
 export const prerender = false;
@@ -19,9 +18,7 @@ const photo = photos[index];
 const prev = index > 0 ? photos[index - 1] : null;
 const next = index < photos.length - 1 ? photos[index + 1] : null;
 
-const { entries: posts } = await localizedPosts("tr", { orderBy: { published_at: "desc" } });
-const titleBySlug = new Map(posts.map((post) => [post.id, post.data.title]));
-const postSlug = (postSlugsByPhoto().get(photo.id) ?? []).find((slug) => titleBySlug.has(slug));
+const post = (await photoPostFinder())(photo.id);
 
 const origin = Astro.url.origin;
 const pageUrl = origin + "/galeri/" + photo.id;
@@ -31,15 +28,11 @@ const category = galleryCategories.find((cat) => cat.id === photo.category)?.lab
 const description = metaDescription(
 	photo.story || [photo.title, exif, photo.location].filter(Boolean).join(" · ") + " — Ahmet Enes'in galerisinden bir kare.",
 );
-const srcset = photo.srcSet.filter((s) => s.w >= 480).map((s) => s.src + " " + s.w + "w").join(", ");
-// contentUrl 1600px genislige olceklenmis onizleme; boyutlar ona gore.
+const srcset = photoSrcset(photo, 480);
 // Görsel inmeden yer ayrılsın (CLS): `width/height:auto` öznitelik boyutlarını geçersiz kılıyordu; oran CSS'e gider.
 const aspect = photo.width && photo.height ? Number((photo.width / photo.height).toFixed(4)) : undefined;
-const shown = photo.width && photo.height
-	? { width: Math.min(1600, photo.width), height: Math.round((Math.min(1600, photo.width) * photo.height) / photo.width) }
-	: null;
 
-const creator = { "@type": "Person", "@id": origin + "/#person", name: "Ahmet Enes", url: origin };
+const creator = photoCreator(origin);
 const exifData = (
 	[
 		["Gövde", photo.exif?.camera],
@@ -63,7 +56,7 @@ const jsonLd = {
 			thumbnailUrl: origin + photo.src,
 			name: photo.title,
 			...(photo.story ? { description: photo.story } : {}),
-			...(shown ?? {}),
+			...previewSize(photo),
 			...(photo.location ? { contentLocation: { "@type": "Place", name: photo.location } } : {}),
 			...(exifData.length ? { exifData } : {}),
 			creator,
@@ -117,7 +110,7 @@ const jsonLd = {
 		</header>
 
 		{photo.story && <p class="photo-story">{photo.story}</p>}
-		{postSlug && <a class="photo-post" href={"/" + postSlug}>Yazıda: {titleBySlug.get(postSlug)} →</a>}
+		{post && <a class="photo-post" href={post.href}>Yazıda: {post.title} →</a>}
 		<PostShare title={photo.title} url={pageUrl} locale="tr" label="Kareyi paylaş" />
 
 		{(prev || next) && (

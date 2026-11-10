@@ -1,6 +1,7 @@
 import sources from "../data/blog-image-sources.json";
 import { imageSrc } from "./responsive-image";
 import { loadGallery, type GalleryPhoto } from "./gallery";
+import { localizedPosts } from "../utils/localized-posts";
 
 // Blog gorselleri galerideki Immich karelerinden turetildi (eski markdown'daki
 // asset id'leri). Eslesen kare: EXIF satiri + galeride derin baglanti.
@@ -29,4 +30,15 @@ export function postSlugsByPhoto(): Map<string, string[]> {
     out.set(id, list);
   }
   return out;
+}
+
+/** Karenin gectigi yayindaki ilk yazi (kapak once): galeri/kare sayfasinda "Yazıda: …". */
+export async function photoPostFinder(): Promise<(photoId: string) => { href: string; title: string } | null> {
+  const { entries: posts } = await localizedPosts("tr", { orderBy: { published_at: "desc" } });
+  const titleBySlug = new Map(posts.map((post) => [post.id, post.data.title]));
+  const slugsByPhoto = postSlugsByPhoto();
+  return (photoId) => {
+    const slug = (slugsByPhoto.get(photoId) ?? []).find((s) => titleBySlug.has(s));
+    return slug ? { href: "/" + slug, title: titleBySlug.get(slug) ?? "" } : null;
+  };
 }

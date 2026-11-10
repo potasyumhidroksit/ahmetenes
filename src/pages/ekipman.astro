@@ -3,7 +3,7 @@ import Content from "../layouts/Content.astro";
 import PageHero from "../components/PageHero.astro";
 import { PAGE_HEROES, pageHeroOg } from "../lib/page-hero";
 import { equipment, gearCategories, type GearItem } from "../lib/equipment";
-import { loadGallery } from "../lib/gallery";
+import { loadGallery, photoThumb } from "../lib/gallery";
 import { metaDescription } from "../utils/meta-description";
 
 export const prerender = false;
@@ -16,7 +16,6 @@ const shotsFor = (item: GearItem) => {
   const { field, match } = item.exif;
   return photos.filter((p) => match.test(p.exif?.[field] ?? ""));
 };
-const thumb = (p: (typeof photos)[number]) => (p.srcSet.find((s) => s.w === 240) ?? p.srcSet[0])?.src ?? p.src;
 
 // Aciklama ekipman listesinden: once govde ve objektifler.
 const mainGear = equipment.filter((e) => e.category === "kamera" || e.category === "lens").map((e) => e.name);
@@ -52,7 +51,7 @@ const groups = gearCategories
                       {shots.slice(0, 6).map((p) => (
                         <li>
                           <a href={"/galeri/" + p.id} title={p.title} aria-label={p.title + " — kareyi aç"}>
-                            <img src={thumb(p)} alt="" width="56" height="56" loading="lazy" decoding="async" style={p.color ? `background-color:${p.color}` : undefined} />
+                            <img src={photoThumb(p, 240)} alt="" width="56" height="56" loading="lazy" decoding="async" style={p.color ? `background-color:${p.color}` : undefined} />
                           </a>
                         </li>
                       ))}

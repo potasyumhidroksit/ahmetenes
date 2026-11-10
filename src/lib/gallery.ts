@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { getAlbumAssetIds, getAssetBatch, SITEDE_ALBUM_ID, thumbhashAverageColor, type ImmichAsset } from "./immich";
+import { getAlbumAssetIds, getAssetBatch, PREVIEW_WIDTHS, SITEDE_ALBUM_ID, thumbhashAverageColor, type ImmichAsset } from "./immich";
 import { equipment } from "./equipment";
 
 export type GalleryCategory = { id: string; label: string };
@@ -99,8 +99,22 @@ function toPhoto(item: CuratedItem): GalleryPhoto {
     color: item.color,
     exif: item.exif,
     src: "/api/immich/preview/" + item.id + "?w=800",
-    srcSet: [240, 480, 640, 800, 1200, 1600].map((w) => ({ w, src: "/api/immich/preview/" + item.id + "?w=" + w })),
+    srcSet: PREVIEW_WIDTHS.map((w) => ({ w, src: "/api/immich/preview/" + item.id + "?w=" + w })),
     fullSrc: "/api/immich/preview/" + item.id + "?w=1600",
+  };
+}
+
+type ImmichExif = NonNullable<ImmichAsset["exifInfo"]>;
+
+/** Immich EXIF'i -> galeri EXIF'i; canli deger yoksa yedek (kuratorlu kunye). */
+function exifFrom(live: ImmichExif, fallback?: GalleryPhoto["exif"]): NonNullable<GalleryPhoto["exif"]> {
+  return {
+    camera: live.model || fallback?.camera,
+    lens: live.lensModel || fallback?.lens,
+    iso: live.iso != null ? String(live.iso) : fallback?.iso,
+    aperture: live.fNumber != null ? String(live.fNumber) : fallback?.aperture,
+    shutter: live.exposureTime || fallback?.shutter,
+    focal: live.focalLength != null ? String(live.focalLength) + "mm" : fallback?.focal,
   };
 }
 
@@ -116,14 +130,7 @@ function mergeCurated(item: CuratedItem, asset?: ImmichAsset): CuratedItem {
     layout: w && h ? (w >= h ? "wide" : "tall") : item.layout,
     color: thumbhashAverageColor(asset.thumbhash) ?? item.color,
     year: live.dateTimeOriginal ? String(new Date(live.dateTimeOriginal).getUTCFullYear()) : item.year,
-    exif: {
-      camera: live.model || item.exif?.camera,
-      lens: live.lensModel || item.exif?.lens,
-      iso: live.iso != null ? String(live.iso) : item.exif?.iso,
-      aperture: live.fNumber != null ? String(live.fNumber) : item.exif?.aperture,
-      shutter: live.exposureTime || item.exif?.shutter,
-      focal: live.focalLength != null ? String(live.focalLength) + "mm" : item.exif?.focal,
-    },
+    exif: exifFrom(live, item.exif),
   };
 }
 
@@ -140,16 +147,7 @@ function assetToCurated(a: ImmichAsset): CuratedItem {
     width: a.width || undefined,
     height: a.height || undefined,
     color: thumbhashAverageColor(a.thumbhash),
-    exif: a.exifInfo
-      ? {
-          camera: a.exifInfo.model || undefined,
-          lens: a.exifInfo.lensModel || undefined,
-          iso: a.exifInfo.iso != null ? String(a.exifInfo.iso) : undefined,
-          aperture: a.exifInfo.fNumber != null ? String(a.exifInfo.fNumber) : undefined,
-          shutter: a.exifInfo.exposureTime || undefined,
-          focal: a.exifInfo.focalLength != null ? String(a.exifInfo.focalLength) + "mm" : undefined,
-        }
-      : undefined,
+    exif: a.exifInfo ? exifFrom(a.exifInfo) : undefined,
   };
 }
 
@@ -184,8 +182,6 @@ export function gearName(field: "camera" | "lens", raw?: string | null): string 
   return hit ? hit.name : raw.replace(/\s*\|\s*[A-Za-z]+\s+\d{3}$/, "").replace(/\s*\|\s*/g, " ").trim();
 }
 
-/** "Fujifilm X-T5 · Sigma Art 17-40mm F1.8 · 40mm · f/4.5 · 1/600 · ISO 125". Sabit odaklı objektifte odak uzaklığı
- *  adda zaten yazılı ("Sigma 56mm F1.4") — tekrarlanmaz; zoom aralığı ("17-40mm") tekrar sayılmaz. */
 /** Yazılardaki gibi Türkçe birim: "23.9mm" → "23,9 mm" (sayı ile birim bölünmez). */
 function focalTr(raw: string | undefined, mm: number): string | null {
   if (!raw) return null;
@@ -201,6 +197,8 @@ function shutterTr(raw?: string): string | null {
   return Number.isFinite(n) && /^[\d.]+$/.test(s) ? `${String(n).replace(".", ",")}\u00a0sn` : s;
 }
 
+/** "Fujifilm X-T5 · Sigma Art 17-40mm F1.8 · 40mm · f/4.5 · 1/600 · ISO 125". Sabit odaklı objektifte odak uzaklığı
+ *  adda zaten yazılı ("Sigma 56mm F1.4") — tekrarlanmaz; zoom aralığı ("17-40mm") tekrar sayılmaz. */
 export function exifLine(p: GalleryPhoto): string {
   const e = p.exif;
   const lens = gearName("lens", e?.lens);
@@ -209,4 +207,21 @@ export function exifLine(p: GalleryPhoto): string {
   return [gearName("camera", e?.camera), lens, primeHasFocal ? null : focalTr(e?.focal, focalMm), e?.aperture ? "f/" + e.aperture : null, shutterTr(e?.shutter), e?.iso ? "ISO " + e.iso : null]
     .filter(Boolean)
     .join(" · ");
+}
+
+/** srcset ozniteligi; minW'den kucuk genislikler atlanir. */
+export const photoSrcset = (p: GalleryPhoto, minW = 0) =>
+  p.srcSet.filter((s) => s.w >= minW).map((s) => s.src + " " + s.w + "w").join(", ");
+
+/** Kucuk resim: istenen genislikteki varyant (yoksa ilk varyant). */
+export const photoThumb = (p: GalleryPhoto, w: number) => (p.srcSet.find((s) => s.w === w) ?? p.srcSet[0])?.src ?? p.src;
+
+/** JSON-LD: karelerin yaraticisi/telif sahibi (ana sayfadaki Person ile ayni @id). */
+export const photoCreator = (origin: string) => ({ "@type": "Person", "@id": origin + "/#person", name: "Ahmet Enes", url: origin });
+
+/** contentUrl 1600px genislige olceklenmis onizleme; JSON-LD boyutlari ona gore. */
+export function previewSize(p: GalleryPhoto): { width: number; height: number } | null {
+  if (!p.width || !p.height) return null;
+  const width = Math.min(1600, p.width);
+  return { width, height: Math.round((width * p.height) / p.width) };
 }

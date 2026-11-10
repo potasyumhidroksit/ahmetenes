@@ -6,6 +6,7 @@ import {
   immichAssetUrl,
   immichAuthHeaders,
   IMMICH_API_KEY,
+  PREVIEW_WIDTHS as WIDTHS,
   type ImmichKind,
 } from "../../../../lib/immich";
 import { loadGallery } from "../../../../lib/gallery";
@@ -17,7 +18,6 @@ export const prerender = false;
 // kutuphanesinin geri kalani degil) ve sabit genislikler (her w icin diske
 // yeni onbellek dosyasi yazilip CPU harcaniyordu).
 const KINDS: ImmichKind[] = ["thumbnail", "preview"];
-const WIDTHS = [240, 480, 640, 800, 1200, 1600];
 const snapWidth = (w: number) => WIDTHS.find((x) => x >= w) ?? WIDTHS[WIDTHS.length - 1];
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CACHE_DIR = process.env.IMG_CACHE_DIR || "/app/data/imgcache";

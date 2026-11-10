@@ -5,7 +5,7 @@ import { search } from "emdash";
 import Base from "../layouts/Content.astro";
 import { localizedPosts } from "../utils/localized-posts";
 import { excerptAround, fold, hasWord, highlight, plainText, searchTerms } from "../lib/search-text";
-import { galleryCategories, loadGallery, type GalleryPhoto } from "../lib/gallery";
+import { galleryCategories, loadGallery, photoThumb, type GalleryPhoto } from "../lib/gallery";
 import { imageSrc, localImage } from "../lib/responsive-image";
 
 import { localeFromUrl, localePath, translate } from "../utils/i18n";
@@ -89,7 +89,6 @@ if (query) {
 		// galeri alinamazsa yalnizca yazilar
 	}
 }
-const thumb = (photo: GalleryPhoto) => (photo.srcSet.find((s) => s.w === 480) ?? photo.srcSet[0])?.src ?? photo.src;
 const summary = [results.length && `${results.length} yazı`, photoHits.length && `${photoHits.length} kare`].filter(Boolean).join(", ");
 ---
 
@@ -131,7 +130,7 @@ const summary = [results.length && `${results.length} yazı`, photoHits.length &
 						{photoHits.map((photo) => (
 							<li>
 								<a href={"/galeri/" + photo.id}>
-									<img src={thumb(photo)} alt="" width="160" height="160" loading="lazy" decoding="async" style={photo.color ? `background-color:${photo.color}` : undefined} />
+									<img src={photoThumb(photo, 480)} alt="" width="160" height="160" loading="lazy" decoding="async" style={photo.color ? `background-color:${photo.color}` : undefined} />
 									<span>{photo.title}</span>
 								</a>
 							</li>

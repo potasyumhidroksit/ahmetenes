@@ -19,6 +19,9 @@ export function immichAssetUrl(kind: ImmichKind, assetId: string): string {
 
 export const SITEDE_ALBUM_ID = "a2d99017-906b-4cd9-ae1e-12f0c83fb4eb";
 
+/** Vekilin sundugu (ve galerinin srcset'te istedigi) genislikler. */
+export const PREVIEW_WIDTHS = [240, 480, 640, 800, 1200, 1600];
+
 export type ImmichAsset = {
   id: string;
   originalFileName: string;

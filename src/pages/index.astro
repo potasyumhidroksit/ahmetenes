@@ -4,12 +4,13 @@ import { localizedEntry as getEmDashEntry, localizedMenu as getMenuWithCacheHint
 import PersonaBio from "../layouts/PersonaBio.astro";
 import ProfileCard from "../components/personabio/ProfileCard.astro";
 import { localeFromUrl, translate } from "../utils/i18n";
+import { mergeCacheHints } from "../utils/cache-hint";
 const locale = localeFromUrl(Astro.url);
 const [{entry, error, cacheHint}, {data:settings, cacheHint:settingsHint}, {data:menu, cacheHint:menuHint}, {data:socialMenu, cacheHint:socialMenuHint}] = await Promise.all([
   getEmDashEntry("bio_profiles", "personabio", { locale }), getSiteSettingsWithCacheHint(), getMenuWithCacheHint("primary", { locale }), getMenuWithCacheHint("social", { locale }),
 ]);
 if (error && error.name !== "LiveEntryNotFoundError") return new Response(locale === "tr" ? "Profil yüklenemedi." : "Unable to load profile.", {status:500});
-if (Astro.cache?.enabled) Astro.cache.set({...cacheHint, tags:[...(cacheHint?.tags ?? []), ...(settingsHint.tags ?? []), ...(menuHint.tags ?? []), ...(socialMenuHint.tags ?? [])]});
+if (Astro.cache?.enabled) Astro.cache.set(mergeCacheHints(cacheHint ?? {}, settingsHint, menuHint, socialMenuHint));
 const profile = {
   title: entry?.data.title || settings.title || "Profile",
   description: entry?.data.description ?? settings.tagline,

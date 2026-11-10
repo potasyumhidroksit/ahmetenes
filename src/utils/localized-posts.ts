@@ -1,4 +1,5 @@
 import { getEmDashCollection } from "emdash";
+import { mergeCacheHints } from "./cache-hint";
 import type { Locale } from "./i18n";
 import { localizeTurkish } from "./turkish-content";
 
@@ -14,6 +15,6 @@ export async function localizedPosts(locale: Locale, options: {
   return {
     ...fallback,
     entries: fallback.entries.map((entry) => localizeTurkish(entry)),
-    cacheHint: { ...result.cacheHint, tags: [...(result.cacheHint.tags ?? []), ...(fallback.cacheHint.tags ?? [])] },
+    cacheHint: mergeCacheHints(result.cacheHint, fallback.cacheHint),
   };
 }

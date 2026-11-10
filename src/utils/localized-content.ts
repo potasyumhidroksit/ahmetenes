@@ -1,4 +1,5 @@
 import { getEmDashEntry, getMenuWithCacheHint, getTerm, getTranslations } from "emdash";
+import { mergeCacheHints } from "./cache-hint";
 import { type Locale } from "./i18n";
 import { localizeTurkish } from "./turkish-content";
 
@@ -18,7 +19,7 @@ export async function localizedEntry<T extends string>(collection: T, slug: stri
     ...fallback,
     entry: options.locale === "tr" && fallback.entry ? localizeTurkish(fallback.entry) : fallback.entry,
     fallbackLocale,
-    cacheHint: { ...result.cacheHint, tags: [...(result.cacheHint.tags ?? []), ...(fallback.cacheHint.tags ?? [])] },
+    cacheHint: mergeCacheHints(result.cacheHint, fallback.cacheHint),
   };
 }
 export async function localizedMenu(name: string, options: { locale: Locale }) {

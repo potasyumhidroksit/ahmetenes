@@ -101,9 +101,3 @@ export async function getPulseStatus(): Promise<PulseStatus> {
     return pulseCache?.data ?? { ok: false, playing: false, track: null };
   }
 }
-
-export function formatDuration(ms: number | null | undefined): string {
-  if (!ms) return "0:00";
-  const s = Math.floor(ms / 1000);
-  return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
-}

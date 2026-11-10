@@ -20,31 +20,8 @@ export function localePath(path: string, _locale: Locale = "tr"): string {
   return canonical.replace(/^\/(?:posts|yazilar)(?=\/?$|[?#])/, "/posts");
 }
 
-// Turkish interface strings. `translate()` is fed Turkish literals by most
-// pages; English literals (a few shared layouts) are mapped back to Turkish.
-const interfaceTr: Record<string, string> = {
-  "Ayarlar": "Ayarlar", "Görünüm": "Görünüm", "Dil": "Dil", "Alt bilgi": "Alt bilgi",
-  "Ana sayfa": "Ana sayfa", "Hakkımda": "Hakkımda", "Yazılar": "Yazılar", "Ana menü": "Ana menü",
-  "Görüşme": "Görüşme", "Fotoğraflar": "Fotoğraflar", "Menüyü kapat": "Menüyü kapat",
-  "Tema": "Tema", "Açık": "Açık", "Koyu": "Koyu", "E-posta": "E-posta",
-  "Kişisel notlar & düşünceler": "Kişisel notlar & düşünceler",
-  "Profil bağlantıları": "Profil bağlantıları", "profili": "profili", "Profil": "Profil",
-  "Renk teması": "Renk teması", "Açık tema": "Açık tema", "Koyu tema": "Koyu tema",
-  "Dil seçimi": "Dil seçimi", "İçeriğe geç": "İçeriğe geç", "Yaşam yolundan notlar": "Yaşam yolundan notlar",
-  "Yazılarda ara": "Yazılarda ara", "Ara": "Ara", "Yönetim": "Yönetim", "Tüm yazılar": "Tüm yazılar",
-  "Ana sayfaya dön": "Ana sayfaya dön", "Notlar, fikirler ve üzerine düşündüklerim.": "Notlar, fikirler ve üzerine düşündüklerim.",
-  "Yazı görünümü": "Yazı görünümü", "Liste": "Liste", "Kare": "Kare", "Tekli": "Tekli",
-  "Biraz düşünce, biraz zaman.": "Biraz düşünce, biraz zaman.", "Yeni yazılar burada yerini alacak.": "Yeni yazılar burada yerini alacak.",
-  "Notlar & düşünceler": "Notlar & düşünceler", "Yazıyı oku": "Yazıyı oku", "dk okuma": "dk okuma",
-  "Kategori": "Kategori", "Etiket": "Etiket", "yazı": "yazı",
-  "Bu kategoride henüz yazı yok.": "Bu kategoride henüz yazı yok.", "Bu etikette henüz yazı yok.": "Bu etikette henüz yazı yok.",
-  "Yayın tarihi": "Yayın tarihi", "Okuma süresi": "Okuma süresi", "İçindekiler": "İçindekiler", "Bu yazıda": "Bu yazıda",
-  "Yazar": "Yazar", "Yazarlar": "Yazarlar", "Etiketler": "Etiketler", "İlgini çekebilir": "İlgini çekebilir",
-  "Yazılar arasında ara": "Yazılar arasında ara", "Yazılarda ara...": "Yazılarda ara...", "Başlıksız": "Başlıksız",
-  "Bir kelime veya konu yazarak notlar arasında gezin.": "Bir kelime veya konu yazarak notlar arasında gezin.",
-  "Sayfa bulunamadı": "Sayfa bulunamadı", "Aradığın sayfa bulunamadı.": "Aradığın sayfa bulunamadı.",
-};
-
+// Turkish interface strings: pages pass Turkish literals, which are returned
+// unchanged; English literals (a few shared layouts) are mapped to Turkish.
 const englishToTurkish: Record<string, string> = {
   Home: "Ana sayfa", About: "Hakkımda", Posts: "Yazılar", "My Blog": "Ahmet Enes",
   Navigate: "Gezin", Connect: "Bağlan", Search: "Ara", "Search...": "Yazılarda ara...",
@@ -56,7 +33,7 @@ const englishToTurkish: Record<string, string> = {
 };
 
 export const translate = (_locale: Locale, text: string) =>
-  interfaceTr[text] ?? englishToTurkish[text] ?? text;
+  englishToTurkish[text] ?? text;
 
 export function readingTimeLabel(_locale: Locale, minutes: number): string {
   return minutes + " dk okuma";

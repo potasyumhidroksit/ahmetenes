@@ -13,6 +13,7 @@ import { createPublicPageContext } from "emdash/page";
 
 import { Font } from "astro:assets";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
+import { socialLinks } from "../utils/social-links";
 import "../styles/tokens.css";
 import "../styles/theme.css";
 import "../styles/appearance.css";
@@ -20,6 +21,7 @@ import AppearanceHead from "../components/AppearanceHead.astro";
 import SiteFavicon from "../components/SiteFavicon.astro";
 import FooterPreferences from "../components/FooterPreferences.astro";
 import SearchDialog from "../components/SearchDialog.astro";
+import AnalyticsBeacon from "../components/AnalyticsBeacon.astro";
 import { localeFromUrl, localePath, translate } from "../utils/i18n";
 const locale = localeFromUrl(Astro.url);
 const t = (text: string) => translate(locale, text);
@@ -74,13 +76,7 @@ const siteTitle = t(resolveBlogSiteIdentity(settingsResult.data).siteTitle);
 const profile = profileResult.entry?.data;
 const identity = profile?.title || siteTitle;
 const menu = menuResult.data;
-const socialLinks = (socialResult.data?.items ?? []).map((link) => {
-  const emailPath = link.url.match(/^\/email\/([^/?#\s]+@[^/?#\s]+)(\?.*)?$/i);
-  return { ...link, href: emailPath ? `mailto:${emailPath[1]}${emailPath[2] ?? ""}` : link.url };
-}).filter((link) => {
-  if (link.href.startsWith("/") && !link.href.startsWith("//")) return true;
-  try { return ["https:", "http:", "mailto:", "tel:"].includes(new URL(link.href).protocol); } catch { return false; }
-});
+const links = socialLinks(socialResult.data?.items ?? []);
 const fullTitle = exactTitle || title.includes(siteTitle) ? title : `${title} — ${siteTitle}`;
 // Kanonik URL ve varsayılan paylaşım görseli (EmDashHead'e verilir).
 const canonical = canonicalProp ?? new URL(Astro.url.pathname, Astro.url.origin).href;
@@ -138,7 +134,7 @@ const pageCtx = createPublicPageContext({
           <button class="content-drawer-close" type="button" aria-label={t("Menüyü kapat")} title={t("Menüyü kapat")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
           <ContentMenu items={menu?.items ?? []} />
           <a class="content-search-link" href={localePath("/search", locale)} aria-current={Astro.url.pathname === localePath('/search', locale) ? 'page' : undefined} aria-label={t("Sitede ara")} title={t("Ara")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="10.75" cy="10.75" r="6.75"/><path d="m16 16 4.25 4.25"/></svg></a>
-          {socialLinks.length > 0 && <div class="content-drawer-social" aria-label={t("Profil bağlantıları")}><ul>{socialLinks.map((link) => <li><a href={link.href} aria-label={link.label} title={link.label} target={link.target} rel={link.target === "_blank" ? "noopener noreferrer" : undefined}><LinkIcon url={link.href} /></a></li>)}</ul></div>}
+          {links.length > 0 && <div class="content-drawer-social" aria-label={t("Profil bağlantıları")}><ul>{links.map((link) => <li><a href={link.href} aria-label={link.label} title={link.label} target={link.target} rel={link.target === "_blank" ? "noopener noreferrer" : undefined}><LinkIcon url={link.href} /></a></li>)}</ul></div>}
         </nav>
       </header>
       <div class="content-menu-backdrop" aria-hidden="true"></div>
@@ -149,16 +145,7 @@ const pageCtx = createPublicPageContext({
     </div>
     <SearchDialog />
     <EmDashBodyEnd page={pageCtx} />
-    <script is:inline define:vars={{ notFound }}>
-      try {
-        // Otomasyon (Lighthouse, headless test) ziyaret sayilmaz. 404'te yol +
-        // geldigi sitenin adi (referrer) kirik baglanti olarak gider.
-        if (location.pathname.indexOf("/_emdash") !== 0 && !navigator.webdriver) {
-          var hit = notFound ? { path: location.pathname, missing: true, ref: document.referrer } : { path: location.pathname };
-          fetch("/api/analytics", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(hit), keepalive: true }).catch(function () {});
-        }
-      } catch (e) {}
-    </script>
+    <AnalyticsBeacon notFound={notFound} />
   </body>
 </html>
 

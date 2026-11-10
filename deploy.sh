@@ -33,6 +33,7 @@ notify() { [ -x /usr/local/sbin/notify ] && /usr/local/sbin/notify "$@" >/dev/nu
 run_container() { # $1 = imaj
   docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
   docker run -d --name "$CONTAINER_NAME" --restart unless-stopped \
+    --memory 512m --memory-swap 1g \
     -p "127.0.0.1:${HOST_PORT}:4321" \
     --log-opt max-file=3 --log-opt max-size=10m \
     --label com.centurylinklabs.watchtower.enable=false \

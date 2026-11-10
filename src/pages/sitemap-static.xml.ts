@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { getEmDashCollection } from "emdash";
+import { escapeXml } from "../lib/escape";
 import { loadGallery } from "../lib/gallery";
 import { localizedPosts } from "../utils/localized-posts";
 
@@ -9,15 +10,6 @@ export const prerender = false;
 // pages koleksiyonu su an dahil degil. Statik sayfalar + CMS sayfalari icin
 // ayri bir sitemap uretiyoruz; robots.txt ikisini de bildirir.
 const STATIC_PATHS = ["/", "/galeri", "/ekipman", "/medya", "/iletisim", "/posts", "/gizlilik"];
-
-function escapeXml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
 
 export const GET: APIRoute = async ({ url }) => {
   const origin = url.origin.replace(/\/$/, "");

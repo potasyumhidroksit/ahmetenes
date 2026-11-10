@@ -1,6 +1,8 @@
 // Turkce arama yardimcilari: aksan/ı-i katlamali eslesme, yalnizca gercek metin
 // alanlari (span metni, gorsel alt/caption), vurgulu ve guvenli (escape) ozet.
 
+import { escapeHtml } from "./escape";
+
 /** "Işık" -> "isik", "ÇİĞDEM" -> "cigdem": tr kucuk harf + aksanlari sil. */
 function foldCharUncached(ch: string): string {
   return ch
@@ -94,10 +96,6 @@ export function hasWord(folded: string, term: string): boolean {
 
 export function searchTerms(query: string): string[] {
   return [...new Set(fold(query.slice(0, 100)).split(/\s+/).filter(Boolean))].slice(0, 8);
-}
-
-function escapeHtml(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 /** Metni escape eder, terimlerin gectigi yerleri <mark> ile sarar. */

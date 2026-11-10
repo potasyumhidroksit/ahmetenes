@@ -1,13 +1,10 @@
 import type { APIRoute } from "astro";
 import { readBody, responder, safeReturnPath } from "../../../lib/form-request";
+import { EMAIL_RE, RESEND_API_KEY, sendEmail } from "../../../lib/mail";
 import { CONFIRM_TTL_MS, addSubscriber, removeSubscriber, signEmailToken } from "../../../lib/newsletter";
 import { clientIp, isBot, rateLimit } from "../../../lib/rate-limit";
 
 export const prerender = false;
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
-const FROM = process.env.RESEND_FROM || "mail@ahmetenes.com";
 
 export const POST: APIRoute = async ({ request, url }) => {
   const { body, isForm } = await readBody(request);
@@ -52,12 +49,7 @@ export const POST: APIRoute = async ({ request, url }) => {
       confirmUrl +
       "\n\nBu isteği sen yapmadıysan bu e-postayı yoksayabilirsin. Onay 7 gün geçerli.\n— Ahmet Enes, ahmetenes.com";
     try {
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { Authorization: "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
-        body: JSON.stringify({ from: FROM, to: [email], subject: "Bülten aboneliğini onayla", html, text }),
-        signal: AbortSignal.timeout(15000),
-      });
+      const res = await sendEmail({ to: [email], subject: "Bülten aboneliğini onayla", html, text }, 15000);
       if (!res.ok) throw new Error("resend " + res.status);
     } catch {
       await removeSubscriber(email);

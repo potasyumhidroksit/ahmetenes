@@ -1,5 +1,6 @@
 import credits from "../data/image-credits.json";
 import { imageSrc } from "./responsive-image";
+import { escapeHtml as esc } from "./escape";
 
 // Yazilardaki acik lisansli (CC0 / CC BY / CC BY-SA) fotograflarin kaynak
 // bilgisi. CC BY ve BY-SA atif ister: eser, yazar, lisans ve kaynak baglantisi.
@@ -50,8 +51,6 @@ export function imageCredit(image: unknown): ImageCredit | undefined {
     source: e.source ? SOURCES[e.source] ?? e.source : undefined,
   };
 }
-
-const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** RSS gibi duz HTML ciktilari icin tek satir atif. */
 export function imageCreditHtml(image: unknown): string {

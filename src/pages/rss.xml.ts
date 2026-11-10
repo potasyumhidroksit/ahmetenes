@@ -6,6 +6,7 @@ import { localizedPosts } from "../utils/localized-posts";
 import ogPosts from "../data/og-posts.json";
 import { portableTextToHtml } from "../lib/portable-text-html";
 import { imageSrc, localImage } from "../lib/responsive-image";
+import { escapeXml } from "../lib/escape";
 import { imageCredit } from "../lib/image-credit";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
 
@@ -94,23 +95,7 @@ ${items}
 	});
 };
 
-const XML_ESCAPE_PATTERNS = [
-	[/&/g, "&amp;"],
-	[/</g, "&lt;"],
-	[/>/g, "&gt;"],
-	[/"/g, "&quot;"],
-	[/'/g, "&apos;"],
-] as const;
-
 /** CDATA icinde "]]>" gecerse bolunur (aksi halde XML bozulur). */
 function cdata(str: string): string {
 	return "<![CDATA[" + str.replace(/]]>/g, "]]]]><![CDATA[>") + "]]>";
-}
-
-function escapeXml(str: string): string {
-	let result = str;
-	for (const [pattern, replacement] of XML_ESCAPE_PATTERNS) {
-		result = result.replace(pattern, replacement);
-	}
-	return result;
 }

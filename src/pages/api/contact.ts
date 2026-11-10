@@ -1,21 +1,12 @@
 import type { APIRoute } from "astro";
+import { escapeHtml } from "../../lib/escape";
 import { readBody, responder } from "../../lib/form-request";
+import { EMAIL_RE, RESEND_API_KEY, sendEmail } from "../../lib/mail";
 import { clientIp, isBot, rateLimit } from "../../lib/rate-limit";
 
 export const prerender = false;
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
-const FROM = process.env.RESEND_FROM || "mail@ahmetenes.com";
 const TO = process.env.CONTACT_TO || "info@ahmetenes.com";
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 export const POST: APIRoute = async ({ request }) => {
   const { body, isForm } = await readBody(request);
@@ -59,19 +50,16 @@ export const POST: APIRoute = async ({ request }) => {
     "</div>";
 
   try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: FROM,
+    const res = await sendEmail(
+      {
         to: [TO],
         reply_to: email,
         subject: "Yeni iletişim mesajı — " + name,
         text: message + String.fromCharCode(10, 10) + "— " + name + " (" + email + ")",
         html,
-      }),
-      signal: AbortSignal.timeout(20000),
-    });
+      },
+      20000,
+    );
     if (!res.ok) {
       return respond({ ok: false, error: "Mesaj gönderilemedi, biraz sonra tekrar dene." }, 502);
     }

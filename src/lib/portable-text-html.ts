@@ -3,6 +3,7 @@
 // Bilinmeyen blok turleri atlanir.
 import { localImage } from "./responsive-image";
 import { imageCreditHtml } from "./image-credit";
+import { escapeHtml as esc } from "./escape";
 
 type Span = { _type?: string; text?: string; marks?: string[] };
 type MarkDef = { _key?: string; _type?: string; href?: string };
@@ -20,9 +21,6 @@ type Block = {
 const DECORATORS: Record<string, string> = { strong: "strong", em: "em", code: "code", underline: "u", "strike-through": "s" };
 /** Feed gorselleri: okuyucu genisligine yeten en buyuk varyant. */
 const FEED_IMAGE_MAX_W = 1280;
-
-const esc = (value: string) =>
-  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** Goreli yolu mutlak yapar; http(s) disi (javascript: vb.) semalar atilir. */
 function absolute(url: string, siteUrl: string): string | null {

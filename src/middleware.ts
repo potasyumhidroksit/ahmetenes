@@ -1,21 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 import type { APIContext } from "astro";
-import { personabioTheme, PERSONABIO_ID, PERSONABIO_PREVIEW_PATH } from "./themes/personabio/manifest";
-
-const catalog = "/_emdash/api/admin/themes/marketplace";
-const json = (data: unknown) => Response.json({success:true, data}, {headers:{"Cache-Control":"private, no-store"}});
-
-async function fixAdminColorScheme(response: Response) {
-  if (!response.ok || !response.headers.get("content-type")?.includes("text/html")) return response;
-  const html = await response.text();
-  const override = '<style id="persona-bio-admin-mode">html[data-mode="dark"]{color-scheme:dark!important}html[data-mode="light"]{color-scheme:light!important}</style>';
-  if (html.includes('id="persona-bio-admin-mode"')) return new Response(html, response);
-  return new Response(html.replace("</head>", `${override}</head>`), {
-    status: response.status,
-    statusText: response.statusText,
-    headers: response.headers,
-  });
-}
+import { fixAdminColorScheme, isLocalThemePreview, withThemeCatalog } from "./themes/personabio/admin";
 
 /** Public HTML sayfalari edge/tarayici onbellegine uygun mu? (admin, api, arama ve
  * kendi TTL'ini yoneten xml/txt ciktilar haric) */
@@ -44,11 +29,10 @@ function isAnonymous(context: APIContext): boolean {
   );
 }
 
-/** Kimlikli/onizleme yanitlari hicbir katmanda saklanmasin. */
-function withNoStore(response: Response): Response {
+/** Yanit govdesini bozmadan basliklari ekler/degistirir. */
+function withHeaders(response: Response, values: Record<string, string>): Response {
   const headers = new Headers(response.headers);
-  headers.set("Cache-Control", "private, no-store");
-  headers.set("Cloudflare-CDN-Cache-Control", "no-store");
+  for (const [name, value] of Object.entries(values)) headers.set(name, value);
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -56,17 +40,16 @@ function withNoStore(response: Response): Response {
   });
 }
 
-/** Yanit govdesini bozmadan onbellek basliklarini ekler. */
-function withCache(response: Response): Response {
-  const headers = new Headers(response.headers);
-  headers.set("Cache-Control", "public, max-age=0, s-maxage=300, stale-while-revalidate=86400");
-  headers.set("Cloudflare-CDN-Cache-Control", "max-age=300, stale-while-revalidate=86400");
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
-}
+/** Kimlikli/onizleme yanitlari hicbir katmanda saklanmasin. */
+const NO_STORE = { "Cache-Control": "private, no-store", "Cloudflare-CDN-Cache-Control": "no-store" };
+/** Anonim public HTML: edge'de 5 dk + stale-while-revalidate. */
+const PUBLIC_CACHE = {
+  "Cache-Control": "public, max-age=0, s-maxage=300, stale-while-revalidate=86400",
+  "Cloudflare-CDN-Cache-Control": "max-age=300, stale-while-revalidate=86400",
+};
+/** 404'ler edge'de en fazla 60 sn: yayindan once paylasilan bir yazi linki
+ * yayindan sonra dakikalarca 404 kalmasin (Cloudflare varsayilani daha uzun). */
+const NOT_FOUND_CACHE = { "Cache-Control": "public, max-age=0, s-maxage=60", "Cloudflare-CDN-Cache-Control": "max-age=60" };
 
 /**
  * Zafiyet tarayicilarinin yoklamalari (.git, .env, *.php, wp-*, /proc/...).
@@ -97,10 +80,6 @@ function isProbe(pathname: string): boolean {
   return PROBE_SEGMENT.test(path) || PROBE_PATH.test(path);
 }
 
-/** Extend the built-in catalog, retaining EmDash authentication and upstream entries.
- * Runs after next() so core auth, permissions and CSRF checks always execute first.
- * Local catalog handling is deliberately restricted to administrator accounts.
- */
 async function handleRequest(context: APIContext, next: () => Promise<Response>): Promise<Response> {
   const {url, request} = context;
   if (isProbe(url.pathname) || isBrokenSitemapPath(url.pathname)) {
@@ -122,14 +101,7 @@ async function handleRequest(context: APIContext, next: () => Promise<Response>)
   }
   const path = url.pathname.replace(/\/$/, "");
   if (path === "/_emdash/admin/themes") return context.redirect("/_emdash/admin/themes/marketplace",302);
-  const preview = path === "/_emdash/api/themes/preview" && request.method === "POST";
-  let localPreview = false;
-  if (preview) {
-    try {
-      const body = await request.clone().json() as {previewUrl?: unknown};
-      localPreview = body.previewUrl === `${url.origin}${PERSONABIO_PREVIEW_PATH}`;
-    } catch { /* Let the core endpoint report invalid JSON. */ }
-  }
+  const localPreview = await isLocalThemePreview(context, path);
   let response = await next();
   if (path.startsWith("/_emdash/admin")) response = await fixAdminColorScheme(response);
 
@@ -139,14 +111,9 @@ async function handleRequest(context: APIContext, next: () => Promise<Response>)
   // /istatistik: anonime 404, yoneticiye sayfa; ikisi de hicbir katmanda
   // saklanmamali (edge cerezlere bakmaz: onbellekteki 404 yoneticiye de giderdi).
   if (url.pathname.startsWith("/istatistik") || (contentType.includes("text/html") && !url.pathname.startsWith("/_emdash") && !isAnonymous(context))) {
-    response = withNoStore(response);
+    response = withHeaders(response, NO_STORE);
   } else if (request.method === "GET" && response.status === 404 && contentType.includes("text/html")) {
-    // 404'ler edge'de en fazla 60 sn: yayindan once paylasilan bir yazi linki
-    // yayindan sonra dakikalarca 404 kalmasin (Cloudflare varsayilani daha uzun).
-    const headers = new Headers(response.headers);
-    headers.set("Cache-Control", "public, max-age=0, s-maxage=60");
-    headers.set("Cloudflare-CDN-Cache-Control", "max-age=60");
-    response = new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+    response = withHeaders(response, NOT_FOUND_CACHE);
   } else if (
     request.method === "GET" &&
     response.status === 200 &&
@@ -154,72 +121,41 @@ async function handleRequest(context: APIContext, next: () => Promise<Response>)
     isCacheable(url.pathname) &&
     !response.headers.has("set-cookie")
   ) {
-    response = withCache(response);
+    response = withHeaders(response, PUBLIC_CACHE);
   }
-  if (!context.locals.user || context.locals.user.role < 50 || [401,403].includes(response.status)) return response;
-  if (localPreview && (response.ok || response.status === 400)) {
-    // No remote content export or signing is needed for this same-site preview.
-    return json({url: `${url.origin}${PERSONABIO_PREVIEW_PATH}`});
-  }
-  if (request.method !== "GET") return response;
-  const theme = personabioTheme(url.origin);
-  if (path === `${catalog}/${PERSONABIO_ID}/thumbnail`) return context.redirect(theme.thumbnailUrl,302);
-  if (path === `${catalog}/${PERSONABIO_ID}`) return json(theme);
-  if (path !== catalog) return response;
-  if (!response.ok && response.status !== 404 && response.status < 500) return response;
-  let data: {items: {id:string}[]; nextCursor?:string} = {items:[]};
-  if (response.ok) {
-    try {
-      const payload = await response.clone().json() as {data?: typeof data};
-      if (!Array.isArray(payload.data?.items)) return response;
-      data = payload.data!;
-    } catch { return response; }
-  }
-  const query = (url.searchParams.get("q") || "").toLocaleLowerCase("tr");
-  const keyword = url.searchParams.get("keyword");
-  const match = `${theme.name} ${theme.description} ${theme.keywords.join(" ")}`.toLocaleLowerCase("tr").includes(query) && (!keyword || theme.keywords.includes(keyword));
-  if (!url.searchParams.get("cursor") && match) data.items = [theme, ...data.items.filter(item => item.id !== PERSONABIO_ID)];
-  return json(data);
+  return withThemeCatalog(context, path, response, localPreview);
 }
+
+const SECURITY_HEADERS = {
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "SAMEORIGIN",
+};
+const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "connect-src 'self' https:",
+  "frame-ancestors 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join("; ");
 
 /** Guvenlik basliklari. CSP yalnizca public sayfalara uygulanir; EmDash admin
  * editorunu (inline worker/editor scriptleri) kirmamak icin /_emdash haric tutulur. */
 function withSecurityHeaders(response: Response, pathname: string): Response {
   try {
-    response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-    response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
-    response.headers.set("X-Content-Type-Options", "nosniff");
-    response.headers.set("X-Frame-Options", "SAMEORIGIN");
-    if (!pathname.startsWith("/_emdash")) {
-      response.headers.set(
-        "Content-Security-Policy",
-        [
-          "default-src 'self'",
-          "script-src 'self' 'unsafe-inline'",
-          "style-src 'self' 'unsafe-inline'",
-          "img-src 'self' data: blob: https:",
-          "font-src 'self' data:",
-          "connect-src 'self' https:",
-          "frame-ancestors 'self'",
-          "object-src 'none'",
-          "base-uri 'self'",
-          "form-action 'self'",
-        ].join("; "),
-      );
-    }
+    for (const [name, value] of Object.entries(SECURITY_HEADERS)) response.headers.set(name, value);
+    if (!pathname.startsWith("/_emdash")) response.headers.set("Content-Security-Policy", CONTENT_SECURITY_POLICY);
     return response;
   } catch {
-    // Basliklar immutable ise yeni bir Response ile ayni govdeyi dondur.
-    const headers = new Headers(response.headers);
-    headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-    headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
-    headers.set("X-Content-Type-Options", "nosniff");
-    headers.set("X-Frame-Options", "SAMEORIGIN");
-    return new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers,
-    });
+    // Basliklar immutable ise (ornegin Response.redirect) yeni bir Response ile
+    // ayni govdeyi dondur; bu yolda CSP eklenmez.
+    return withHeaders(response, SECURITY_HEADERS);
   }
 }
 

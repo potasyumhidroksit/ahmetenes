@@ -1,0 +1,5 @@
+[Unit]
+Description=Ahmetenes sağlık kontrolü
+[Service]
+Type=oneshot
+ExecStart=/var/www/deneme/projeler/ahmetenes/scripts/healthcheck.sh

@@ -1,0 +1,3 @@
+# Bilerek kapalı (disabled) tutulan birimler: kur.sh bunları kurar ama hiç etkinleştirmez/başlatmaz.
+# ahmetenes-health.timer 10 Kas 2026 kapatıldı (apex içerik denetimleri izleme.py ek listesine taşındı).
+ahmetenes-health.timer

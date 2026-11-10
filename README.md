@@ -120,8 +120,8 @@ Konteyner açılışta `docker-entrypoint.sh` ile seed'i idempotent uygular, son
   `scripts/cdn-purge-watch.sh`): HTML Cloudflare'de 5 dk (`s-maxage=300`) + stale-while-revalidate ile
   önbelleklenir; panelde kaydet/yayınla/sil sonrası eklenti `/var/www/ahmetenes-data/cdn-purge-request`
   dosyasına yazar, sunucudaki path birimi `scripts/cdn-refresh.sh`'i çalıştırır (Cloudflare anahtarı
-  konteynere girmez). Kurulum: `cp scripts/systemd/ahmetenes-cdn-purge.* /etc/systemd/system/ &&
-  systemctl daemon-reload && systemctl enable --now ahmetenes-cdn-purge.path`. Günlük:
+  konteynere girmez). Birimler `ops/systemd/` (yedek, cdn-purge, health) ship
+  adımı `ops/kur.sh` ile kurulur (değişen dosya + daemon-reload; `ops/systemd/kapali` etkinleşmez). Günlük:
   `journalctl -u ahmetenes-cdn-purge`. Site ayarları ve menüler bu kancalarda yok; onlardan sonra
   `bash scripts/cdn-refresh.sh`.
 - **Yedek** (`ahmetenes-backup.timer`, 04:00; `scripts/backup.sh`): SQLite `.backup` (tutarlı anlık

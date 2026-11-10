@@ -1,0 +1,7 @@
+[Unit]
+Description=Her gün 04:00 ahmetenes yedeği
+[Timer]
+OnCalendar=*-*-* 04:00:00
+Persistent=true
+[Install]
+WantedBy=timers.target

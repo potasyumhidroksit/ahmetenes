@@ -8,7 +8,7 @@ import Base from "../../layouts/Content.astro";
 import { firstParagraphPreview } from "../../utils/first-paragraph";
 import PageHero from "../../components/PageHero.astro";
 import { PAGE_HEROES, pageHeroOg } from "../../lib/page-hero";
-import { blockText as spanText } from "../../lib/heading-id";
+import { blockText } from "../../lib/heading-id";
 
 import { formatDate, localeFromUrl, localePath } from "../../utils/i18n";
 const locale = localeFromUrl(Astro.url);
@@ -33,17 +33,17 @@ if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
 // Sayfa basligi zaten <h1>; icerikteki h1 bloklari h2'ye indirilir, basligi
 // tekrar eden ilk h1 atlanir (tek h1, tekrar eden baslik yok).
 // Duzenleme modunda (gorsel editor) icerige dokunma.
-const blockText = (block: PortableTextBlock) => spanText((block as { children?: unknown }).children).trim();
+const textOf = (block: PortableTextBlock) => blockText((block as { children?: unknown }).children).trim();
 const rawContent = page.data.content as PortableTextBlock[] | undefined;
 const content = Array.isArray(rawContent) && !getEditMeta(rawContent)
 	? rawContent
-		.filter((block, index) => !(index === 0 && block.style === "h1" && blockText(block).toLocaleLowerCase("tr") === page.data.title.toLocaleLowerCase("tr")))
+		.filter((block, index) => !(index === 0 && block.style === "h1" && textOf(block).toLocaleLowerCase("tr") === page.data.title.toLocaleLowerCase("tr")))
 		.map((block) => (block.style === "h1" ? { ...block, style: "h2" } : block))
 	: rawContent;
 // Ilk paragraf kisa kalirsa (ör. /now) ara basliklarla zenginlestir.
 const headings = (Array.isArray(rawContent) ? rawContent : [])
 	.filter((block) => block.style === "h2")
-	.map((block) => blockText(block))
+	.map((block) => textOf(block))
 	.filter(Boolean);
 const lead = firstParagraphPreview(rawContent);
 const description = (lead.length < 70 && headings.length

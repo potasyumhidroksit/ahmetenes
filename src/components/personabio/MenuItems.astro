@@ -12,13 +12,24 @@ function isExternal(href: string): boolean {
     return false;
   }
 }
+// Menu kutularinin sagindaki kucuk dekoratif cizimler (public/cizim), adrese gore.
+const cizimler: Record<string, string> = {
+  "/galeri": "/cizim/menu-galeri.webp",
+  "/ekipman": "/cizim/menu-ekipman.webp",
+  "/medya": "/cizim/menu-medya.webp",
+  "/posts": "/cizim/menu-yazilar.webp",
+  "/hakkimda": "/cizim/menu-hakkimda.webp",
+  "/iletisim": "/cizim/menu-iletisim.webp",
+};
 ---
 <ul class="personabio-menu-items">
   {items.map(item => {
     const href = localePath(item.url, locale);
     const external = isExternal(href);
+    const cizim = external ? undefined : cizimler[href.replace(/\/$/, "")];
     return <li>
       {isSafeHref(item.url) ? <a href={href} target={item.target} title={item.titleAttr} rel={item.target === "_blank" ? "noopener noreferrer" : undefined} aria-current={Astro.url.pathname.replace(/\/$/, "") === href.replace(/\/$/, "") ? "page" : undefined}>
+        {cizim && <img class="personabio-menu-art" src={cizim} alt="" width="160" height="64" loading="lazy" decoding="async" />}
         <span>{menuLabel(item.label, locale)}</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" data-link-icon={external ? "external" : "internal"}>
           {external ? <path d="M7 17 17 7M8 7h9v9"/> : <path d="M5 12h14m-6-6 6 6-6 6"/>}

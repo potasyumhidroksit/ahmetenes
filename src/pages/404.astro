@@ -11,6 +11,7 @@ const { entries: latest } = await localizedPosts(locale, { orderBy: { published_
 
 <Base title={t("Sayfa bulunamadı")} robots="noindex" notFound>
 	<div class="not-found">
+		<img class="not-found-art" src="/cizim/kayip-yol.webp" alt="" width="280" height="187" loading="lazy" decoding="async" />
 		<h1>404</h1>
 		<p>{t("Aradığın sayfa bulunamadı.")}</p>
 		<a href={localePath("/", locale)}>{t("Ana sayfaya dön")}</a>
@@ -48,6 +49,18 @@ const { entries: latest } = await localizedPosts(locale, { orderBy: { published_
 		text-align: center;
 		padding: var(--spacing-24) var(--spacing-6) var(--spacing-12);
 	}
+
+	/* Kucuk dekoratif cizim; kenarlari panele erir, baskida gizli. */
+	.not-found-art {
+		display: block;
+		width: min(280px, 70%);
+		height: auto;
+		margin: 0 auto -8px;
+		-webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent);
+		mask-image: radial-gradient(closest-side, #000 30%, transparent);
+	}
+	:global(html[data-appearance="light"]) .not-found-art { opacity: 0.75; }
+	@media print { .not-found-art { display: none; } }
 
 	.not-found h1 {
 		font-size: var(--font-size-5xl);

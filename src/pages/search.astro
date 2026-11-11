@@ -166,6 +166,7 @@ const summary = [results.length && `${results.length} yazı`, photoHits.length &
 		}
 
 		{!query && <p class="search-hint">{t("Bir kelime, yer ya da konu yazarak yazılar ve kareler arasında gezin.")}</p>}
+		{(!query || !summary) && <img class="search-art" src="/cizim/arama.webp" alt="" width="240" height="160" loading="lazy" decoding="async" />}
 	</section>
 </Base>
 
@@ -175,6 +176,18 @@ const summary = [results.length && `${results.length} yazı`, photoHits.length &
 		margin: 0 auto;
 		padding: var(--spacing-8) var(--spacing-6) var(--spacing-16);
 	}
+
+	/* Bos aramada kucuk dekoratif cizim; kenarlari panele erir. Acik temada koyu zemini leke gibi durdugu icin, baskida da gizli. */
+	.search-art {
+		display: block;
+		width: min(240px, 60%);
+		height: auto;
+		margin-top: var(--spacing-6);
+		-webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent);
+		mask-image: radial-gradient(closest-side, #000 30%, transparent);
+	}
+	:global(html[data-appearance="light"]) .search-art { display: none; }
+	@media print { .search-art { display: none; } }
 
 	.search-section-title {
 		font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase;

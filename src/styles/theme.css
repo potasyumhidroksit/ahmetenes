@@ -330,3 +330,18 @@ html[data-public-theme] body .site-search-dialog .search-dialog-close:hover { ba
   }
 }
 @keyframes icerik-belir { from { opacity: 0; translate: 0 24px; } }
+
+/* Yazi arsivi basliginda kucuk dekoratif cizim: yalniz genis ekranda, basligin saginda, kenarlari panele erir.
+   Dar ekranda metinle cakismasin, acik temada koyu zemini leke gibi durmasin diye gizli; baskida gizli. */
+[data-public-theme="personabio-content"] .content-panel .archive-art { display: none; }
+@media (min-width: 1101px) {
+  [data-public-theme="personabio-content"] .content-panel .archive-header:has(> .archive-art) { position: relative; }
+  [data-public-theme="personabio-content"] .content-panel .archive-art {
+    display: block; position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    width: 260px; height: auto; pointer-events: none;
+    -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent);
+    mask-image: radial-gradient(closest-side, #000 30%, transparent);
+  }
+  html[data-appearance="light"][data-public-theme="personabio-content"] .content-panel .archive-art { display: none; }
+}
+@media print { [data-public-theme="personabio-content"] .content-panel .archive-art { display: none !important; } }

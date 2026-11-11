@@ -93,16 +93,23 @@ html[data-public-theme="personabio-bio"] { font-size:24px; color-scheme:dark; }
   .personabio-profile h1 { font-size: 40px; }
 }
 
-/* Menu kutularinda kucuk dekoratif cizim: okun solunda, kenarlari zemine erir, yazinin arkasinda kalir.
-   Koyu temada "screen" ile cizimin koyu zemini cama karisir. Acik temada koyu zemin leke gibi durdugu icin gizli; baskida gizli. */
+/* Menu kutularinda kucuk dekoratif cizim (Cizim.astro): okun solunda, kenarlari zemine erir, yazinin arkasinda kalir.
+   Koyu temada "screen", acik temada "multiply" ile cizimin zemini cama karisir. */
 .personabio-menu-items a:has(> .personabio-menu-art) { position:relative; isolation:isolate; overflow:hidden; }
-.personabio-menu-art {
-  position:absolute; z-index:-1; top:0; right:calc(1.7rem + 1.275rem + 6px);
-  height:100%; width:auto; aspect-ratio:5/2; object-fit:cover; pointer-events:none;
+.personabio-menu-items .personabio-menu-art {
+  position:absolute; z-index:-1; top:0; right:calc(1.7rem + 1.275rem + 6px); height:100%; width:auto;
   -webkit-mask-image:radial-gradient(closest-side, #000 45%, transparent);
   mask-image:radial-gradient(closest-side, #000 45%, transparent);
   mix-blend-mode:screen; opacity:.8;
 }
-html[data-appearance="light"] .personabio-menu-art { display:none; }
-@media(max-width:736px) { .personabio-menu-art { right:calc(20px + 1.275rem + 4px); } }
-@media print { .personabio-menu-art { display:none; } }
+html[data-appearance="light"] .personabio-menu-items .personabio-menu-art { mix-blend-mode:multiply; opacity:.9; }
+@media(max-width:736px) { .personabio-menu-items .personabio-menu-art { right:calc(20px + 1.275rem + 4px); } }
+
+/* Profil sutununun arkasinda cok silik, zemine eriyen cizim (Cizim.astro); avatar ve yazinin altinda kalir. */
+.personabio-profile .personabio-profile-art {
+  position:absolute; z-index:-1; left:50%; top:62%; width:min(30rem, 110%); transform:translate(-50%,-50%);
+  -webkit-mask-image:radial-gradient(closest-side, #000 10%, transparent);
+  mask-image:radial-gradient(closest-side, #000 10%, transparent);
+  opacity:.16;
+}
+html[data-appearance="light"] .personabio-profile .personabio-profile-art { opacity:.2; }

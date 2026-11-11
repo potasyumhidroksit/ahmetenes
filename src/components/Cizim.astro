@@ -1,0 +1,15 @@
+---
+// Dekoratif cizim (public/cizim/<ad>.webp koyu, <ad>-acik.webp acik tema).
+// Arka plan gorseli olarak basilir: yalniz gecerli temanin dosyasi iner,
+// ekran okuyucudan gizlidir; boyut CSS'te (genislik + oran), baskida gizli.
+// Stil: appearance.css "Dekoratif cizimler".
+interface Props {
+	ad: string;
+	class?: string;
+	/** Gorselin en/boy orani (varsayilan 3/2). */
+	oran?: string;
+}
+const { ad, class: cls, oran = "3 / 2" } = Astro.props;
+const style = `--cizim-koyu:url("/cizim/${ad}.webp");--cizim-acik:url("/cizim/${ad}-acik.webp");aspect-ratio:${oran}`;
+---
+<span class:list={["cizim", cls]} aria-hidden="true" style={style}></span>

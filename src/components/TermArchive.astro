@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Content.astro";
+import Cizim from "./Cizim.astro";
 import PostCard from "./PostCard.astro";
 import { getReadingTime } from "../utils/reading-time";
 import { localeFromUrl } from "../utils/i18n";
@@ -23,7 +24,7 @@ const { term, posts } = archive;
 <Base title={title} description={description} robots={posts.length < 2 ? "noindex, follow" : undefined}>
 	<section class="archive-section">
 		<header class="archive-header">
-			<img class="archive-art" src="/cizim/masa.webp" alt="" width="260" height="173" loading="lazy" decoding="async" />
+			<Cizim ad="masa" class="archive-art" />
 			<span class="archive-label">{label}</span>
 			<h1 class="archive-title">{term.label}</h1>
 			<p class="archive-count">
@@ -33,7 +34,10 @@ const { term, posts } = archive;
 
 		{
 			posts.length === 0 ? (
-				<p class="no-posts">{empty}</p>
+				<div class="no-posts-wrap">
+					<Cizim ad="arama" class="no-posts-art" />
+					<p class="no-posts">{empty}</p>
+				</div>
 			) : (
 				<div class="posts-grid">
 					{posts.map(({ post, tags }) => (
@@ -97,6 +101,9 @@ const { term, posts } = archive;
 	.no-posts {
 		color: var(--color-muted);
 	}
+
+	/* Bos kategori/etiket: kucuk dekoratif cizim (Cizim.astro). */
+	.no-posts-wrap :global(.no-posts-art) { width: min(220px, 60%); margin-bottom: var(--spacing-4); }
 
 	@media (max-width: 900px) {
 		.posts-grid {

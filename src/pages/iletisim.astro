@@ -1,5 +1,6 @@
 ---
 import Content from "../layouts/Content.astro";
+import Cizim from "../components/Cizim.astro";
 import PageHero from "../components/PageHero.astro";
 import { PAGE_HEROES, pageHeroOg } from "../lib/page-hero";
 import NewsletterForm from "../components/NewsletterForm.astro";
@@ -11,6 +12,7 @@ const contactMessage = contactState === "ok" ? "Teşekkürler! Mesajın iletildi
   <section class="archive-section contact-page">
     <PageHero {...PAGE_HEROES.iletisim} />
     <header class="archive-header">
+      <Cizim ad="iletisim" class="archive-art" />
       <h1>İletişim</h1>
       <p>Bir iş, bir soru ya da sadece merhaba.</p>
     </header>
@@ -125,6 +127,15 @@ const contactMessage = contactState === "ok" ? "Teşekkürler! Mesajın iletildi
   .contact-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
   .newsletter-box { margin-top: 1rem; padding-top: 1.25rem; border-top: 1px solid var(--color-border-subtle); }
   .form-status { min-height: 1.2em; font-size: 0.85rem; color: var(--color-muted); margin: 0; }
+  /* Mesaj gonderildi: kucuk dekoratif cizim (zarf + kagit ucak), temaya gore dosya; baskida gizli. */
+  .form-status[data-state="ok"]::before {
+    content: ""; display: block; width: 150px; aspect-ratio: 3 / 2; margin: 0 0 6px -12px;
+    background: url("/cizim/iletisim.webp") center / cover no-repeat;
+    -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent);
+    mask-image: radial-gradient(closest-side, #000 30%, transparent);
+  }
+  :global(html[data-appearance="light"]) .form-status[data-state="ok"]::before { background-image: url("/cizim/iletisim-acik.webp"); }
+  @media print { .form-status[data-state="ok"]::before { display: none; } }
   .form-status[data-state="ok"] { color: light-dark(#1a7f37, #6fd08c); }
   .form-status[data-state="error"] { color: light-dark(#c0392b, #ff8a80); }
 </style>

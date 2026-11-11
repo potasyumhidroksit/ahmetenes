@@ -3,6 +3,7 @@
 // Veri akisi degisirse (yeni form, yeni ucuncu taraf, saklama suresi) bu
 // sayfa da guncellenmeli; UPDATED tarihi elle ilerletilir.
 import Content from "../layouts/Content.astro";
+import Cizim from "../components/Cizim.astro";
 
 const UPDATED = new Date("2026-09-23T12:00:00Z");
 const updatedLabel = UPDATED.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
@@ -13,6 +14,7 @@ const updatedLabel = UPDATED.toLocaleDateString("tr-TR", { day: "numeric", month
 >
 	<article class="page-article">
 		<header class="page-header">
+			<Cizim ad="gizlilik" class="archive-art" />
 			<h1 class="page-title">Gizlilik</h1>
 			<p class="page-updated">Son güncelleme: <time datetime={UPDATED.toISOString().slice(0, 10)}>{updatedLabel}</time></p>
 		</header>

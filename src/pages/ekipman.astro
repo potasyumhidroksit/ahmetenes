@@ -1,5 +1,6 @@
 ---
 import Content from "../layouts/Content.astro";
+import Cizim from "../components/Cizim.astro";
 import PageHero from "../components/PageHero.astro";
 import { PAGE_HEROES, pageHeroOg } from "../lib/page-hero";
 import { equipment, gearCategories, type GearItem } from "../lib/equipment";
@@ -32,6 +33,7 @@ const groups = gearCategories
   <section class="archive-section gear-page">
     <PageHero {...PAGE_HEROES.ekipman} />
     <header class="archive-header">
+      <Cizim ad="ekipman" class="archive-art" />
       <h1>Ekipman</h1>
       <p>Kullandığım gövdeler, objektifler ve aksesuarlar.</p>
     </header>

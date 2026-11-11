@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Content.astro";
+import Cizim from "../components/Cizim.astro";
 import { localeFromUrl, localePath, translate } from "../utils/i18n";
 import { localizedPosts } from "../utils/localized-posts";
 const locale = localeFromUrl(Astro.url);
@@ -11,7 +12,7 @@ const { entries: latest } = await localizedPosts(locale, { orderBy: { published_
 
 <Base title={t("Sayfa bulunamadı")} robots="noindex" notFound>
 	<div class="not-found">
-		<img class="not-found-art" src="/cizim/kayip-yol.webp" alt="" width="280" height="187" loading="lazy" decoding="async" />
+		<Cizim ad="kayip-yol" class="not-found-art" />
 		<h1>404</h1>
 		<p>{t("Aradığın sayfa bulunamadı.")}</p>
 		<a href={localePath("/", locale)}>{t("Ana sayfaya dön")}</a>
@@ -50,17 +51,16 @@ const { entries: latest } = await localizedPosts(locale, { orderBy: { published_
 		padding: var(--spacing-24) var(--spacing-6) var(--spacing-12);
 	}
 
-	/* Kucuk dekoratif cizim; kenarlari panele erir, baskida gizli. */
-	.not-found-art {
-		display: block;
+	/* Kucuk dekoratif cizim (Cizim.astro); kenarlari panele erir. */
+	.not-found :global(.not-found-art) {
 		width: min(280px, 70%);
-		height: auto;
 		margin: 0 auto -8px;
-		-webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent);
-		mask-image: radial-gradient(closest-side, #000 30%, transparent);
 	}
-	:global(html[data-appearance="light"]) .not-found-art { opacity: 0.75; }
-	@media print { .not-found-art { display: none; } }
+	/* Acik gorselin alt kenari koyulasiyor; oval sinir belli olmasin diye daha yumusak erit. */
+	:global(html[data-appearance="light"]) .not-found :global(.not-found-art) {
+		-webkit-mask-image: radial-gradient(closest-side, #000 5%, transparent);
+		mask-image: radial-gradient(closest-side, #000 5%, transparent);
+	}
 
 	.not-found h1 {
 		font-size: var(--font-size-5xl);

@@ -1,5 +1,6 @@
 ---
 import Content from "../layouts/Content.astro";
+import Cizim from "../components/Cizim.astro";
 import { exifLine, loadGallery, galleryCategories, photoCreator, photoSrcset, previewSize } from "../lib/gallery";
 import { photoPostFinder } from "../lib/blog-photo";
 
@@ -44,6 +45,7 @@ const themes = themeNames.length > 1 ? themeNames.slice(0, -1).join(", ") + " ve
 <Content title="Galeri" description={`Fotoğraf portfolyosu: ${themes || "şehir ve sokak"} kareleri. Her karenin çekim bilgisi (gövde, objektif, diyafram), konumu ve kısa hikâyesiyle.`} image={cover ? origin + "/api/immich/preview/" + cover.id + "?fmt=og" : undefined} imageAlt={cover?.alt ?? cover?.title} jsonLd={jsonLd}>
   <section class="archive-section gallery-page">
     <header class="archive-header">
+      <Cizim ad="galeri" class="archive-art" />
       <h1>Galeri</h1>
       <p>{photos.length} kare{themes && " · " + themes}</p>
     </header>

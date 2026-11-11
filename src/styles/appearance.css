@@ -275,3 +275,15 @@ html[data-public-theme] .personabio-footer .appearance-icons svg { width: 18px; 
   img, figure { break-inside: avoid; }
   h1, h2, h3 { break-after: avoid; }
 }
+
+/* Dekoratif cizimler (src/components/Cizim.astro): temaya gore koyu/acik dosya arka plan olarak,
+   kenarlar zemine erir. Boyut ve yer, kullanildigi yerin kuralinda (daha ozgul secici). Baskida gizli. */
+.cizim {
+  display: block;
+  background: var(--cizim-koyu) center / cover no-repeat;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent);
+  mask-image: radial-gradient(closest-side, #000 30%, transparent);
+}
+html[data-appearance="light"] .cizim { background-image: var(--cizim-acik); }
+@media print { .cizim { display: none !important; } }

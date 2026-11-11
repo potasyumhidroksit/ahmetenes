@@ -7,5 +7,7 @@ import type { AstroGlobal } from "astro";
  */
 export function notFound(context: AstroGlobal): Promise<Response> {
   context.response.status = 404;
+  // 404 sayfasi istenen adrese gore cizim secer; rewrite sonrasi Astro.url "/404" olur.
+  (context.locals as { istenenYol?: string }).istenenYol = context.url.pathname;
   return context.rewrite("/404");
 }

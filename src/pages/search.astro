@@ -4,6 +4,7 @@ export const prerender = false;
 import { search } from "emdash";
 import Base from "../layouts/Content.astro";
 import Cizim from "../components/Cizim.astro";
+import { ARAMA_CIZIMLERI, gunAnahtari, sec } from "../lib/cizim-secim";
 import { localizedPosts } from "../utils/localized-posts";
 import { excerptAround, fold, hasWord, highlight, plainText, searchTerms } from "../lib/search-text";
 import { galleryCategories, loadGallery, photoThumb, type GalleryPhoto } from "../lib/gallery";
@@ -167,7 +168,7 @@ const summary = [results.length && `${results.length} yazı`, photoHits.length &
 		}
 
 		{!query && <p class="search-hint">{t("Bir kelime, yer ya da konu yazarak yazılar ve kareler arasında gezin.")}</p>}
-		{(!query || !summary) && <Cizim ad="arama" class="search-art" />}
+		{(!query || !summary) && <Cizim ad={sec(ARAMA_CIZIMLERI, query || gunAnahtari())} class="search-art" />}
 	</section>
 </Base>
 

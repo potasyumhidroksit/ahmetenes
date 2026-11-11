@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Content.astro";
 import Cizim from "../components/Cizim.astro";
+import { KAYIP_CIZIMLERI, sec } from "../lib/cizim-secim";
 import { localeFromUrl, localePath, translate } from "../utils/i18n";
 import { localizedPosts } from "../utils/localized-posts";
 const locale = localeFromUrl(Astro.url);
@@ -12,7 +13,7 @@ const { entries: latest } = await localizedPosts(locale, { orderBy: { published_
 
 <Base title={t("Sayfa bulunamadı")} robots="noindex" notFound>
 	<div class="not-found">
-		<Cizim ad="kayip-yol" class="not-found-art" />
+		<Cizim ad={sec(KAYIP_CIZIMLERI, (Astro.locals as { istenenYol?: string }).istenenYol ?? Astro.url.pathname)} class="not-found-art" />
 		<h1>404</h1>
 		<p>{t("Aradığın sayfa bulunamadı.")}</p>
 		<a href={localePath("/", locale)}>{t("Ana sayfaya dön")}</a>

@@ -282,8 +282,18 @@ html[data-public-theme] .personabio-footer .appearance-icons svg { width: 18px; 
   display: block;
   background: var(--cizim-koyu) center / cover no-repeat;
   pointer-events: none;
-  -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent);
-  mask-image: radial-gradient(closest-side, #000 30%, transparent);
+  -webkit-mask-image: radial-gradient(closest-side, #000 12%, transparent);
+  mask-image: radial-gradient(closest-side, #000 12%, transparent);
 }
 html[data-appearance="light"] .cizim { background-image: var(--cizim-acik); }
 @media print { .cizim { display: none !important; } }
+/* Icerik sayfalarinda alt bilginin ustunde sakin kapanis seridi; ana sayfada yok (profil karti yeterli). */
+.footer-art {
+  width: min(420px, 80%); margin: 8px auto 4px; opacity: .8;
+  /* Serit genis ve ince: oval yerine yatay ve dikey yumusak erime (iki maskenin kesisimi). */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 35%, #000 65%, transparent), linear-gradient(transparent, #000 35%, #000 65%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent, #000 35%, #000 65%, transparent), linear-gradient(transparent, #000 35%, #000 65%, transparent);
+  mask-composite: intersect;
+}
+[data-public-theme="personabio-bio"] .footer-art { display: none; }

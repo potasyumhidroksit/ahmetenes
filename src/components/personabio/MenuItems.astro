@@ -2,6 +2,7 @@
 import { isSafeHref, type MenuItem } from "emdash";
 import MenuItems from "./MenuItems.astro";
 import Cizim from "../Cizim.astro";
+import { MENU_CIZIMLERI, gunAnahtari, sira } from "../../lib/cizim-secim";
 interface Props { items: MenuItem[]; }
 const { items } = Astro.props;
 import { localeFromUrl, localePath, menuLabel } from "../../utils/i18n";
@@ -13,21 +14,16 @@ function isExternal(href: string): boolean {
     return false;
   }
 }
-// Menu kutularinin sagindaki kucuk dekoratif cizimler (public/cizim/<ad>[-acik].webp), adrese gore.
-const cizimler: Record<string, string> = {
-  "/galeri": "menu-galeri",
-  "/ekipman": "menu-ekipman",
-  "/medya": "menu-medya",
-  "/posts": "menu-yazilar",
-  "/hakkimda": "menu-hakkimda",
-  "/iletisim": "menu-iletisim",
-};
+// Menu kutularinin sagindaki kucuk dekoratif cizimler: adrese gore varyant listesi, hangi
+// varyantin gosterilecegi gune gore (tum kutular ayni gun ayni takimdan). Bkz. lib/cizim-secim.ts.
+const takim = sira(gunAnahtari());
 ---
 <ul class="personabio-menu-items">
   {items.map(item => {
     const href = localePath(item.url, locale);
     const external = isExternal(href);
-    const cizim = external ? undefined : cizimler[href.replace(/\/$/, "")];
+    const varyantlar = external ? undefined : MENU_CIZIMLERI[href.replace(/\/$/, "")];
+    const cizim = varyantlar?.[takim % varyantlar.length];
     return <li>
       {isSafeHref(item.url) ? <a href={href} target={item.target} title={item.titleAttr} rel={item.target === "_blank" ? "noopener noreferrer" : undefined} aria-current={Astro.url.pathname.replace(/\/$/, "") === href.replace(/\/$/, "") ? "page" : undefined}>
         {cizim && <Cizim ad={cizim} class="personabio-menu-art" oran="5 / 2" />}

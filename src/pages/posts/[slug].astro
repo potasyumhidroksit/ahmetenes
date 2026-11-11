@@ -1,6 +1,7 @@
 ---
 import { notFound } from "../../utils/http";
 import Cizim from "../../components/Cizim.astro";
+import { KAPANIS_CIZIMLERI, sec } from "../../lib/cizim-secim";
 import {
 	getTermsForEntries,
 	getSeoMeta,
@@ -234,7 +235,7 @@ const publishDate = post.data.publishedAt ? formatDate(post.data.publishedAt, lo
 					)}
 				</div>
 
-				<Cizim ad="kapanis" class="article-end-art" />
+				<Cizim ad={sec(KAPANIS_CIZIMLERI, post.id)} class="article-end-art" />
 
 				{showToc && <p class="article-top"><a href="#top"><span aria-hidden="true">↑</span>&nbsp;{t("Başa dön")}</a></p>}
 

@@ -1,9 +1,11 @@
 ---
 import AppearanceControl from "./AppearanceControl.astro";
+import Cizim from "./Cizim.astro";
 // Site tek dilli: tek secenekli dil dugmesi yerine sahiplik + RSS. (Eski
 // LanguageControl her icerik sayfasinda yalnizca bunun icin DB sorgusu yapiyordu.)
 const year = new Date().getFullYear();
 ---
+<Cizim ad="serit" class="footer-art" oran="4 / 1" />
 <div class="personabio-footer">
   <AppearanceControl icons />
   <p class="personabio-owner"><span>© {year} Ahmet Enes</span><span aria-hidden="true">·</span><a href="/rss.xml">RSS</a><span aria-hidden="true">·</span><a href="/gizlilik">Gizlilik</a></p>

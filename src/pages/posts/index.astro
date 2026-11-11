@@ -1,6 +1,7 @@
 ---
 import { localizedPosts } from "../../utils/localized-posts";
 import Cizim from "../../components/Cizim.astro";
+import { ARSIV_CIZIMLERI, gunAnahtari, sec } from "../../lib/cizim-secim";
 import { localeFromUrl, localePath, translate } from "../../utils/i18n";
 const locale = localeFromUrl(Astro.url);
 const t = (text: string) => translate(locale, text);
@@ -28,7 +29,7 @@ const commentCounts = new Map(
   <section class="archive-section posts-page" data-view="single">
     <script is:inline>try{var v=localStorage.getItem("posts-view");if(["list","grid","single"].indexOf(v)>-1)document.currentScript.parentElement.dataset.view=v}catch(e){}</script>
     <header class="archive-header">
-      <Cizim ad="masa" class="archive-art" />
+      <Cizim ad={sec(ARSIV_CIZIMLERI, gunAnahtari())} class="archive-art" />
       <h1>{t("Yazılar")}</h1>
       <p>{posts.length} yazı · ışık, kompozisyon, sokak ve ekipman üzerine notlar</p>
       <p class="archive-order-note">Okuma sırasına göre dizili: fotoğrafa yeni başlıyorsan yukarıdan aşağı ilerle.</p>

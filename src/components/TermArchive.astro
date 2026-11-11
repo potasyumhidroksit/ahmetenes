@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Content.astro";
 import Cizim from "./Cizim.astro";
+import { ARSIV_CIZIMLERI, KATEGORI_CIZIMLERI, sec } from "../lib/cizim-secim";
 import PostCard from "./PostCard.astro";
 import { getReadingTime } from "../utils/reading-time";
 import { localeFromUrl } from "../utils/i18n";
@@ -19,12 +20,15 @@ interface Props {
 const { archive, title, description, label, empty } = Astro.props;
 const locale = localeFromUrl(Astro.url);
 const { term, posts } = archive;
+// Kategoriye ozgu baslik cizimi; etiket ve tanimsiz kategori: slug'a gore sabit varyant.
+const kategori = Astro.url.pathname.startsWith("/category/");
+const baslikCizimi = (kategori && KATEGORI_CIZIMLERI[term.slug]) || sec(ARSIV_CIZIMLERI, term.slug);
 ---
 
 <Base title={title} description={description} robots={posts.length < 2 ? "noindex, follow" : undefined}>
 	<section class="archive-section">
 		<header class="archive-header">
-			<Cizim ad="masa" class="archive-art" />
+			<Cizim ad={baslikCizimi} class="archive-art" />
 			<span class="archive-label">{label}</span>
 			<h1 class="archive-title">{term.label}</h1>
 			<p class="archive-count">

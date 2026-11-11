@@ -19,6 +19,7 @@ const number = (value: number) => (stats.ok ? value.toLocaleString("tr-TR") : "�
     </header>
     <div class="media-grid">
       <article class="media-card" data-pulse-card data-playing={pulse.playing ? "true" : "false"}>
+        <Cizim ad="pikap" class="media-card-art" />
         <p class="media-label" data-pulse-label>{pulse.playing ? "Şu an çalıyor" : track ? "Son dinlenen" : "Müzik"}</p>
         <div class="pulse-row">
           <img data-pulse-art src={track?.art || "/favicon.svg"} alt="" width="88" height="88" />
@@ -32,6 +33,7 @@ const number = (value: number) => (stats.ok ? value.toLocaleString("tr-TR") : "�
         <a class="media-more" data-pulse-open href={track?.link || undefined} target="_blank" rel="noopener noreferrer" hidden={!track?.link}>Şarkıyı aç →</a>
       </article>
       <article class="media-card">
+        <Cizim ad="sinema-salonu" class="media-card-art" />
         <p class="media-label">Sinedexter</p>
         <div class="stat-grid">
           <div class="stat"><strong data-stat="films">{number(stats.films)}</strong><span>Film</span></div>
@@ -144,6 +146,10 @@ const number = (value: number) => (stats.ok ? value.toLocaleString("tr-TR") : "�
 
 <style>
   .media-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  /* Kart kosesinde kucuk dekoratif cizim (Cizim.astro): icerigin arkasinda, saga yasli. */
+  .media-card:has(> :global(.media-card-art)) { position: relative; isolation: isolate; overflow: hidden; }
+  .media-card > :global(.media-card-art) { position: absolute; z-index: -1; top: 0; right: 0; width: 150px; opacity: .85; }
+  @media (max-width: 600px) { .media-card > :global(.media-card-art) { width: 96px; opacity: .55; } }
   .media-card {
     display: flex; flex-direction: column;
     background: var(--color-surface); border: 1px solid var(--color-border-subtle);

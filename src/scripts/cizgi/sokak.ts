@@ -177,6 +177,21 @@ export function kurSokak(stage: HTMLElement): void {
   let gorunur = true;
   new IntersectionObserver(([e]) => { gorunur = e.isIntersecting; }).observe(stage);
 
+  // Dar ekran (telefon): sahne kesilmez; görüntü kaldırım hizasında yakınlaşır ve fotoğrafçıyı izleyerek bütün
+  // sokak boyunca kayar. Üstteki boş gök kırpılır (y 40'tan başlar). Genişlik kabın en-boy oranından hesaplanır.
+  const KAM_Y = 40, KAM_H = H - KAM_Y;
+  let kamX = -1;
+  const dar = window.matchMedia('(max-width: 736px)'); // Sokak.astro'daki telefon kırılımıyla aynı
+  const kamera = (dt: number) => {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    if (!w || !h || !dar.matches) { if (kamX !== -1) { svg.setAttribute('viewBox', `0 0 ${W} ${H}`); kamX = -1; } return; }
+    const vw = Math.min(W, KAM_H * (w / h));
+    const hedef = clamp(foto.x - vw * 0.42, 0, W - vw);
+    // fotoğrafçı sahneden çıkıp baştan girince yumuşakça başa döner
+    kamX = kamX < 0 ? hedef : kamX + (hedef - kamX) * Math.min(1, dt * (Math.abs(hedef - kamX) > vw ? 1.2 : 3));
+    svg.setAttribute('viewBox', `${f(kamX)} ${KAM_Y} ${f(vw)} ${KAM_H}`);
+  };
+
   run((t, dt) => {
     if (!gorunur && !location.search.includes('debug')) return;
     wind.step(t);
@@ -218,6 +233,7 @@ export function kurSokak(stage: HTMLElement): void {
     kuslar.ciz(t, dt, gece, foto.x);
     kedi.ciz(t, dt, gece);
     foto.ciz(t, dt, wind.value, vapurX);
+    kamera(dt);
   });
 }
 

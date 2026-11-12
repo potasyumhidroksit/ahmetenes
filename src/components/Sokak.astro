@@ -9,11 +9,6 @@
   const yer = document.querySelector<HTMLElement>("[data-sokak]");
   if (yer) {
     kurSokak(yer);
-    const svg = yer.querySelector("svg");
-    const dar = window.matchMedia("(max-width: 736px)");
-    const uygula = () => svg?.setAttribute("preserveAspectRatio", dar.matches ? "xMidYMax slice" : "xMidYMid meet");
-    uygula();
-    dar.addEventListener("change", uygula);
   }
 </script>
 
@@ -41,6 +36,7 @@
   .sokak :global(.pp) { fill: var(--paper); }
   .sokak :global(.sk-isik-kat) { mix-blend-mode: screen; }
   :global(html[data-appearance="light"]) .sokak :global(.sk-isik-kat) { mix-blend-mode: multiply; }
-  @media (max-width: 736px) { .sokak { aspect-ratio: 400 / 240; border-radius: 1.25rem; } }
+  /* Telefonda sahne yakınlaşır ve fotoğrafçıyı izleyerek kayar (sokak.ts kamera). */
+  @media (max-width: 736px) { .sokak { aspect-ratio: 400 / 230; border-radius: 1.25rem; } }
   @media print { .sokak { display: none; } }
 </style>

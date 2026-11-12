@@ -1,6 +1,7 @@
 ---
 import type { MenuItem } from "emdash";
 import Cizim from "../Cizim.astro";
+import Sokak from "../Sokak.astro";
 import MenuItems from "./MenuItems.astro";
 import { Image } from "emdash/ui";
 import LinkIcon from "./LinkIcon.astro";
@@ -32,6 +33,7 @@ const { profile, links, menu = [], edit = {} } = Astro.props;
       {menu.length > 0 && <nav class="personabio-menu" aria-label={translate(locale, "Ana menü")}><MenuItems items={menu}/></nav>}
     </div>
   </main>
+  <Sokak />
   <footer class="personabio-footer-container" aria-label={translate(locale, "Alt bilgi")}>
     <FooterPreferences />
   </footer>

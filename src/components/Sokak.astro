@@ -1,0 +1,46 @@
+---
+// Ana sayfa kartının altında çizgi sahne: İstanbul'da bir sokak, deniz kenarında vapuru fotoğraflayan biri.
+// Çizim tamamen istemcide SVG olarak kurulur (src/scripts/cizgi/sokak.ts); JS yoksa alan boş kart olarak kalır.
+---
+<div class="sokak" data-sokak></div>
+
+<script>
+  import { kurSokak } from "../scripts/cizgi/sokak";
+  const yer = document.querySelector<HTMLElement>("[data-sokak]");
+  if (yer) {
+    kurSokak(yer);
+    const svg = yer.querySelector("svg");
+    const dar = window.matchMedia("(max-width: 736px)");
+    const uygula = () => svg?.setAttribute("preserveAspectRatio", dar.matches ? "xMidYMax slice" : "xMidYMid meet");
+    uygula();
+    dar.addEventListener("change", uygula);
+  }
+</script>
+
+<style>
+  .sokak {
+    width: 59rem; max-width: 100%;
+    aspect-ratio: 960 / 220;
+    border-radius: 1.75rem; overflow: hidden;
+    background: light-dark(#fff, #1c2229);
+    color: light-dark(#1d2128, #dde3e8);
+    --paper: light-dark(#fff, #1c2229);
+    --sk-atki: light-dark(#f2a7bf, #9a5a73);
+    --sk-pantolon: light-dark(#3a4250, #2a313b);
+    --sk-tente: light-dark(#bee1ff, #2f4e6e);
+    --sk-cicek: light-dark(#f08aa8, #a85574);
+    --sk-cay: light-dark(#d9895a, #b06a40);
+    --sk-kedi: light-dark(#d79a62, #8e6240);
+    --sk-serce: light-dark(#8a6a4c, #6c5442);
+    --sk-baca: light-dark(#e9dcc4, #b8ab92);
+    --sk-cam: light-dark(#eef3f7, #26303a);
+    --sk-pencere: light-dark(#ffe6bf, #f2c98f);
+    --sk-isik: light-dark(#ffd59a, #ffc98a);
+  }
+  .sokak :global(svg) { display: block; width: 100%; height: 100%; touch-action: pan-y; }
+  .sokak :global(.pp) { fill: var(--paper); }
+  .sokak :global(.sk-isik-kat) { mix-blend-mode: screen; }
+  :global(html[data-appearance="light"]) .sokak :global(.sk-isik-kat) { mix-blend-mode: multiply; }
+  @media (max-width: 736px) { .sokak { aspect-ratio: 400 / 240; border-radius: 1.25rem; } }
+  @media print { .sokak { display: none; } }
+</style>

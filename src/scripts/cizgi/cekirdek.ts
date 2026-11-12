@@ -128,6 +128,8 @@ export function gunTohumu(z: Zaman, tuz = ''): number {
 
 declare global { interface Window { __step?: (seconds?: number) => number; __sahne?: Record<string, unknown> } }
 let ornekSayisi = 0;
+/** Sahnenin genel hizi (sahibin istegi, 12 Kas 2026: 1,1x). Yuruyus adimiyla ilerleme birlikte hizlanir: ayak kaymaz. */
+const HIZ = 1.1;
 /** ?debug: sayfadaki butun sahnelerin adimlayicilari (window.__step hepsini birlikte ilerletir). */
 const adimcilar = new Map<string, (s?: number) => number>();
 
@@ -183,13 +185,13 @@ export function cekirdek(stage: HTMLElement, o: { ad: string; W: number; H: numb
   const svgler = [kGok.svg, kStatik.svg, kDinamik.svg];
 
   // ---------------------------------------------------------------- kalite
-  const kaba = matchMedia('(pointer: coarse)').matches;
   // Hafiflik (sahibin istegi, 12 Kas 2026: bazi cihazlarda kasiyordu): kisilerin murekkep titremesi (her karede
   // calisan SVG filtresi) varsayilan olarak kapalidir; mimarideki titreme (bir kez cizilen statik katman) kalir.
-  // Telefon ve tablette sahne 30 kare/sn baslar; uzun sure akici giderse 60'a cikar.
+  // Kare hizi olabildigince yuksek (sahibin istegi): her cihaz ekranin tam hizinda baslar (60/120 Hz); yalniz
+  // gercekten yavassa 30, daha da yavassa 20 kare/sn'ye iner ve akicilasinca geri cikar.
   const kaliteSabit = sorgu.has('kalite');
   const tabanKalite = 1;
-  let kalite = kaliteSabit ? clamp(Number(sorgu.get('kalite')), 0, 3) : kaba ? 2 : tabanKalite;
+  let kalite = kaliteSabit ? clamp(Number(sorgu.get('kalite')), 0, 3) : tabanKalite;
   const kaliteUygula = () => { if (kalite === 0) kDinamik.kok.setAttribute('filter', filtreler[2]); else kDinamik.kok.removeAttribute('filter'); };
   kaliteUygula();
 
@@ -359,9 +361,9 @@ export function cekirdek(stage: HTMLElement, o: { ad: string; W: number; H: numb
     if (!kaliteSabit && ham < 250 && now - basT > 3000) {
       kareMs = kareMs * 0.95 + ham * 0.05;
       // yavaslik iki yoldan anlasilir: kareler seyreklesir ya da sahnenin kendi isi kare basina 6 ms'yi asar
-      if (kareMs > 22 || isMs > 6) { yavasMs += ham; iyiMs = 0; } else { yavasMs = 0; iyiMs += ham; }
-      if (yavasMs > 1000 && kalite < 3) { kalite++; kaliteUygula(); yavasMs = 0; kareMs = 16.7; isMs = 0; }
-      else if (kalite > tabanKalite && yukseltme < 3 && kareMs < 19 && iyiMs > 30000 * 2 ** yukseltme) { kalite--; yukseltme++; kaliteUygula(); iyiMs = 0; }
+      if (kareMs > 24 || isMs > 9) { yavasMs += ham; iyiMs = 0; } else { yavasMs = 0; iyiMs += ham; }
+      if (yavasMs > 1500 && kalite < 3) { kalite++; kaliteUygula(); yavasMs = 0; kareMs = 16.7; isMs = 0; }
+      else if (kalite > tabanKalite && yukseltme < 3 && kareMs < 19 && isMs < 5 && iyiMs > 12000 * 2 ** yukseltme) { kalite--; yukseltme++; kaliteUygula(); iyiMs = 0; }
     }
     // 30 (kalite 2) ve 20 (kalite 3, zayif cihaz) kare/sn kademeleri sureye gore: 60 Hz'te kare atlar, zaten
     // kisilmis ekranda gereksiz atlamaz.
@@ -397,6 +399,7 @@ export function cekirdek(stage: HTMLElement, o: { ad: string; W: number; H: numb
       [...dalgalar, ...esintiler].forEach((d) => kDinamik.kok.appendChild(d.n)); // en ustte
       kDinamik.kok.appendChild(odakHalka);
       adim = (dt: number) => {
+        dt *= HIZ; // butun sahne 1,1 kat hizli (sahibin istegi); saat kulesi ve isiklar duvar saatine bagli kalir
         t += dt;
         if (Date.now() - zmnDuvar > 20000) zamanYenile();
         hedefRuzgar = lerp(hedefRuzgar, 0.12 + 0.25 * Math.sin(t * 0.21) + 0.15 * Math.sin(t * 0.67), 1 - Math.exp(-dt * 0.7));

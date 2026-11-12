@@ -1,5 +1,5 @@
 ---
-// Ana sayfa kartinin ustunde cizgi sahne: Istanbul'da bir sokak, deniz kenarinda vapuru fotograflayan biri.
+// Ana sayfa kartinin ustunde cizgi sahne: Istanbul'da bir sokak ve oradan gecen bir fotografci.
 // Cizim tamamen istemcide SVG olarak kurulur (src/scripts/cizgi/sokak.ts); JS yoksa alan bos kart olarak kalir.
 // Dokunma, ruzgar, telefon kamerasi ve kalite ayari src/scripts/cizgi/cekirdek.ts icinde.
 ---
@@ -16,7 +16,8 @@
     position: relative; overflow: hidden;
     width: 59rem; max-width: 100%;
     aspect-ratio: 960 / 220;
-    border-radius: 1.75rem;
+    /* profil kartiyla ayni kose (appearance.css: --public-control-radius, her genislikte 8px) */
+    border-radius: var(--public-control-radius, 8px);
     background: light-dark(#fff, #1c2229);
     color: light-dark(#1d2128, #dde3e8);
     --paper: light-dark(#fff, #1c2229);
@@ -32,8 +33,14 @@
     --sk-cam: light-dark(#eef3f7, #26303a);
     --sk-pencere: light-dark(#ffe6bf, #f2c98f);
     --sk-isik: light-dark(#ffd59a, #ffc98a);
+    --sk-perde: light-dark(#fff3dc, #ecdcb8);
+    --sk-film: light-dark(#6b5a44, #4a3d2c);
   }
+  /* klavye odagi: sitenin odak halkasi */
+  .sokak:focus-visible { outline: 2px solid light-dark(#536163, #e0e6eb); outline-offset: 3px; }
   /* Dar ekranda kap diklesir: cekirdek bunu gorur, sahneyi yakinlastirir ve fotografciyi izleyerek kaydirir. */
-  @media (max-width: 600px) { .sokak { aspect-ratio: 400 / 230; border-radius: 1.25rem; } }
+  @media (max-width: 600px) { .sokak { aspect-ratio: 400 / 230; } }
+  /* yuksek karsitlik: kagit ve murekkep sistem renklerinden */
+  @media (forced-colors: active) { .sokak { --paper: Canvas; color: CanvasText; background: Canvas; } }
   @media print { .sokak { display: none; } }
 </style>

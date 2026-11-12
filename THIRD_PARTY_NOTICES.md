@@ -8,4 +8,4 @@ The JPEG screenshots in `public/themes/personabio/` show the English homepage an
 
 ## line-art-animation
 
-`src/scripts/cizgi/ink.ts`, `gait.ts` and `motion.ts` are copied from https://github.com/JDhruv14/line-art-animation (commit c43d698), copyright 2026 JDhruv14, MIT license. The home-page street scene (`src/scripts/cizgi/sokak.ts`) is built on them; its cat and sparrows are adapted from that repository's village example.
+`src/scripts/cizgi/ink.ts`, `gait.ts` and `motion.ts` are copied from https://github.com/JDhruv14/line-art-animation (commit c43d698), copyright 2026 JDhruv14, MIT license. The home-page street scene (`src/scripts/cizgi/sokak.ts`, with the shared engine in `cekirdek.ts` and the animals in `canlilar.ts`) is built on them; its cat and sparrows are adapted from that repository's village example.

@@ -1,4 +1,4 @@
-// line-art-animation (https://github.com/JDhruv14/line-art-animation, MIT, c43d698) kütüphanesinden olduğu gibi alındı.
+// line-art-animation (https://github.com/JDhruv14/line-art-animation, MIT, c43d698) kutuphanesinden oldugu gibi alindi.
 // ink.ts — pen, paper and the drawing primitives every line-art figure shares.
 //
 // Conventions

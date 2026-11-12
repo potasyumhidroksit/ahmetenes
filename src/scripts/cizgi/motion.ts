@@ -1,4 +1,4 @@
-// line-art-animation (https://github.com/JDhruv14/line-art-animation, MIT, c43d698) kütüphanesinden olduğu gibi alındı.
+// line-art-animation (https://github.com/JDhruv14/line-art-animation, MIT, c43d698) kutuphanesinden oldugu gibi alindi.
 // motion.ts — the small physics that make things feel alive without looking procedural.
 
 export const clamp = (x: number, a: number, b: number): number => Math.max(a, Math.min(b, x));

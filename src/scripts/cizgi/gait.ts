@@ -1,4 +1,4 @@
-// line-art-animation (https://github.com/JDhruv14/line-art-animation, MIT, c43d698) kütüphanesinden olduğu gibi alındı.
+// line-art-animation (https://github.com/JDhruv14/line-art-animation, MIT, c43d698) kutuphanesinden oldugu gibi alindi.
 // gait.ts — walk and run solvers for a figure drawn in ink.ts figure space
 // (feet on y = 120, facing +x, hip above x = 40).
 //

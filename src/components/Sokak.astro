@@ -1,22 +1,22 @@
 ---
-// Ana sayfa kartının altında çizgi sahne: İstanbul'da bir sokak, deniz kenarında vapuru fotoğraflayan biri.
-// Çizim tamamen istemcide SVG olarak kurulur (src/scripts/cizgi/sokak.ts); JS yoksa alan boş kart olarak kalır.
+// Ana sayfa kartinin ustunde cizgi sahne: Istanbul'da bir sokak, deniz kenarinda vapuru fotograflayan biri.
+// Cizim tamamen istemcide SVG olarak kurulur (src/scripts/cizgi/sokak.ts); JS yoksa alan bos kart olarak kalir.
+// Dokunma, ruzgar, telefon kamerasi ve kalite ayari src/scripts/cizgi/cekirdek.ts icinde.
 ---
 <div class="sokak" data-sokak></div>
 
 <script>
   import { kurSokak } from "../scripts/cizgi/sokak";
   const yer = document.querySelector<HTMLElement>("[data-sokak]");
-  if (yer) {
-    kurSokak(yer);
-  }
+  if (yer) kurSokak(yer);
 </script>
 
 <style>
   .sokak {
+    position: relative; overflow: hidden;
     width: 59rem; max-width: 100%;
     aspect-ratio: 960 / 220;
-    border-radius: 1.75rem; overflow: hidden;
+    border-radius: 1.75rem;
     background: light-dark(#fff, #1c2229);
     color: light-dark(#1d2128, #dde3e8);
     --paper: light-dark(#fff, #1c2229);
@@ -26,17 +26,14 @@
     --sk-cicek: light-dark(#f08aa8, #a85574);
     --sk-cay: light-dark(#d9895a, #b06a40);
     --sk-kedi: light-dark(#d79a62, #8e6240);
+    --sk-agiz: light-dark(#b05a5a, #7a3a3a);
     --sk-serce: light-dark(#8a6a4c, #6c5442);
     --sk-baca: light-dark(#e9dcc4, #b8ab92);
     --sk-cam: light-dark(#eef3f7, #26303a);
     --sk-pencere: light-dark(#ffe6bf, #f2c98f);
     --sk-isik: light-dark(#ffd59a, #ffc98a);
   }
-  .sokak :global(svg) { display: block; width: 100%; height: 100%; touch-action: pan-y; }
-  .sokak :global(.pp) { fill: var(--paper); }
-  .sokak :global(.sk-isik-kat) { mix-blend-mode: screen; }
-  :global(html[data-appearance="light"]) .sokak :global(.sk-isik-kat) { mix-blend-mode: multiply; }
-  /* Telefonda sahne yakınlaşır ve fotoğrafçıyı izleyerek kayar (sokak.ts kamera). */
-  @media (max-width: 736px) { .sokak { aspect-ratio: 400 / 230; border-radius: 1.25rem; } }
+  /* Dar ekranda kap diklesir: cekirdek bunu gorur, sahneyi yakinlastirir ve fotografciyi izleyerek kaydirir. */
+  @media (max-width: 600px) { .sokak { aspect-ratio: 400 / 230; border-radius: 1.25rem; } }
   @media print { .sokak { display: none; } }
 </style>

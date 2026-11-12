@@ -18,6 +18,7 @@ interface Props {
 const { profile, links, menu = [], edit = {} } = Astro.props;
 ---
 <div class="personabio-shell">
+  <Sokak />
   <main class="personabio-card" id="main-content" aria-label={`${profile.title} ${translate(locale, "profili")}`}>
     <div class="personabio-profile">
       <Cizim ad="profil" class="personabio-profile-art" oran="4 / 3" />
@@ -33,7 +34,6 @@ const { profile, links, menu = [], edit = {} } = Astro.props;
       {menu.length > 0 && <nav class="personabio-menu" aria-label={translate(locale, "Ana menü")}><MenuItems items={menu}/></nav>}
     </div>
   </main>
-  <Sokak />
   <footer class="personabio-footer-container" aria-label={translate(locale, "Alt bilgi")}>
     <FooterPreferences />
   </footer>

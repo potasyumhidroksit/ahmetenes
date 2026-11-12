@@ -5,7 +5,7 @@
 //    pay); hedef yoksa ruzgar eser. Fare, parmak ve kalem ayni yoldan gecer. Dikey kaydirma tarayicida kalir
 //    (touch-action: pan-y); yatay surukleme telefonda kamerayi kaydirir.
 //  - Klavye: sahne odaklanabilir; ←/→ hedefler arasinda gezer, Enter/Bosluk dokunur, Esc birakir.
-//  - Kalite: kare suresi olculur; yavas cihazda once murekkep titremesi kapanir, sonra 30 kare/sn'ye inilir
+//  - Kalite: kare suresi ve sahnenin kendi isi olculur; yavas cihazda 30, daha da yavassa 20 kare/sn'ye inilir
 //    (sureye gore: ekrani 30 Hz'e kisilmis cihazda kare atlanmaz). Uzun sure iyi giderse bir kademe geri cikar.
 //  - Dongu yalniz sahne gorunurken doner (gizli sayfa, ekran disi, arka plan sekmesi: rAF durur).
 //  - Saat: Istanbul duvar saati; gun dogumu/batimi gune gore hesaplanir; mevsim, ay evresi.
@@ -69,6 +69,8 @@ export interface Cekirdek {
   ayarla(anahtar: string, deger: string | null): void;
   kalite(): number;
   dar(): boolean;
+  /** Su an ekranda gorunen sahne araligi [sol, sag] (telefonda kamera penceresi; geniste butun sahne). */
+  gorunurX(): [number, number];
   sorgu: URLSearchParams;
   basla(ciz: (t: number, dt: number) => void, odak: () => number | null): void;
   /** Sahneyi soker: dongu, gozlemciler, dinleyiciler ve DOM. */
@@ -182,12 +184,12 @@ export function cekirdek(stage: HTMLElement, o: { ad: string; W: number; H: numb
 
   // ---------------------------------------------------------------- kalite
   const kaba = matchMedia('(pointer: coarse)').matches;
-  // Dokunmatik cihazlarda, az cekirdekli makinelerde ve Safari'de (SVG filtresi islemcide calisir) kisilerin
-  // murekkep titremesi bastan kapalidir; mimarideki titreme (bir kez cizilen statik katman) her yerde kalir.
-  const elma = /Apple/.test(navigator.vendor || '');
+  // Hafiflik (sahibin istegi, 12 Kas 2026: bazi cihazlarda kasiyordu): kisilerin murekkep titremesi (her karede
+  // calisan SVG filtresi) varsayilan olarak kapalidir; mimarideki titreme (bir kez cizilen statik katman) kalir.
+  // Telefon ve tablette sahne 30 kare/sn baslar; uzun sure akici giderse 60'a cikar.
   const kaliteSabit = sorgu.has('kalite');
-  const tabanKalite = kaba || elma || (navigator.hardwareConcurrency || 8) <= 4 ? 1 : 0;
-  let kalite = kaliteSabit ? clamp(Number(sorgu.get('kalite')), 0, 2) : tabanKalite;
+  const tabanKalite = 1;
+  let kalite = kaliteSabit ? clamp(Number(sorgu.get('kalite')), 0, 3) : kaba ? 2 : tabanKalite;
   const kaliteUygula = () => { if (kalite === 0) kDinamik.kok.setAttribute('filter', filtreler[2]); else kDinamik.kok.removeAttribute('filter'); };
   kaliteUygula();
 
@@ -342,6 +344,7 @@ export function cekirdek(stage: HTMLElement, o: { ad: string; W: number; H: numb
   const zamanYenile = () => { zmn = zamanHesapla(sorgu); zmnDuvar = Date.now(); surum++; };
 
   // ---------------------------------------------------------------- dongu: yalniz gorunurken doner
+  let isMs = 0;
   let gorunur = true, kareMs = 16.7, yavasMs = 0, iyiMs = 0, yukseltme = 0, rafId = 0, calisiyor = false, kuruldu = false;
   let onceki = 0, sonCizim = 0, basT = 0;
   let adim: (dt: number) => void = () => {};
@@ -355,14 +358,18 @@ export function cekirdek(stage: HTMLElement, o: { ad: string; W: number; H: numb
     // geri cikar (her cikista bekleme iki katina cikar, en cok uc kez: salinmasin).
     if (!kaliteSabit && ham < 250 && now - basT > 3000) {
       kareMs = kareMs * 0.95 + ham * 0.05;
-      if (kareMs > 24) { yavasMs += ham; iyiMs = 0; } else { yavasMs = 0; iyiMs += ham; }
-      if (yavasMs > 1500 && kalite < 2) { kalite++; kaliteUygula(); yavasMs = 0; kareMs = 16.7; }
+      // yavaslik iki yoldan anlasilir: kareler seyreklesir ya da sahnenin kendi isi kare basina 6 ms'yi asar
+      if (kareMs > 22 || isMs > 6) { yavasMs += ham; iyiMs = 0; } else { yavasMs = 0; iyiMs += ham; }
+      if (yavasMs > 1000 && kalite < 3) { kalite++; kaliteUygula(); yavasMs = 0; kareMs = 16.7; isMs = 0; }
       else if (kalite > tabanKalite && yukseltme < 3 && kareMs < 19 && iyiMs > 30000 * 2 ** yukseltme) { kalite--; yukseltme++; kaliteUygula(); iyiMs = 0; }
     }
-    // 30 kare/sn kademesi sureye gore: 60 Hz'te iki karede bir cizer, zaten 30 Hz'e kisilmis ekranda kare atlamaz.
-    if (kalite === 2 && now - sonCizim < 30) return;
+    // 30 (kalite 2) ve 20 (kalite 3, zayif cihaz) kare/sn kademeleri sureye gore: 60 Hz'te kare atlar, zaten
+    // kisilmis ekranda gereksiz atlamaz.
+    if (kalite >= 2 && now - sonCizim < (kalite === 3 ? 46 : 30)) return;
     const dt = Math.min(0.1, (now - sonCizim) / 1000); sonCizim = now;
+    const is0 = performance.now();
     adim(dt);
+    isMs = isMs * 0.9 + (performance.now() - is0) * 0.1;
   };
   const durdur = () => { calisiyor = false; cancelAnimationFrame(rafId); };
   const baslat = () => { if (calisiyor || !kuruldu || debug || azaltMQ.matches || !uygun()) return; calisiyor = true; onceki = 0; rafId = requestAnimationFrame(kare); };
@@ -385,6 +392,7 @@ export function cekirdek(stage: HTMLElement, o: { ad: string; W: number; H: numb
     ayarla(anahtar, deger) { if (deger === null) sorgu.delete(anahtar); else sorgu.set(anahtar, deger); zamanYenile(); },
     kalite: () => kalite,
     dar: () => dar,
+    gorunurX: () => [kamX, kamX + vw],
     basla(ciz, odak) {
       [...dalgalar, ...esintiler].forEach((d) => kDinamik.kok.appendChild(d.n)); // en ustte
       kDinamik.kok.appendChild(odakHalka);
